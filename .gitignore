@@ -112,7 +112,6 @@ tools/jenkins_scripts/mac/android/userconf.ini
 # CTags
 tags
 /external/emscripten/
-/external/libwebsockets/
 /external/sqlite3/
 /scripting/javascript/spidermonkey-android/
 /scripting/javascript/spidermonkey-ios/
