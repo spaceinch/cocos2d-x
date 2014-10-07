@@ -61,6 +61,7 @@ public:
      * @return NULL
      */
     void send(CCHttpRequest* request);
+    void send(CCHttpRequest* request, bool prioritize);
   
     
     /**

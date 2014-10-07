@@ -455,25 +455,32 @@ bool CCHttpClient::lazyInitThreadSemphore()
 
 //Add a get task to queue
 void CCHttpClient::send(CCHttpRequest* request)
-{    
-    if (false == lazyInitThreadSemphore()) 
+{
+    this->send(request, false);
+}
+void CCHttpClient::send(CCHttpRequest* request, bool prioritize)
+{
+    if (false == lazyInitThreadSemphore())
     {
         return;
     }
-    
+
     if (!request)
     {
         return;
     }
-        
+
     ++s_asyncRequestCount;
-    
+
     request->retain();
-        
+
     pthread_mutex_lock(&s_requestQueueMutex);
-    s_requestQueue->addObject(request);
+    if (prioritize)
+        s_requestQueue->insertObject(request, 0);
+    else
+        s_requestQueue->addObject(request);
     pthread_mutex_unlock(&s_requestQueueMutex);
-    
+
     // Notify thread start to work
     pthread_cond_signal(&s_SleepCondition);
 }
