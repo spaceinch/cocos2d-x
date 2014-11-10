@@ -28,28 +28,28 @@
 
 NS_CC_EXT_BEGIN
 
-CCInvocation* CCInvocation::create(CCObject* target, SEL_CCControlHandler action, CCControlEvent controlEvent)
+Invocation* Invocation::create(Ref* target, Control::Handler action, Control::EventType controlEvent)
 {
-    CCInvocation* pRet = new CCInvocation(target, action, controlEvent);
-    if (pRet != NULL)
+    Invocation* pRet = new (std::nothrow) Invocation(target, action, controlEvent);
+    if (pRet != nullptr)
     {
         pRet->autorelease();
     }
     return pRet;
 }
 
-CCInvocation::CCInvocation(CCObject* target, SEL_CCControlHandler action, CCControlEvent controlEvent)
+Invocation::Invocation(Ref* target, Control::Handler action, Control::EventType controlEvent)
 {
-    m_target=target;
-    m_action=action;
-    m_controlEvent=controlEvent;
+    _target=target;
+    _action=action;
+    _controlEvent=controlEvent;
 }
 
-void CCInvocation::invoke(CCObject* sender)
+void Invocation::invoke(Ref* sender)
 {
-    if (m_target && m_action)
+    if (_target && _action)
     {
-        (m_target->*m_action)(sender, m_controlEvent);
+        (_target->*_action)(sender, _controlEvent);
     }                
 }
 
