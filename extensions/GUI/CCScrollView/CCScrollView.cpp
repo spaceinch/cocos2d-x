@@ -70,9 +70,7 @@ ScrollView::ScrollView()
 
 ScrollView::~ScrollView()
 {
-    CC_SAFE_RELEASE(m_pTouches);
-    this->unregisterScriptHandler(kScrollViewScroll);
-    this->unregisterScriptHandler(kScrollViewZoom);
+
 }
 
 ScrollView* ScrollView::create(Size size, Node* container/* = nullptr*/)
@@ -121,11 +119,6 @@ bool ScrollView::initWithViewSize(Size size, Node *container/* = nullptr*/)
 
         setTouchEnabled(true);
         
-<<<<<<< HEAD
-        this->addChild(m_pContainer);
-        m_fMinScale = m_fMaxScale = 1.0f;
-        m_mapScriptHandler.clear();
-=======
         _touches.reserve(EventTouch::MAX_TOUCHES);
         
         _delegate = nullptr;
@@ -140,7 +133,6 @@ bool ScrollView::initWithViewSize(Size size, Node *container/* = nullptr*/)
         _minScale = _maxScale = 1.0f;
 
         
->>>>>>> 8e3590978d589e771dfa5fd6169319cdaec61c35
         return true;
     }
     return false;
@@ -850,29 +842,5 @@ Rect ScrollView::getViewRect()
     }
 
     return Rect(screenPos.x, screenPos.y, _viewSize.width*scaleX, _viewSize.height*scaleY);
-}
-
-void CCScrollView::registerScriptHandler(int nFunID,int nScriptEventType)
-{
-    this->unregisterScriptHandler(nScriptEventType);
-    m_mapScriptHandler[nScriptEventType] = nFunID;
-}
-void CCScrollView::unregisterScriptHandler(int nScriptEventType)
-{
-    std::map<int,int>::iterator iter = m_mapScriptHandler.find(nScriptEventType);
-    
-    if (m_mapScriptHandler.end() != iter)
-    {
-        m_mapScriptHandler.erase(iter);
-    }
-}
-int  CCScrollView::getScriptHandler(int nScriptEventType)
-{
-    std::map<int,int>::iterator iter = m_mapScriptHandler.find(nScriptEventType);
-    
-    if (m_mapScriptHandler.end() != iter)
-        return iter->second;
-    
-    return 0;
 }
 NS_CC_EXT_END

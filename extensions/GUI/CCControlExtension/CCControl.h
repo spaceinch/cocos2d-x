@@ -62,11 +62,7 @@ class Invocation;
  *
  * To use the Control you have to subclass it.
  */
-<<<<<<< HEAD
-class CC_EX_DLL CCControl : public CCLayerRGBA
-=======
 class CC_EX_DLL Control : public Layer
->>>>>>> 8e3590978d589e771dfa5fd6169319cdaec61c35
 {
 public:
     /** Kinds of possible events for the control objects. */
@@ -121,35 +117,7 @@ public:
      * @param controlEvents A bitmask whose set flags specify the control events for
      * which action messages are sent. See "CCControlEvent" for bitmask constants.
      */
-<<<<<<< HEAD
-    CCDictionary* m_pDispatchTable;
-
-public:
-    /**
-     *  @js ctor
-     */
-    CCControl();
-    virtual bool init(void);
-    /**
-     *  @js NA
-     *  @lua NA
-     */
-    virtual ~CCControl();
-
-    /**
-     *  @js NA
-     *  @lua NA
-     */
-    virtual void onEnter();
-    /**
-     *  @js NA
-     *  @lua NA
-     */
-    virtual void onExit();
-    virtual void registerWithTouchDispatcher();
-=======
     virtual void sendActionsForControlEvents(EventType controlEvents);
->>>>>>> 8e3590978d589e771dfa5fd6169319cdaec61c35
 
     /**
      * Adds a target and action for a particular event (or events) to an internal
@@ -295,21 +263,6 @@ protected:
     /** The current control state constant. */
     CC_SYNTHESIZE_READONLY(State, _state, State);
 
-<<<<<<< HEAD
-    static CCControl* create();
-public:
-    /**
-     *  @js NA
-     */
-    void addHandleOfControlEvent(int nFunID,CCControlEvent controlEvent);
-    /**
-     *  @js NA
-     */
-    void removeHandleOfControlEvent(CCControlEvent controlEvent);
-private:
-    int  getHandleOfControlEvent(CCControlEvent controlEvent);
-=======
->>>>>>> 8e3590978d589e771dfa5fd6169319cdaec61c35
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(Control);
 };

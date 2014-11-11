@@ -39,8 +39,6 @@ class TableView;
 
 /**
  * Sole purpose of this delegate is to single touch event in this version.
- * @js NA
- * @lua NA
  */
 class CC_EX_DLL TableViewDelegate : public ScrollViewDelegate
 {
@@ -92,7 +90,6 @@ public:
 
 /**
  * Data source that governs table backend data.
- * @lua NA
  */
 class CC_EX_DLL TableViewDataSource
 {
@@ -155,7 +152,7 @@ public:
     
     /** Empty contructor of TableView */
     static TableView* create();
-  
+    
     /**
      * An intialized table view object
      *
@@ -328,20 +325,7 @@ protected:
 
 public:
     void _updateContentSize();
-    
-    enum TableViewScriptEventType
-    {
-        kTableViewScroll   = 0,
-        kTableViewZoom,
-        kTableCellTouched,
-        kTableCellHighLight,
-        kTableCellUnhighLight,
-        kTableCellWillRecycle,
-        kTableCellSizeForIndex,
-        kTableCellSizeAtIndex,
-        kNumberOfCellsInTableView,
-    };
-    void unregisterAllScriptHandler();
+
 };
 
 

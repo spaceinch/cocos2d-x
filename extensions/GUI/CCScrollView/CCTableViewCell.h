@@ -34,7 +34,6 @@ NS_CC_EXT_BEGIN
 
 /**
  * Abstract class for SWTableView cell node
- * @lua NA
  */
 class CC_EX_DLL TableViewCell: public Node
 {

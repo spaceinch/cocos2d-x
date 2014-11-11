@@ -78,11 +78,6 @@ public:
      * @lua NA
      */
     virtual void updateTweenAction(float value, const std::string& key) override;
-  
-    /**
-     * Custom draw method for spaceinch
-     */
-    virtual void draw() override;
 
 /** Contains the position (in x-axis) of the slider inside the receiver. */
     float _sliderXPosition;
@@ -221,47 +216,7 @@ void ControlSwitchSprite::updateTweenAction(float value, const std::string& key)
     setSliderXPosition(value);
 }
 
-void CCControlSwitchSprite::draw()
-{
-    CC_NODE_DRAW_SETUP();
-
-    ccGLEnableVertexAttribs(kCCVertexAttribFlag_PosColorTex);
-    ccGLBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    getShaderProgram()->setUniformsForBuiltins();
-
-    glActiveTexture(GL_TEXTURE0);
-    ccGLBindTexture2DN(0,getTexture()->getName());
-    glUniform1i(m_uTextureLocation, 0);
-
-    glActiveTexture(GL_TEXTURE1);
-    ccGLBindTexture2DN(1,m_pMaskTexture->getName());
-    glUniform1i(m_uMaskLocation, 1);
-
-#define kQuadSize sizeof(m_sQuad.bl)
-#ifdef EMSCRIPTEN
-    long offset = 0;
-    setGLBufferData(&m_sQuad, 4 * kQuadSize, 0);
-#else
-    long offset = (long)&m_sQuad;
-#endif // EMSCRIPTEN
-
-    // vertex
-    int diff = offsetof( ccV3F_C4B_T2F, vertices);
-    glVertexAttribPointer(kCCVertexAttrib_Position, 3, GL_FLOAT, GL_FALSE, kQuadSize, (void*) (offset + diff));
-
-    // texCoods
-    diff = offsetof( ccV3F_C4B_T2F, texCoords);
-    glVertexAttribPointer(kCCVertexAttrib_TexCoords, 2, GL_FLOAT, GL_FALSE, kQuadSize, (void*)(offset + diff));
-
-    // color
-    diff = offsetof( ccV3F_C4B_T2F, colors);
-    glVertexAttribPointer(kCCVertexAttrib_Color, 4, GL_UNSIGNED_BYTE, GL_TRUE, kQuadSize, (void*)(offset + diff));
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);    
-    glActiveTexture(GL_TEXTURE0);
-}
-
-void CCControlSwitchSprite::needsLayout()
+void ControlSwitchSprite::needsLayout()
 {
     _onSprite->setPosition(_onSprite->getContentSize().width / 2 + _sliderXPosition,
         _onSprite->getContentSize().height / 2);

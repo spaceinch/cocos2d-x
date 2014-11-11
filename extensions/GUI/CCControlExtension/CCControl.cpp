@@ -260,7 +260,7 @@ Vector<Invocation*>& Control::dispatchListforControlEvent(EventType controlEvent
 {
     Vector<Invocation*>* invocationList = nullptr;
     auto iter = _dispatchTable.find((int)controlEvent);
-  
+    
     // If the invocation list does not exist for the  dispatch table, we create it
     if (iter == _dispatchTable.end())
     {

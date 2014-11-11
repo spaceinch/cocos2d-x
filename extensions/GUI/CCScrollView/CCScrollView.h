@@ -41,12 +41,7 @@ NS_CC_EXT_BEGIN
 
 class ScrollView;
 
-class CCScrollView;
-/**
- *  @js NA
- *  @lua NA
- */
-class CC_EX_DLL CCScrollViewDelegate
+class CC_EX_DLL ScrollViewDelegate
 {
 public:
     /**
@@ -70,7 +65,6 @@ public:
 /**
  * ScrollView support for cocos2d-x.
  * It provides scroll view functionalities to cocos2d projects natively.
- * @lua NA
  */
 class CC_EX_DLL  ScrollView : public Layer, public ActionTweenDelegate
 {
@@ -82,7 +76,6 @@ public:
         VERTICAL,
         BOTH
     };
-
     /**
      * Returns an autoreleased scroll view object.
      *
@@ -117,8 +110,6 @@ public:
      * @return scroll view object
      */
     bool initWithViewSize(Size size, Node* container = NULL);
-    
-    virtual void registerWithTouchDispatcher();
 
     /**
      * Sets a new content offset. It ignores max/min offset. It just sets what's given. (just like UIKit's UIScrollView)
@@ -264,17 +255,6 @@ public:
     /**
      * CCActionTweenDelegate
      */
-    bool isClippingToBounds() { return m_bClippingToBounds; }
-    void setClippingToBounds(bool bClippingToBounds) { m_bClippingToBounds = bClippingToBounds; }
-    /**
-     *  @js NA
-     */
-    virtual void visit();
-    virtual void addChild(CCNode * child, int zOrder, int tag);
-    virtual void addChild(CCNode * child, int zOrder);
-    virtual void addChild(CCNode * child);
-    void setTouchEnabled(bool e);
-private:
     void updateTweenAction(float value, const std::string& key);
 
     bool hasVisibleParents() const;
@@ -388,17 +368,6 @@ protected:
      */
     Rect _parentScissorRect;
     bool _scissorRestored;
-public:
-    enum ScrollViewScriptEventType
-    {
-        kScrollViewScroll   = 0,
-        kScrollViewZoom,
-    };
-    void registerScriptHandler(int nFunID,int nScriptEventType);
-    void unregisterScriptHandler(int nScriptEventType);
-    int  getScriptHandler(int nScriptEventType);
-private:
-    std::map<int,int> m_mapScriptHandler;
     
     /** Touch listener */
     EventListenerTouchOneByOne* _touchListener;

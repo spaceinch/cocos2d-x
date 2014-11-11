@@ -110,7 +110,7 @@ protected:
     int                     _autorepeatCount;
 
     // Weak links to children
-	  CC_SYNTHESIZE_RETAIN(Sprite*, _minusSprite, MinusSprite)
+	CC_SYNTHESIZE_RETAIN(Sprite*, _minusSprite, MinusSprite)
     CC_SYNTHESIZE_RETAIN(Sprite*, _plusSprite, PlusSprite)
     CC_SYNTHESIZE_RETAIN(Label*, _minusLabel, MinusLabel)
     CC_SYNTHESIZE_RETAIN(Label*, _plusLabel, PlusLabel)

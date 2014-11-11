@@ -47,6 +47,7 @@ NS_CC_EXT_BEGIN
  * @addtogroup control_extension
  * @{
  */
+
 class CC_EX_DLL ControlColourPicker: public Control
 {
 public:

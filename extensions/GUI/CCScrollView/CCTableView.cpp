@@ -666,17 +666,4 @@ void TableView::onTouchCancelled(Touch *pTouch, Event *pEvent)
     }
 }
 
-void CCTableView::unregisterAllScriptHandler()
-{
-    unregisterScriptHandler(kTableViewScroll);
-    unregisterScriptHandler(kTableViewZoom);
-    unregisterScriptHandler(kTableCellTouched);
-    unregisterScriptHandler(kTableCellHighLight);
-    unregisterScriptHandler(kTableCellUnhighLight);
-    unregisterScriptHandler(kTableCellWillRecycle);
-    unregisterScriptHandler(kTableCellSizeForIndex);
-    unregisterScriptHandler(kTableCellSizeAtIndex);
-    unregisterScriptHandler(kNumberOfCellsInTableView);
-}
-
 NS_CC_EXT_END

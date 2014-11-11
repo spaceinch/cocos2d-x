@@ -190,7 +190,6 @@ bool ControlStepper::isContinuous() const
 {
     return _continuous;
 }
-
 //
 //// ControlStepper Public Methods
 
