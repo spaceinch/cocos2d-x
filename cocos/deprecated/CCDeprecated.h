@@ -1153,6 +1153,17 @@ CC_DEPRECATED_ATTRIBUTE CC_DLL Vec4* kmVec4Transform(Vec4* pOut, const Vec4* pV,
 
 //end of deprecated attributes and methods for kazMath
 
+//Custom decprecated added by SpaceInch mmiller@spaceinch.com
+CC_DEPRECATED_ATTRIBUTE typedef timeval cc_timeval;
+
+#define CCTableView TableView
+#define CCTableViewCell TableViewCell
+#define CCTableViewDelegate TableViewDelegate
+#define CCTableViewDataSource TableViewDataSource
+#define CCScrollView ScrollView
+
+//end of SpaceInch deprecated attributes
+
 NS_CC_END
 
 
