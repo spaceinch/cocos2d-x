@@ -589,6 +589,16 @@ const Vec2 KM_VEC2_NEG_X = Vec2(-1, 0);
 const Vec2 KM_VEC2_POS_X = Vec2(1, 0);
 const Vec2 KM_VEC2_ZERO = Vec2(0, 0);
 
+double CCTime::timersubCocos2d(struct cc_timeval *start, struct cc_timeval *end);
+{
+    if (! start || ! end)
+    {
+        return 0;
+    }
+    
+    return ((end->tv_sec*1000.0+end->tv_usec/1000.0) - (start->tv_sec*1000.0+start->tv_usec/1000.0));
+}
+
 NS_CC_END
 
 #if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))

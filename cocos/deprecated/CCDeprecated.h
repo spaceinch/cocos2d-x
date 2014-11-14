@@ -1155,12 +1155,32 @@ CC_DEPRECATED_ATTRIBUTE CC_DLL Vec4* kmVec4Transform(Vec4* pOut, const Vec4* pV,
 
 //Custom decprecated added by SpaceInch mmiller@spaceinch.com
 CC_DEPRECATED_ATTRIBUTE typedef timeval cc_timeval;
+namespace CCTime{
+CC_DEPRECATED_ATTRIBUTE double timersubCocos2d(struct timeval *start, struct timeval *end);
+}
 
 #define CCTableView TableView
 #define CCTableViewCell TableViewCell
 #define CCTableViewDelegate TableViewDelegate
 #define CCTableViewDataSource TableViewDataSource
 #define CCScrollView ScrollView
+#define CCControlButton ControlButton
+
+//CC_DEPRECATED_ATTRIBUTE
+template <class T> cocos2d::Vector<T> cc_convertArrayToVector(cocos2d::Array* array)
+{
+    cocos2d::Vector<T> resultVec;
+    if ( array )
+    {
+        for (int i = 0; i < array->count(); ++i)
+        {
+            resultVec.pushBack(reinterpret_cast<T>(array->objectAtIndex(i)));
+        }
+    }
+    return resultVec;
+}
+
+
 
 //end of SpaceInch deprecated attributes
 
