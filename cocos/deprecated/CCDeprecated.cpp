@@ -589,7 +589,7 @@ const Vec2 KM_VEC2_NEG_X = Vec2(-1, 0);
 const Vec2 KM_VEC2_POS_X = Vec2(1, 0);
 const Vec2 KM_VEC2_ZERO = Vec2(0, 0);
 
-double CCTime::timersubCocos2d(struct cc_timeval *start, struct cc_timeval *end);
+double CCTime::timersubCocos2d(struct timeval *start, struct timeval *end)
 {
     if (! start || ! end)
     {
