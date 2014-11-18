@@ -285,6 +285,11 @@ public:
     inline bool isTextureRectRotated(void) const { return _rectRotated; }
 
     /**
+     * Space Inch Modification to set if texture rectangle is rotated
+     */
+    inline void setIsTextureRectRotated(bool rectRotated) { _rectRotated = rectRotated; }
+  
+    /**
      * Returns the index used on the TextureAtlas.
      */
     inline ssize_t getAtlasIndex(void) const { return _atlasIndex; }

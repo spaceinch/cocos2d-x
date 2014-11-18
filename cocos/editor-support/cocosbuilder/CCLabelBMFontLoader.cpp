@@ -12,7 +12,7 @@ namespace cocosbuilder {
 
 void LabelBMFontLoader::onHandlePropTypeColor3(Node * pNode, Node * pParent, const char * pPropertyName, Color3B pColor3B, CCBReader * ccbReader) {
     if(strcmp(pPropertyName, PROPERTY_COLOR) == 0) {
-        ((Label *)pNode)->setColor(pColor3B);
+        ((CocosBuilderLabelBMFont *)pNode)->setColor(pColor3B);
     } else {
         NodeLoader::onHandlePropTypeColor3(pNode, pParent, pPropertyName, pColor3B, ccbReader);
     }
@@ -20,7 +20,7 @@ void LabelBMFontLoader::onHandlePropTypeColor3(Node * pNode, Node * pParent, con
 
 void LabelBMFontLoader::onHandlePropTypeByte(Node * pNode, Node * pParent, const char * pPropertyName, unsigned char pByte, CCBReader * ccbReader) {
     if(strcmp(pPropertyName, PROPERTY_OPACITY) == 0) {
-        ((Label *)pNode)->setOpacity(pByte);
+        ((CocosBuilderLabelBMFont *)pNode)->setOpacity(pByte);
     } else {
         NodeLoader::onHandlePropTypeByte(pNode, pParent, pPropertyName, pByte, ccbReader);
     }
@@ -28,7 +28,7 @@ void LabelBMFontLoader::onHandlePropTypeByte(Node * pNode, Node * pParent, const
 
 void LabelBMFontLoader::onHandlePropTypeBlendFunc(Node * pNode, Node * pParent, const char * pPropertyName, BlendFunc pBlendFunc, CCBReader * ccbReader) {
     if(strcmp(pPropertyName, PROPERTY_BLENDFUNC) == 0) {
-        ((Label *)pNode)->setBlendFunc(pBlendFunc);
+        ((CocosBuilderLabelBMFont *)pNode)->setBlendFunc(pBlendFunc);
     } else {
         NodeLoader::onHandlePropTypeBlendFunc(pNode, pParent, pPropertyName, pBlendFunc, ccbReader);
     }
@@ -36,7 +36,12 @@ void LabelBMFontLoader::onHandlePropTypeBlendFunc(Node * pNode, Node * pParent, 
 
 void LabelBMFontLoader::onHandlePropTypeFntFile(Node * pNode, Node * pParent, const char * pPropertyName, const char* pFntFile, CCBReader * ccbReader) {
     if(strcmp(pPropertyName, PROPERTY_FNTFILE) == 0) {
-        ((Label *)pNode)->setBMFontFilePath(pFntFile);
+#if CC_COCOSBUILDER_USE_BMFONTLABEL == 1
+        ((CocosBuilderLabelBMFont *)pNode)->setFntFile(pFntFile);
+#else
+        ((CocosBuilderLabelBMFont *)pNode)->setBMFontFilePath(pFntFile);
+#endif
+        
     } else {
         NodeLoader::onHandlePropTypeFntFile(pNode, pParent, pPropertyName, pFntFile, ccbReader);
     }
@@ -44,7 +49,7 @@ void LabelBMFontLoader::onHandlePropTypeFntFile(Node * pNode, Node * pParent, co
 
 void LabelBMFontLoader::onHandlePropTypeText(Node * pNode, Node * pParent, const char * pPropertyName, const char* pText, CCBReader * ccbReader) {
     if(strcmp(pPropertyName, PROPERTY_STRING) == 0) {
-        ((Label *)pNode)->setString(pText);
+        ((CocosBuilderLabelBMFont *)pNode)->setString(pText);
     } else {
         NodeLoader::onHandlePropTypeText(pNode, pParent, pPropertyName, pText, ccbReader);
     }

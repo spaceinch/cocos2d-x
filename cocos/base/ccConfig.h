@@ -299,9 +299,18 @@ To enable set it to a value different than 0. Disabled by default.
  protected by default.
  */
 #ifndef CC_CONSTRUCTOR_ACCESS
-//#define CC_CONSTRUCTOR_ACCESS protected
-// Modified for SpaceInch Migration: mmiller@spaceinch.com
-#define CC_CONSTRUCTOR_ACCESS public
+#define CC_CONSTRUCTOR_ACCESS protected
+#endif
+
+/** Added by SpaceInch to toggle the use of the old LabelFontBM and the new Label
+ There are positioning problems with the new Label using BMFont's, this a work around to avoid
+ using them for BMFont's.
+ */
+#ifndef CocosBuilderLabelBMFont
+#define CocosBuilderLabelBMFont LabelBMFont
+#endif
+#ifndef CC_COCOSBUILDER_USE_BMFONTLABEL
+#define CC_COCOSBUILDER_USE_BMFONTLABEL 1
 #endif
  
 #endif // __CCCONFIG_H__
