@@ -307,10 +307,10 @@ To enable set it to a value different than 0. Disabled by default.
  using them for BMFont's.
  */
 #ifndef CocosBuilderLabelBMFont
-#define CocosBuilderLabelBMFont LabelBMFont
+#define CocosBuilderLabelBMFont Label
 #endif
 #ifndef CC_COCOSBUILDER_USE_BMFONTLABEL
-#define CC_COCOSBUILDER_USE_BMFONTLABEL 1
+#define CC_COCOSBUILDER_USE_BMFONTLABEL 0
 #endif
  
 #endif // __CCCONFIG_H__
