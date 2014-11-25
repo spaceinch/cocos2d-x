@@ -1167,14 +1167,14 @@ CC_DEPRECATED_ATTRIBUTE double timersubCocos2d(struct timeval *start, struct tim
 #define CCControlButton ControlButton
 
 //CC_DEPRECATED_ATTRIBUTE
-template <class T> cocos2d::Vector<T> cc_convertArrayToVector(cocos2d::Array* array)
+template <class T> cocos2d::Vector<T> cc_convertArrayToVector(cocos2d::__Array* array)
 {
     cocos2d::Vector<T> resultVec;
     if ( array )
     {
         for (int i = 0; i < array->count(); ++i)
         {
-            resultVec.pushBack(reinterpret_cast<T>(array->objectAtIndex(i)));
+            resultVec.pushBack(reinterpret_cast<T>(array->getObjectAtIndex(i)));
         }
     }
     return resultVec;
