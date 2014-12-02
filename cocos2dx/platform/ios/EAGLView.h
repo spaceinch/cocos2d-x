@@ -70,6 +70,14 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 #import "CCESRenderer.h"
 
+//fix problem on iOS 8 when surface size is 0x0
+//disable layout to fix the problem
+//if app should be ready to change rotation you should enable it again
+//that was reproduced on iphone5 and iphone 6 after showing video
+
+BOOL s_ignoreLayoutRefresh = NO;
+
+
 //CLASS INTERFACE:
 
 /** EAGLView Class.

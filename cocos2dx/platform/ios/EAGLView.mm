@@ -254,6 +254,11 @@ static EAGLView *view = 0;
 
 - (void) layoutSubviews
 {
+    if(s_ignoreLayoutRefresh == YES)
+    {
+        return;
+    }
+    
     [renderer_ resizeFromLayer:(CAEAGLLayer*)self.layer];
     size_ = [renderer_ backingSize];
 
