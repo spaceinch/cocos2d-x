@@ -75,6 +75,8 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 #define IOS_MAX_TOUCHES_COUNT     10
 
+BOOL s_ignoreLayoutRefresh = NO;
+
 static EAGLView *view = 0;
 
 @interface EAGLView (Private)
