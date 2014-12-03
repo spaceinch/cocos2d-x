@@ -75,7 +75,7 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 //if app should be ready to change rotation you should enable it again
 //that was reproduced on iphone5 and iphone 6 after showing video
 
-BOOL s_ignoreLayoutRefresh = NO;
+extern BOOL s_ignoreLayoutRefresh;
 
 
 //CLASS INTERFACE:
