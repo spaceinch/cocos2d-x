@@ -76,6 +76,9 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 #import "CCES2Renderer-ios.h"
 #import "OpenGL_Internal-ios.h"
 
+//GLOBAL VARIABLES
+BOOL s_ignoreLayoutRefresh = NO;
+
 //CLASS IMPLEMENTATIONS:
 
 #define IOS_MAX_TOUCHES_COUNT     10
@@ -253,6 +256,11 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 
 - (void) layoutSubviews
 {
+    if(s_ignoreLayoutRefresh == YES)
+    {
+        return;
+    }
+  
     [renderer_ resizeFromLayer:(CAEAGLLayer*)self.layer];
     size_ = [renderer_ backingSize];
 
