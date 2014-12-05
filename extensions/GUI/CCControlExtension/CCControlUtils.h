@@ -34,8 +34,9 @@
 #ifndef __CCCONTROL_UTILS_H__
 #define __CCCONTROL_UTILS_H__
 
-#include "sprite_nodes/CCSprite.h"
+#include "2d/CCSprite.h"
 #include "../../ExtensionMacros.h"
+#include "extensions/ExtensionExport.h"
 
 NS_CC_EXT_BEGIN
 
@@ -61,24 +62,41 @@ typedef struct
  * @{
  */
 
-/**helper class to store ccColor3B's in mutable arrays
- * @js NA
- * @lua NA
- **/
-class CC_EX_DLL CCColor3bObject : public CCObject
+//helper class to store Color3B's in mutable arrays
+class CC_EX_DLL Color3bObject : public Ref
 {
 public:
-    ccColor3B value;
-    CCColor3bObject(ccColor3B s_value):value(s_value){}
+    Color3B value;
+    /**
+     * @js NA
+     * @lua NA
+     */
+    Color3bObject(Color3B s_value):value(s_value){}
 };
 
-class CC_EX_DLL CCControlUtils
+class CC_EX_DLL ControlUtils
 {
 public:
-    static CCSprite* addSpriteToTargetWithPosAndAnchor(const char* spriteName, CCNode * target, CCPoint pos, CCPoint anchor);
+    /**
+     * @js NA
+     * @lua NA
+     */
+    static Sprite* addSpriteToTargetWithPosAndAnchor(const char* spriteName, Node * target, Vec2 pos, Vec2 anchor);
+    /**
+     * @js NA
+     * @lua NA
+     */
     static HSV HSVfromRGB(RGBA value);
+    /**
+     * @js NA
+     * @lua NA
+     */
     static RGBA RGBfromHSV(HSV value);
-    static CCRect CCRectUnion(const CCRect& src1, const CCRect& src2);
+    /**
+     * @js NA
+     * @lua NA
+     */
+    static Rect RectUnion(const Rect& src1, const Rect& src2);
 };
 
 // end of GUI group

@@ -37,6 +37,7 @@
 #include "CCControlUtils.h"
 #include "CCControlHuePicker.h"
 #include "CCControlSaturationBrightnessPicker.h"
+#include "extensions/ExtensionExport.h"
 
 NS_CC_EXT_BEGIN
 
@@ -47,33 +48,38 @@ NS_CC_EXT_BEGIN
  * @{
  */
 
-class CC_EX_DLL CCControlColourPicker: public CCControl
+class CC_EX_DLL ControlColourPicker: public Control
 {
 public:
-    CCControlColourPicker();
-    virtual ~CCControlColourPicker();
-    virtual void setColor(const ccColor3B& colorValue);
+    static ControlColourPicker* create();
+    /**
+     * @js ctor
+     */
+    ControlColourPicker();
+    /**
+     * @js NA
+     * @lua NA
+     */
+    virtual ~ControlColourPicker();
+
+    virtual bool init() override;
+
+    virtual void setColor(const Color3B& colorValue);
     virtual void setEnabled(bool bEnabled);
+
+    //virtual ~ControlColourPicker();
+    void hueSliderValueChanged(Ref * sender, Control::EventType controlEvent);
+    void colourSliderValueChanged(Ref * sender, Control::EventType controlEvent);
+
 protected:
-    HSV m_hsv;
-    CC_SYNTHESIZE_RETAIN(CCControlSaturationBrightnessPicker*, m_colourPicker, colourPicker)
-    CC_SYNTHESIZE_RETAIN(CCControlHuePicker*, m_huePicker, HuePicker)
-    CC_SYNTHESIZE_RETAIN(CCSprite*, m_background, Background)
-    
-public:
-
-    static CCControlColourPicker* create();
-
-    virtual bool init();
-    //virtual ~CCControlColourPicker();
-    void hueSliderValueChanged(CCObject * sender, CCControlEvent controlEvent);
-    void colourSliderValueChanged(CCObject * sender, CCControlEvent controlEvent);
-
-protected:    
     void updateControlPicker();
     void updateHueAndControlPicker();
-    virtual bool ccTouchBegan(CCTouch* touch, CCEvent* pEvent);
-    
+    virtual bool onTouchBegan(Touch* touch, Event* pEvent);
+
+    HSV _hsv;
+    CC_SYNTHESIZE_RETAIN(ControlSaturationBrightnessPicker*, _colourPicker, colourPicker)
+    CC_SYNTHESIZE_RETAIN(ControlHuePicker*, _huePicker, HuePicker)
+    CC_SYNTHESIZE_RETAIN(Sprite*, _background, Background)
 };
 
 // end of GUI group

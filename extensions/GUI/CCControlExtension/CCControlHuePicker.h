@@ -35,6 +35,7 @@
 
 #include "CCControl.h"
 #include "CCInvocation.h"
+#include "extensions/ExtensionExport.h"
 
 NS_CC_EXT_BEGIN
 
@@ -45,33 +46,41 @@ NS_CC_EXT_BEGIN
  * @{
  */
 
-class CC_EX_DLL CCControlHuePicker : public CCControl
+class CC_EX_DLL ControlHuePicker : public Control
 {
+public:
+    static ControlHuePicker* create(Node* target, Vec2 pos);
+    /**
+     * @js ctor
+     */
+    ControlHuePicker();
+    /**
+     * @js NA
+     * @lua NA
+     */
+    virtual ~ControlHuePicker();
+    virtual bool initWithTargetAndPos(Node* target, Vec2 pos);
+
+    virtual void setEnabled(bool enabled);
+
+    // overrides
+    virtual bool onTouchBegan(Touch* touch, Event* pEvent) override;
+    virtual void onTouchMoved(Touch *pTouch, Event *pEvent) override;
+
+protected:
+    void updateSliderPosition(Vec2 location);
+    bool checkSliderPosition(Vec2 location);
+
     //maunally put in the setters
-    CC_SYNTHESIZE_READONLY(float, m_hue, Hue);
+    CC_SYNTHESIZE_READONLY(float, _hue, Hue);
     virtual void setHue(float val);
-    CC_SYNTHESIZE_READONLY(float, m_huePercentage, HuePercentage);
+    CC_SYNTHESIZE_READONLY(float, _huePercentage, HuePercentage);
     virtual void setHuePercentage(float val);
 
-
     //not sure if these need to be there actually. I suppose someone might want to access the sprite?
-    CC_SYNTHESIZE_RETAIN(CCSprite*, m_background, Background);
-    CC_SYNTHESIZE_RETAIN(CCSprite*, m_slider, Slider);
-    CC_SYNTHESIZE_READONLY(CCPoint, m_startPos, StartPos);
-
-public:
-    CCControlHuePicker();
-    virtual ~CCControlHuePicker();
-    virtual bool initWithTargetAndPos(CCNode* target, CCPoint pos);
-
-    static CCControlHuePicker* create(CCNode* target, CCPoint pos);
-    virtual void setEnabled(bool enabled);
-protected:    
-    void updateSliderPosition(CCPoint location);
-    bool checkSliderPosition(CCPoint location);
-
-    virtual bool ccTouchBegan(CCTouch* touch, CCEvent* pEvent);
-    virtual void ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent);
+    CC_SYNTHESIZE_RETAIN(Sprite*, _background, Background);
+    CC_SYNTHESIZE_RETAIN(Sprite*, _slider, Slider);
+    CC_SYNTHESIZE_READONLY(Vec2, _startPos, StartPos);
 };
 
 // end of GUI group

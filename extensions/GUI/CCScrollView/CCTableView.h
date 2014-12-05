@@ -28,26 +28,19 @@
 
 #include "CCScrollView.h"
 #include "CCTableViewCell.h"
+#include "extensions/ExtensionExport.h"
 
 #include <set>
 #include <vector>
 
 NS_CC_EXT_BEGIN
 
-class CCTableView;
-class CCArrayForObjectSorting;
-
-typedef enum {
-    kCCTableViewFillTopDown,
-    kCCTableViewFillBottomUp
-} CCTableViewVerticalFillOrder;
+class TableView;
 
 /**
  * Sole purpose of this delegate is to single touch event in this version.
- * @js NA
- * @lua NA
  */
-class CC_EX_DLL CCTableViewDelegate : public CCScrollViewDelegate
+class CC_EX_DLL TableViewDelegate : public ScrollViewDelegate
 {
 public:
     /**
@@ -55,24 +48,30 @@ public:
      *
      * @param table table contains the given cell
      * @param cell  cell that is touched
+     * @js NA
+     * @lua NA
      */
-    virtual void tableCellTouched(CCTableView* table, CCTableViewCell* cell) = 0;
+    virtual void tableCellTouched(TableView* table, TableViewCell* cell) = 0;
 
     /**
      * Delegate to respond a table cell press event.
      *
      * @param table table contains the given cell
      * @param cell  cell that is pressed
+     * @js NA
+     * @lua NA
      */
-    virtual void tableCellHighlight(CCTableView* table, CCTableViewCell* cell){};
+    virtual void tableCellHighlight(TableView* table, TableViewCell* cell){};
 
     /**
      * Delegate to respond a table cell release event
      *
      * @param table table contains the given cell
      * @param cell  cell that is pressed
+     * @js NA
+     * @lua NA
      */
-    virtual void tableCellUnhighlight(CCTableView* table, CCTableViewCell* cell){};
+    virtual void tableCellUnhighlight(TableView* table, TableViewCell* cell){};
 
     /**
      * Delegate called when the cell is about to be recycled. Immediately
@@ -81,20 +80,25 @@ public:
      *
      * @param table table contains the given cell
      * @param cell  cell that is pressed
+     * @js NA
+     * @lua NA
      */
-    virtual void tableCellWillRecycle(CCTableView* table, CCTableViewCell* cell){};
+    virtual void tableCellWillRecycle(TableView* table, TableViewCell* cell){};
 
 };
 
 
 /**
  * Data source that governs table backend data.
- * @lua NA
  */
-class CC_EX_DLL CCTableViewDataSource
+class CC_EX_DLL TableViewDataSource
 {
 public:
-    virtual ~CCTableViewDataSource() {}
+    /**
+     * @js NA
+     * @lua NA
+     */
+    virtual ~TableViewDataSource() {}
 
     /**
      * cell size for a given index
@@ -102,7 +106,7 @@ public:
      * @param idx the index of a cell to get a size
      * @return size of a cell at given index
      */
-    virtual CCSize tableCellSizeForIndex(CCTableView *table, unsigned int idx) {
+    virtual Size tableCellSizeForIndex(TableView *table, ssize_t idx) {
         return cellSizeForTable(table);
     };
     /**
@@ -111,8 +115,8 @@ public:
      * @param table table to hold the instances of Class
      * @return cell size
      */
-    virtual CCSize cellSizeForTable(CCTableView *table) {
-        return CCSizeZero;
+    virtual Size cellSizeForTable(TableView *table) {
+        return Size::ZERO;
     };
     /**
      * a cell instance at a given index
@@ -120,43 +124,49 @@ public:
      * @param idx index to search for a cell
      * @return cell found at idx
      */
-    virtual CCTableViewCell* tableCellAtIndex(CCTableView *table, unsigned int idx) = 0;
+    virtual TableViewCell* tableCellAtIndex(TableView *table, ssize_t idx) = 0;
     /**
      * Returns number of cells in a given table view.
      *
      * @return number of cells
      */
-    virtual unsigned int numberOfCellsInTableView(CCTableView *table) = 0;
+    virtual ssize_t numberOfCellsInTableView(TableView *table) = 0;
 
 };
 
 
 /**
- * UITableView counterpart for cocos2d for iphone.
+ * UITableView support for cocos2d-x.
  *
- * this is a very basic, minimal implementation to bring UITableView-like component into cocos2d world.
- * @lua NA
+ * This is a very basic, minimal implementation to bring UITableView-like component into cocos2d world.
  */
-class CC_EX_DLL CCTableView : public CCScrollView, public CCScrollViewDelegate
+class CC_EX_DLL TableView : public ScrollView, public ScrollViewDelegate
 {
 public:
-    /**
-     *  @js ctor
-     */
-    CCTableView();
-    /**
-     *  @js NA
-     */
-    virtual ~CCTableView();
-
+    
+    enum class VerticalFillOrder
+    {
+        TOP_DOWN,
+        BOTTOM_UP
+    };
+    
+    /** Empty contructor of TableView */
+    static TableView* create();
+    
     /**
      * An intialized table view object
      *
      * @param dataSource data source
      * @param size view size
      * @return table view
+     * @code
+     * when this function bound to js or lua,the input params are changed
+     * in js:var create(var jsObject,var size)
+     * in lua:local create(var size)
+     * in lua:
+     * @endcode
      */
-    static CCTableView* create(CCTableViewDataSource* dataSource, CCSize size);
+    static TableView* create(TableViewDataSource* dataSource, Size size);
     /**
      * An initialized table view object
      *
@@ -164,48 +174,78 @@ public:
      * @param size view size
      * @param container parent object for cells
      * @return table view
+     * @code
+     * when this function bound to js or lua,the input params are changed
+     * in js:var create(var jsObject,var size,var container)
+     * in lua:local create(var size, var container)
+     * in lua:
+     * @endcode
      */
-    static CCTableView* create(CCTableViewDataSource* dataSource, CCSize size, CCNode *container);
+    static TableView* create(TableViewDataSource* dataSource, Size size, Node *container);
+    /**
+     * @js ctor
+     */
+    TableView();
+    /**
+     * @js NA
+     * @lua NA
+     */
+    virtual ~TableView();
+
+    bool initWithViewSize(Size size, Node* container = NULL);
 
     /**
      * data source
      * @js NA
+     * @lua NA
      */
-    CCTableViewDataSource* getDataSource() { return m_pDataSource; }
-    void setDataSource(CCTableViewDataSource* source) { m_pDataSource = source; }
+    TableViewDataSource* getDataSource() { return _dataSource; }
+    /**
+     * when this function bound to js or lua,the input params are changed
+     * in js:var setDataSource(var jsSource)
+     * in lua:local setDataSource()
+     * @endcode
+     */
+    void setDataSource(TableViewDataSource* source) { _dataSource = source; }
     /**
      * delegate
      * @js NA
+     * @lua NA
      */
-    CCTableViewDelegate* getDelegate() { return m_pTableViewDelegate; }
-    void setDelegate(CCTableViewDelegate* pDelegate) { m_pTableViewDelegate = pDelegate; }
+    TableViewDelegate* getDelegate() { return _tableViewDelegate; }
+    /**
+     * @code
+     * when this function bound to js or lua,the input params are changed
+     * in js:var setDelegate(var jsDelegate)
+     * in lua:local setDelegate()
+     * @endcode
+     */
+    void setDelegate(TableViewDelegate* pDelegate) { _tableViewDelegate = pDelegate; }
 
     /**
      * determines how cell is ordered and filled in the view.
      */
-    void setVerticalFillOrder(CCTableViewVerticalFillOrder order);
-    CCTableViewVerticalFillOrder getVerticalFillOrder();
+    void setVerticalFillOrder(VerticalFillOrder order);
+    VerticalFillOrder getVerticalFillOrder();
 
-
-    bool initWithViewSize(CCSize size, CCNode* container = NULL);
     /**
      * Updates the content of the cell at a given index.
      *
      * @param idx index to find a cell
      */
-    void updateCellAtIndex(unsigned int idx);
+    void updateCellAtIndex(ssize_t idx);
     /**
      * Inserts a new cell at a given index
      *
      * @param idx location to insert
      */
-    void insertCellAtIndex(unsigned int idx);
+    void insertCellAtIndex(ssize_t idx);
     /**
      * Removes a cell at a given index
      *
      * @param idx index to find a cell
      */
-    void removeCellAtIndex(unsigned int idx);
+    void removeCellAtIndex(ssize_t idx);
     /**
      * reloads data from data source.  the view will be refreshed.
      */
@@ -215,7 +255,7 @@ public:
      *
      * @return free cell
      */
-    CCTableViewCell *dequeueCell();
+    TableViewCell *dequeueCell();
 
     /**
      * Returns an existing cell at a given index. Returns nil if a cell is nonexistent at the moment of query.
@@ -223,80 +263,69 @@ public:
      * @param idx index
      * @return a cell at a given index
      */
-    CCTableViewCell *cellAtIndex(unsigned int idx);
+    TableViewCell *cellAtIndex(ssize_t idx);
 
-
-    virtual void scrollViewDidScroll(CCScrollView* view);
-    virtual void scrollViewDidZoom(CCScrollView* view) {}
-
-    virtual bool ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent);
-    virtual void ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent);
-    virtual void ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent);
-    virtual void ccTouchCancelled(CCTouch *pTouch, CCEvent *pEvent);
+    // Overrides
+    virtual void scrollViewDidScroll(ScrollView* view) override;
+    virtual void scrollViewDidZoom(ScrollView* view)  override {}
+    virtual bool onTouchBegan(Touch *pTouch, Event *pEvent) override;
+    virtual void onTouchMoved(Touch *pTouch, Event *pEvent) override;
+    virtual void onTouchEnded(Touch *pTouch, Event *pEvent) override;
+    virtual void onTouchCancelled(Touch *pTouch, Event *pEvent) override;
 
 protected:
+    long __indexFromOffset(Vec2 offset);
+    long _indexFromOffset(Vec2 offset);
+    Vec2 __offsetFromIndex(ssize_t index);
+    Vec2 _offsetFromIndex(ssize_t index);
 
-    CCTableViewCell *m_pTouchedCell;
+    void _moveCellOutOfSight(TableViewCell *cell);
+    void _setIndexForCell(ssize_t index, TableViewCell *cell);
+    void _addCellIfNecessary(TableViewCell * cell);
+
+    void _updateCellPositions();
+
+
+    TableViewCell *_touchedCell;
     /**
      * vertical direction of cell filling
      */
-    CCTableViewVerticalFillOrder m_eVordering;
+    VerticalFillOrder _vordering;
 
     /**
      * index set to query the indexes of the cells used.
      */
-    std::set<unsigned int>* m_pIndices;
+    std::set<ssize_t>* _indices;
 
     /**
      * vector with all cell positions
      */
-    std::vector<float> m_vCellsPositions;
+    std::vector<float> _vCellsPositions;
     //NSMutableIndexSet *indices_;
     /**
      * cells that are currently in the table
      */
-    CCArrayForObjectSorting* m_pCellsUsed;
+    Vector<TableViewCell*> _cellsUsed;
     /**
      * free list of cells
      */
-    CCArrayForObjectSorting* m_pCellsFreed;
+    Vector<TableViewCell*> _cellsFreed;
     /**
      * weak link to the data source object
      */
-    CCTableViewDataSource* m_pDataSource;
+    TableViewDataSource* _dataSource;
     /**
      * weak link to the delegate object
      */
-    CCTableViewDelegate* m_pTableViewDelegate;
+    TableViewDelegate* _tableViewDelegate;
 
-	CCScrollViewDirection m_eOldDirection;
+    Direction _oldDirection;
 
-    int __indexFromOffset(CCPoint offset);
-    unsigned int _indexFromOffset(CCPoint offset);
-    CCPoint __offsetFromIndex(unsigned int index);
-    CCPoint _offsetFromIndex(unsigned int index);
+    bool _isUsedCellsDirty;
 
-    void _moveCellOutOfSight(CCTableViewCell *cell);
-    void _setIndexForCell(unsigned int index, CCTableViewCell *cell);
-    void _addCellIfNecessary(CCTableViewCell * cell);
-
-    void _updateCellPositions();
 public:
     void _updateContentSize();
-    
-    enum TableViewScriptEventType
-    {
-        kTableViewScroll   = 0,
-        kTableViewZoom,
-        kTableCellTouched,
-        kTableCellHighLight,
-        kTableCellUnhighLight,
-        kTableCellWillRecycle,
-        kTableCellSizeForIndex,
-        kTableCellSizeAtIndex,
-        kNumberOfCellsInTableView,
-    };
-    void unregisterAllScriptHandler();
+
 };
 
 

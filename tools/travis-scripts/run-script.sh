@@ -7,78 +7,128 @@ COCOS2DX_ROOT="$DIR"/../..
 CORES=`nproc`
 echo ${CORES}
 
-if [ "$GEN_JSB"x = "YES"x ]; then
+if [ -z "$NDK_ROOT" ]; then
+    export NDK_ROOT=$HOME/bin/android-ndk
+fi
+
+if [ -z "$PYTHON_BIN" ]; then
+    export PYTHON_BIN=/usr/bin/python
+fi
+
+if [ "$GEN_BINDING"x = "YES"x ]; then
+    # Re-generation of the javascript bindings can perform push of the new
+    # version back to github.  We don't do this for pull requests, or if
+    # GH_USER/GH_EMAIL/GH_PASSWORD environment variables are not set correctly
+    # by the encoded variables in the .travis.yml file.  (e.g. if cloned repo's
+    # want to use travis).
     if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
         exit 0
     fi
-    cd $COCOS2DX_ROOT/tools/travis-scripts
-    ./generate-jsbindings.sh
-fi
-
-build_android()
-{
-    cd $COCOS2DX_ROOT/samples/$1/$2/proj.android
-    ln -sf ../../../../android_build_objs obj
-    ./build_native.sh -j ${CORES}
-}
-
-if [ "$PLATFORM"x = "android"x ]; then
-    export NDK_ROOT=$HOME/bin/android-ndk
-    cd $COCOS2DX_ROOT/tools/travis-scripts
-    ./generate-jsbindings.sh
-
-    cd $COCOS2DX_ROOT
-    mkdir -p android_build_objs
-    build_android Cpp HelloCpp
-    build_android Cpp TestCpp
-    build_android Cpp AssetsManagerTest
-    build_android Javascript TestJavascript
-    build_android Lua HelloLua
-    build_android Lua TestLua
-fi
-
-if [ "$PLATFORM"x = "nacl"x ]; then
-    cd $COCOS2DX_ROOT
-    export NACL_SDK_ROOT=$HOME/bin/nacl_sdk/pepper_canary
-    if [ "${TOOLCHAIN}" = "glibc" ]; then
-        export PATH=$PATH:$NACL_SDK_ROOT/toolchain/linux_x86_glibc/bin
-    elif [ "${TOOLCHAIN}" = "pnacl" ]; then
-        export PATH=$PATH:$NACL_SDK_ROOT/toolchain/linux_pnacl/bin
-    else
-        export PATH=$PATH:$NACL_SDK_ROOT/toolchain/linux_x86_newlib/bin
+    if [ -z "${GH_EMAIL}" ]; then
+        echo "GH_EMAIL not set"
+        exit 1
     fi
+    if [ -z "${GH_USER}" ]; then
+        echo "GH_USER not set"
+        exit 1
+    fi
+    if [ -z "${GH_PASSWORD}" ]; then
+        echo "GH_USER not set"
+        exit 1
+    fi
+
+    cd $COCOS2DX_ROOT/tools/travis-scripts
+    ./generate-bindings.sh
+elif [ "$GEN_COCOS_FILES"x = "YES"x ]; then
+    if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+        exit 0
+    fi
+    if [ -z "${GH_EMAIL}" ]; then
+        echo "GH_EMAIL not set"
+        exit 1
+    fi
+    if [ -z "${GH_USER}" ]; then
+        echo "GH_USER not set"
+        exit 1
+    fi
+    if [ -z "${GH_PASSWORD}" ]; then
+        echo "GH_USER not set"
+        exit 1
+    fi
+
+
+    cd $COCOS2DX_ROOT/tools/travis-scripts
+    ./generate-cocosfiles.sh
+elif [ "$PLATFORM"x = "android"x ]; then
+    export NDK_ROOT=$HOME/bin/android-ndk
+
+    # Generate binding glue codes
+    echo "Generating bindings glue codes ..."
+    cd $COCOS2DX_ROOT/tools/travis-scripts
+    ./generate-bindings.sh
+    ./generate-cocosfiles.sh
+
+    cd $COCOS2DX_ROOT
+
+    # Create a directory for temporary objects
+    mkdir android_build_objs
+
+    PROJECTS=("cpp-empty-test" "cpp-tests" "lua-empty-test/project" "lua-tests/project")
+    for i in ${PROJECTS[*]}; do
+        ln -s $COCOS2DX_ROOT/android_build_objs $COCOS2DX_ROOT/tests/$i/proj.android/obj
+    done
+
+    # Build all samples
+    echo "Building all samples ..."
+    cd $COCOS2DX_ROOT/build
+    ./android-build.py -n "NDK_BUG=0 -j10" all
+
+elif [ "$PLATFORM"x = "nacl"x ]; then
+    export NACL_SDK_ROOT=$HOME/bin/nacl_sdk/pepper_canary
+    export PATH=$PATH:$NACL_SDK_ROOT/toolchain/linux_x86_newlib/bin
     export PATH=$PATH:$NACL_SDK_ROOT/toolchain/linux_arm_newlib/bin
-    make -j${CORES}
-fi
+    cd $COCOS2DX_ROOT/build
+    make -j4
+elif [ "$PLATFORM"x = "linux"x ]; then
+    # Generate binding glue codes
+    echo "Generating bindings glue codes ..."
+    cd $COCOS2DX_ROOT/tools/travis-scripts
+    ./generate-bindings.sh
+    ./generate-cocosfiles.sh
 
-if [ "$PLATFORM"x = "linux"x ]; then
-    cd $COCOS2DX_ROOT
-    make -j${CORES}
-fi
+    echo "Building cocos2d-x"
+    cd $COCOS2DX_ROOT/build
+    mkdir -p linux-build
+    cd linux-build
+    cmake ../..
+    make -j10
 
-if [ "$PLATFORM"x = "emscripten"x ]; then
-    cd $COCOS2DX_ROOT
+elif [ "$PLATFORM"x = "emscripten"x ]; then
+    # Generate binding glue codes
+    echo "Generating bindings glue codes ..."
+    cd $COCOS2DX_ROOT/tools/travis-scripts
+    ./generate-bindings.sh
+    ./generate-cocosfiles.sh
+
+    cd $COCOS2DX_ROOT/build
     export PYTHON=/usr/bin/python
     export LLVM=$HOME/bin/clang+llvm-3.2/bin
-    sudo mkdir -p /Library/Fonts
-    sudo cp samples/Cpp/TestCpp/Resources/fonts/arial.ttf /Library/Fonts/Arial.ttf
-    make -f Makefile.emscripten -j${CORES}
-fi
+    export LLVM_ROOT=$LLVM
+    EMCC_DEBUG=1 make PLATFORM=emscripten -j 8
+elif [ "$PLATFORM"x = "mac-ios"x ]; then
+    if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+        exit 0
+    fi
 
-if [ "$PLATFORM"x = "ios"x ]; then
-    cd $COCOS2DX_ROOT/tools/travis-scripts
-    ./generate-jsbindings.sh
+    if [ "$PUSH_TO_MAC"x != "YES"x ]; then
+        cd $COCOS2DX_ROOT/tools/travis-scripts
+        ./generate-bindings.sh
+        ./generate-cocosfiles.sh
 
-    cd $COCOS2DX_ROOT
-    xctool/xctool.sh -project samples/Cpp/HelloCpp/proj.ios/HelloCpp.xcodeproj -scheme HelloCpp test
-    xctool/xctool.sh -project samples/Cpp/SimpleGame/proj.ios/SimpleGame.xcodeproj -scheme SimpleGame test
-    xctool/xctool.sh -project samples/Cpp/TestCpp/proj.ios/TestCpp.xcodeproj -scheme TestCpp test
-    #xctool/xctool.sh -project samples/Cpp/AssetsManagerTest/proj.ios/AssetsManagerTest.xcodeproj -scheme AssetsManagerTest test
-    #xctool/xctool.sh -project samples/Javascript/CocosDragonJS/proj.ios/CocosDragonJS.xcodeproj -scheme CocosDragonJS test
-    #xctool/xctool.sh -project samples/Javascript/CrystalCraze/proj.ios/CrystalCraze.xcodeproj -scheme CrystalCraze test
-    xctool/xctool.sh -project samples/Javascript/MoonWarriors/proj.ios/MoonWarriors.xcodeproj -scheme MoonWarriors test
-    xctool/xctool.sh -project samples/Javascript/TestJavascript/proj.ios/TestJavascript.xcodeproj -scheme TestJavascript test
-    #xctool/xctool.sh -project samples/Javascript/WatermelonWithMe/proj.ios/WatermelonWithMe.xcodeproj -scheme WatermelonWithMe test
-    xctool/xctool.sh -project samples/Lua/HelloLua/proj.ios/HelloLua.xcodeproj -scheme HelloLua test
-    xctool/xctool.sh -project samples/Lua/TestLua/proj.ios/TestLua.xcodeproj -scheme TestLua test
+        cd $COCOS2DX_ROOT
+        xctool -project build/cocos2d_tests.xcodeproj -scheme "$SCHEME" -jobs 8 -arch "$ARCH" -sdk "$SDK"  build
+    fi
+else
+    echo "Unknown \$PLATFORM: '$PLATFORM'"
+    exit 1
 fi
