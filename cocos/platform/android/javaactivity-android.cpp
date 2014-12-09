@@ -42,12 +42,12 @@ THE SOFTWARE.
 #define  LOG_TAG    "main"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 
-void cocos_android_app_init(JNIEnv* env, jobject thiz) __attribute__((weak));
-
 using namespace cocos2d;
 
 extern "C"
 {
+
+extern void cocos_android_app_init(JNIEnv* env, jobject thiz) __attribute__((weak));
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
