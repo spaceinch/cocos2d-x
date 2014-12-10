@@ -44,10 +44,10 @@ THE SOFTWARE.
 
 using namespace cocos2d;
 
+extern void cocos_android_app_init(JNIEnv* env, jobject thiz) __attribute__((weak));
+
 extern "C"
 {
-
-extern void cocos_android_app_init(JNIEnv* env, jobject thiz) __attribute__((weak));
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
