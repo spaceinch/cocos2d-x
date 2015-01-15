@@ -225,6 +225,7 @@ protected:
 
     int _asyncRefCount;
 
+    mutable std::mutex _texturesMutex;
     std::unordered_map<std::string, Texture2D*> _textures;
 };
 
