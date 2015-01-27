@@ -30,6 +30,8 @@ THE SOFTWARE.
 
 #if CC_REF_LEAK_DETECTION
 #include <algorithm>    // std::find
+#include <execinfo.h>
+#include <fstream>      // std::ifstream
 #endif
 
 NS_CC_BEGIN
@@ -37,7 +39,9 @@ NS_CC_BEGIN
 #if CC_REF_LEAK_DETECTION
 static void trackRef(Ref* ref);
 static void untrackRef(Ref* ref);
+bool Ref::s_startTracking = true;
 #endif
+
 
 Ref::Ref()
 : _referenceCount(1) // when the Ref is created, the reference count of it is 1
@@ -50,7 +54,12 @@ Ref::Ref()
 #endif
     
 #if CC_REF_LEAK_DETECTION
-    trackRef(this);
+    m_backTrace = nullptr;
+    
+    if(s_startTracking)
+    {
+        trackRef(this);
+    }
 #endif
 }
 
@@ -147,25 +156,46 @@ unsigned int Ref::getReferenceCount() const
 
 #if CC_REF_LEAK_DETECTION
 
-static std::list<Ref*> __refAllocationList;
+std::list<Ref*>* __refAllocationList = nullptr;
 
 void Ref::printLeaks()
 {
     // Dump Ref object memory leaks
-    if (__refAllocationList.empty())
+    if (__refAllocationList->empty())
     {
         log("[memory] All Ref objects successfully cleaned up (no leaks detected).\n");
     }
     else
     {
-        log("[memory] WARNING: %d Ref objects still active in memory.\n", (int)__refAllocationList.size());
-
-        for (const auto& ref : __refAllocationList)
+        std::string outPutFolder = OUTOUTFOLDER;
+        std::ofstream outfile (outPutFolder);
+        
+        log("[memory] WARNING: %d Ref objects still active in memory.\n", (int)__refAllocationList->size());
+        outfile << "leaked objects " << __refAllocationList->size() << std::endl;
+        
+        int current = 0;
+        for (const auto& ref : *__refAllocationList)
         {
             CC_ASSERT(ref);
             const char* type = typeid(*ref).name();
-            log("[memory] LEAK: Ref object '%s' still active with reference count %d.\n", (type ? type : ""), ref->getReferenceCount());
+            outfile << "[memory] "<< current <<" LEAK: Ref object " << type << " still active with reference count " << ref->getReferenceCount() << std::endl;
+            
+            if (ref->m_traceSize > 1) {
+                char **syms = backtrace_symbols(ref->m_backTrace, ref->m_traceSize);
+                //trace += __PRETTY_FUNCTION__;
+                for(int i=1; i< ref->m_traceSize; i++)
+                {
+                    outfile << syms[i] << std::endl;
+                }
+                free(syms);
+            } else {
+                outfile << "no trace" << std::endl;
+            }
+            
+            current++;
         }
+        
+        outfile.close();
     }
 }
 
@@ -173,23 +203,40 @@ static void trackRef(Ref* ref)
 {
     CCASSERT(ref, "Invalid parameter, ref should not be null!");
 
+    if(__refAllocationList == nullptr)
+    {
+        __refAllocationList = new std::list<Ref*>();
+    }
+
+    //store trace location
+    int traceSize = 25;
+    ref->m_backTrace = new void*[traceSize];
+    ref->m_traceSize = backtrace(ref->m_backTrace, traceSize);
+
     // Create memory allocation record.
-    __refAllocationList.push_back(ref);
+    __refAllocationList->push_back(ref);
+
 }
 
 static void untrackRef(Ref* ref)
 {
-    auto iter = std::find(__refAllocationList.begin(), __refAllocationList.end(), ref);
-    if (iter == __refAllocationList.end())
+    if(__refAllocationList == nullptr)
+    {
+        return;
+    }
+    
+    auto iter = std::find(__refAllocationList->begin(), __refAllocationList->end(), ref);
+    if (iter == __refAllocationList->end())
     {
         log("[memory] CORRUPTION: Attempting to free (%s) with invalid ref tracking record.\n", typeid(*ref).name());
         return;
     }
 
-    __refAllocationList.erase(iter);
+    __refAllocationList->erase(iter);
+    delete ref->m_backTrace;
 }
 
-#endif // #if CC_USE_MEM_LEAK_DETECTION
+#endif // #if CC_REF_LEAK_DETECTION
 
 
 NS_CC_END
