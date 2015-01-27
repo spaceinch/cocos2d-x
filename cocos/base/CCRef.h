@@ -33,7 +33,7 @@ THE SOFTWARE.
 
 #if CC_REF_LEAK_DETECTION
 #include <string>
-#define OUTOUTFOLDER "memLeaksOutput.txt"
+#define OUTPUTFILE "memLeaksOutput.txt"
 
 #endif // #if CC_REF_LEAK_DETECTION
 

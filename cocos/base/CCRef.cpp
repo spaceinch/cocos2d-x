@@ -167,7 +167,7 @@ void Ref::printLeaks()
     }
     else
     {
-        std::string outPutFolder = OUTOUTFOLDER;
+        std::string outPutFolder = OUTPUTFILE;
         std::ofstream outfile (outPutFolder);
         
         log("[memory] WARNING: %d Ref objects still active in memory.\n", (int)__refAllocationList->size());
