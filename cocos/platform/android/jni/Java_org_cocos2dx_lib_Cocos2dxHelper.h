@@ -33,6 +33,7 @@ extern const char * getApkPath();
 extern void showDialogJNI(const char * message, const char * title);
 extern void showEditTextDialogJNI(const char* title, const char* content, int inputMode, int inputFlag, int returnType, int maxLength, EditTextCallback callback, void* ctx);
 extern void terminateProcessJNI();
+extern std::string getExternalStorageDirectory();
 extern std::string getCurrentLanguageJNI();
 extern std::string getPackageNameJNI();
 extern std::string getFileDirectoryJNI();

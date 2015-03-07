@@ -31,11 +31,13 @@ THE SOFTWARE.
 #include "jni/Java_org_cocos2dx_lib_Cocos2dxHelper.h"
 #include "android/asset_manager.h"
 #include "android/asset_manager_jni.h"
+#include "base/ZipUtils.h"
 
 #include <stdlib.h>
 
 #define  LOG_TAG    "CCFileUtils-android.cpp"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
 using namespace std;
 
@@ -73,6 +75,10 @@ FileUtilsAndroid::FileUtilsAndroid()
 
 FileUtilsAndroid::~FileUtilsAndroid()
 {
+    for (auto expansionFile : _expansionFiles)
+    {
+        CC_SAFE_DELETE(expansionFile);
+    }
 }
 
 bool FileUtilsAndroid::init()
@@ -158,6 +164,18 @@ bool FileUtilsAndroid::isFileExistInternal(const std::string& strFilePath) const
                 AAsset_close(aa);
             } else {
                 // CCLOG("[AssetManager] ... in APK %s, found = false!", strFilePath.c_str());
+                
+                // Didn't find "assets/" at the beginning of the path, adding it.
+                std::string strPath = strFilePath;
+                if (strPath.find(_defaultResRootPath) != 0)
+                {
+                    strPath.insert(0, _defaultResRootPath);
+                }
+                
+                for (auto it = _expansionFiles.rbegin(); it != _expansionFiles.rend() && !bFound; ++it)
+                {
+                    bFound = (*it)->fileExists(strPath);
+                }
             }
         }
     }
@@ -320,43 +338,53 @@ unsigned char* FileUtilsAndroid::getFileData(const std::string& filename, const 
     
     if (fullPath[0] != '/')
     {
-        string relativePath = string();
-
-        size_t position = fullPath.find("assets/");
-        if (0 == position) {
-            // "assets/" is at the beginning of the path and we don't want it
-            relativePath += fullPath.substr(strlen("assets/"));
-        } else {
-            relativePath += fullPath;
+        // Expansion files take priority
+        for (auto it = _expansionFiles.rbegin(); it != _expansionFiles.rend() && data == nullptr; ++it)
+        {
+            data = (*it)->getFileData(fullPath, size);
         }
-        LOGD("relative path = %s", relativePath.c_str());
-
-        if (nullptr == FileUtilsAndroid::assetmanager) {
-            LOGD("... FileUtilsAndroid::assetmanager is nullptr");
-            return nullptr;
-        }
-
-        // read asset data
-        AAsset* asset =
+        
+        // Try from the APK
+        if ( data == nullptr )
+        {
+            string relativePath = string();
+            
+            size_t position = fullPath.find("assets/");
+            if (0 == position) {
+                // "assets/" is at the beginning of the path and we don't want it
+                relativePath += fullPath.substr(strlen("assets/"));
+            } else {
+                relativePath += fullPath;
+            }
+            LOGD("relative path = %s", relativePath.c_str());
+            
+            if (nullptr == FileUtilsAndroid::assetmanager) {
+                LOGD("... FileUtilsAndroid::assetmanager is nullptr");
+                return nullptr;
+            }
+            
+            // read asset data
+            AAsset* asset =
             AAssetManager_open(FileUtilsAndroid::assetmanager,
                                relativePath.c_str(),
                                AASSET_MODE_UNKNOWN);
-        if (nullptr == asset) {
-            LOGD("asset is nullptr");
-            return nullptr;
+            if (nullptr == asset) {
+                LOGD("asset is nullptr");
+                return nullptr;
+            }
+            
+            off_t fileSize = AAsset_getLength(asset);
+            
+            data = (unsigned char*) malloc(fileSize);
+            
+            int bytesread = AAsset_read(asset, (void*)data, fileSize);
+            if (size)
+            {
+                *size = bytesread;
+            }
+            
+            AAsset_close(asset);
         }
-
-        off_t fileSize = AAsset_getLength(asset);
-
-        data = (unsigned char*) malloc(fileSize);
-
-        int bytesread = AAsset_read(asset, (void*)data, fileSize);
-        if (size)
-        {
-            *size = bytesread;
-        }
-
-        AAsset_close(asset);
     }
     else
     {
@@ -409,6 +437,14 @@ string FileUtilsAndroid::getWritablePath() const
     {
         return "";
     }
+}
+
+void FileUtilsAndroid::addExpansionFile(const std::string& expansionFile)
+{
+    std::string expansionPath = getExternalStorageDirectory() + "/Android/obb/" + getPackageNameJNI() + "/" + expansionFile;
+    _expansionFiles.push_back(new ZipFile(expansionPath, "assets/"));
+    
+    LOGI("Adding expansion file to search path %s", expansionPath.c_str());
 }
 
 NS_CC_END
