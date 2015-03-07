@@ -170,8 +170,6 @@ bool FileUtilsAndroid::isFileExistInternal(const std::string& strFilePath) const
                 AAsset_close(aa);
             } else {
                 // CCLOG("[AssetManager] ... in APK %s, found = false!", strFilePath.c_str());
-                
-   
             }
         }
     }
@@ -358,11 +356,16 @@ unsigned char* FileUtilsAndroid::getFileData(const std::string& filename, const 
         
         // Expansion files take priority
         std::string expansionFilePath = "assets/" + relativePath;
-        for (auto it = _expansionFiles.rbegin(); it != _expansionFiles.rend() && data == nullptr; ++it)
+        for (auto it = _expansionFileNames.rbegin(); it != _expansionFileNames.rend() && data == nullptr; ++it)
         {
-            data = (*it)->getFileData(expansionFilePath, size);
+          ssize_t localSize = 0;
+          data = getFileDataFromZip(*it, expansionFilePath, &localSize);
+          if ( data )
+          {
+            *size = localSize;
+          }
         }
-        
+      
         // Try from the APK
         if ( data == nullptr )
         {
