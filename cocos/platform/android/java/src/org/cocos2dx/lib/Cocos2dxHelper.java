@@ -38,6 +38,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.preference.PreferenceManager.OnActivityResultListener;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -140,6 +141,10 @@ public class Cocos2dxHelper {
 
     public static String getCocos2dxWritablePath() {
         return Cocos2dxHelper.sFileDirectory;
+    }
+    
+    public static String getExternalStorageDirectory() {
+        return Environment.getExternalStorageDirectory().toString();
     }
 
     public static String getCurrentLanguage() {
