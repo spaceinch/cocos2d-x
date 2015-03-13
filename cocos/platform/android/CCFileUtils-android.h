@@ -96,6 +96,7 @@ private:
     static AAssetManager* assetmanager;
     
     std::vector<cocos2d::ZipFile*> _expansionFiles;
+    std::vector<std::string> _expansionFileNames;
 };
 
 // end of platform group
