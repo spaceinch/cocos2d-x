@@ -226,9 +226,9 @@ Data FileUtilsAndroid::getData(const std::string& filename, bool forString)
         
         // Expansion files take priority
         std::string expansionFilePath = "assets/" + relativePath;
-        for (auto it = _expansionFiles.rbegin(); it != _expansionFiles.rend() && data == nullptr; ++it)
+        for (auto it = _expansionFileNames.rbegin(); it != _expansionFileNames.rend() && data == nullptr; ++it)
         {
-            data = (*it)->getFileData(expansionFilePath, &size);
+            data = getFileDataFromZip(*it, expansionFilePath, &size);
         }
         
         // Try from the APK
@@ -358,9 +358,14 @@ unsigned char* FileUtilsAndroid::getFileData(const std::string& filename, const 
         
         // Expansion files take priority
         std::string expansionFilePath = "assets/" + relativePath;
-        for (auto it = _expansionFiles.rbegin(); it != _expansionFiles.rend() && data == nullptr; ++it)
+        for (auto it = _expansionFileNames.rbegin(); it != _expansionFileNames.rend() && data == nullptr; ++it)
         {
-            data = (*it)->getFileData(expansionFilePath, size);
+            ssize_t localSize = 0;
+            data = getFileDataFromZip(*it, expansionFilePath, &localSize);
+            if ( data )
+            {
+                *size = localSize;
+            }
         }
         
         // Try from the APK
@@ -451,6 +456,7 @@ void FileUtilsAndroid::addExpansionFile(const std::string& expansionFile)
 {
     std::string expansionPath = getExternalStorageDirectory() + "/Android/obb/" + getPackageNameJNI() + "/" + expansionFile;
     _expansionFiles.push_back(new ZipFile(expansionPath, "assets/"));
+    _expansionFileNames.push_back(expansionPath);
     
     LOGI("Adding expansion file to search path %s", expansionPath.c_str());
 }
