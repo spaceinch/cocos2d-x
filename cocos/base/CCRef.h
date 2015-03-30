@@ -31,6 +31,12 @@ THE SOFTWARE.
 
 #define CC_REF_LEAK_DETECTION 0
 
+#if CC_REF_LEAK_DETECTION
+#include <string>
+#define OUTPUTFILE "memLeaksOutput.txt"
+
+#endif // #if CC_REF_LEAK_DETECTION
+
 NS_CC_BEGIN
 
 /**
@@ -146,10 +152,14 @@ public:
     void* _scriptObject;
 #endif
 
-    // Memory leak diagnostic data (only included when CC_USE_MEM_LEAK_DETECTION is defined and its value isn't zero)
-#if CC_USE_MEM_LEAK_DETECTION
+    // Memory leak diagnostic data (only included when CC_REF_LEAK_DETECTION is defined and its value isn't zero)
+#if CC_REF_LEAK_DETECTION
 public:
     static void printLeaks();
+public:
+    void**      m_backTrace;
+    int         m_traceSize;
+    static bool s_startTracking;
 #endif
 };
 
