@@ -1448,6 +1448,10 @@ void Node::setActionManager(ActionManager* actionManager)
 Action * Node::runAction(Action* action)
 {
     CCASSERT( action != nullptr, "Argument must be non-nil");
+    if(!isRunning())
+    {
+        log("Node warning: running action over a non running node");
+    }
     _actionManager->addAction(action, this, !_running);
     return action;
 }
