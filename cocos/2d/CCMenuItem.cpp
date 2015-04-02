@@ -118,10 +118,14 @@ void MenuItem::activate()
 {
     if (_enabled)
     {
+        // Temporarily retain self in case callback removes self
+        RefPtr<MenuItem> refPtr(this);
+      
         if( _callback )
         {
-			_callback(this);
+            _callback(this);
         }
+      
 #if CC_ENABLE_SCRIPT_BINDING
         if (kScriptTypeNone != _scriptType)
         {
