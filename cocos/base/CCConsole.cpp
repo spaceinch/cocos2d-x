@@ -228,7 +228,7 @@ static void _log(const char *format, va_list args)
     fflush(stdout);
 #endif
 
-    Director::getInstance()->getConsole()->log(buf);
+    //Director::getInstance()->getConsole()->log(buf);
 
 }
 
