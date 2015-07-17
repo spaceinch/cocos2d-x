@@ -34,9 +34,11 @@ THE SOFTWARE.
 #include "base/ZipUtils.h"
 
 #include <stdlib.h>
+#include <fstream>
 
 #define  LOG_TAG    "CCFileUtils-android.cpp"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
+#define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG,__VA_ARGS__)
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
 using namespace std;
@@ -453,10 +455,18 @@ string FileUtilsAndroid::getWritablePath() const
 void FileUtilsAndroid::addExpansionFile(const std::string& expansionFile)
 {
     std::string expansionPath = getExternalStorageDirectory() + "/Android/obb/" + getPackageNameJNI() + "/" + expansionFile;
-    _expansionFiles.push_back(new ZipFile(expansionPath, "assets/"));
-    _expansionFileNames.push_back(expansionPath);
-    
-    LOGI("Adding expansion file to search path %s", expansionPath.c_str());
+  
+    // Only add the expansion file if it actually exists
+    if ( std::ifstream(expansionFile) )
+    {
+        _expansionFiles.push_back(new ZipFile(expansionPath, "assets/"));
+        _expansionFileNames.push_back(expansionPath);
+        LOGI("Adding expansion file to search path %s", expansionPath.c_str());
+    }
+    else // Expansion file does not exist
+    {
+        LOGW("Expansion file does not exist %s", expansionPath.c_str());
+    }
 }
 
 NS_CC_END
