@@ -362,7 +362,7 @@ __Array* __Array::clone() const
         }
         else
         {
-            CCLOGWARN("%s isn't clonable.", typeid(*obj).name());
+            //CCLOGWARN("%s isn't clonable.", typeid(*obj).name());
         }
     }
     return ret;
