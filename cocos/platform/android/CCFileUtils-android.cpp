@@ -34,6 +34,7 @@ THE SOFTWARE.
 #include "base/ZipUtils.h"
 
 #include <stdlib.h>
+#include <fcntl.h>
 #include <fstream>
 
 #define  LOG_TAG    "CCFileUtils-android.cpp"
@@ -457,7 +458,8 @@ void FileUtilsAndroid::addExpansionFile(const std::string& expansionFile)
     std::string expansionPath = getExternalStorageDirectory() + "/Android/obb/" + getPackageNameJNI() + "/" + expansionFile;
   
     // Only add the expansion file if it actually exists
-    if ( std::ifstream(expansionFile) )
+    std::ifstream expansionStream(expansionPath, std::ios::binary);
+    if ( expansionStream.is_open() )
     {
         _expansionFiles.push_back(new ZipFile(expansionPath, "assets/"));
         _expansionFileNames.push_back(expansionPath);
