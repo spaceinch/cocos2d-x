@@ -155,6 +155,10 @@ public:
 
     /** @deprecated use getSpriteFrameByName() instead */
     CC_DEPRECATED_ATTRIBUTE SpriteFrame* spriteFrameByName(const std::string&name) { return getSpriteFrameByName(name); }
+  
+    /** Determines if a file a sprite sheet file is loaded
+     */
+    bool isFileLoaded(const std::string& plist) const;
 
 protected:
     // MARMALADE: Made this protected not private, as deriving from this class is pretty useful

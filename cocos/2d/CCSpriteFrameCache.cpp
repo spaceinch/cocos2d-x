@@ -296,6 +296,11 @@ void SpriteFrameCache::removeSpriteFrames()
     _loadedFileNames->clear();
 }
 
+bool SpriteFrameCache::isFileLoaded(const std::string& plist) const
+{
+  return _loadedFileNames->find(plist) != _loadedFileNames->end();
+}
+
 void SpriteFrameCache::removeUnusedSpriteFrames()
 {
     bool removed = false;
