@@ -97,8 +97,12 @@ public:
      * @lua addSpriteFrames
      */
     void addSpriteFramesWithFile(const std::string&plist, Texture2D *texture);
+  
+    /** Adds spriteframes from a cached file
+     */
+    void addSpriteFramesWithCachedFile(const std::string& plist, ValueMap& plistCachedData, Texture2D* texture);
 
-    /** Adds multiple Sprite Frames from a plist file content. The texture will be associated with the created sprite frames. 
+    /** Adds multiple Sprite Frames from a plist file content. The texture will be associated with the created sprite frames.
      * @js addSpriteFrames
      * @lua addSpriteFrames
      */
