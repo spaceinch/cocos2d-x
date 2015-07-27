@@ -211,6 +211,17 @@ void SpriteFrameCache::addSpriteFramesWithFile(const std::string& plist, Texture
     _loadedFileNames->insert(plist);
 }
 
+void SpriteFrameCache::addSpriteFramesWithCachedFile(const std::string& plist, ValueMap& plistCachedData, Texture2D* texture)
+{
+    if (_loadedFileNames->find(plist) != _loadedFileNames->end())
+    {
+        return; // We already added it
+    }
+  
+    addSpriteFramesWithDictionary(plistCachedData, texture);
+    _loadedFileNames->insert(plist);
+}
+
 void SpriteFrameCache::addSpriteFramesWithFileContent(const std::string& plist_content, Texture2D *texture)
 {
     ValueMap dict = FileUtils::getInstance()->getValueMapFromData(plist_content.c_str(), static_cast<int>(plist_content.size()));
@@ -294,6 +305,11 @@ void SpriteFrameCache::removeSpriteFrames()
     _spriteFrames.clear();
     _spriteFramesAliases.clear();
     _loadedFileNames->clear();
+}
+
+bool SpriteFrameCache::isFileLoaded(const std::string& plist) const
+{
+  return _loadedFileNames->find(plist) != _loadedFileNames->end();
 }
 
 void SpriteFrameCache::removeUnusedSpriteFrames()
