@@ -770,12 +770,14 @@ Node* CSLoader::nodeWithFlatBuffersFile(const std::string &fileName)
 Node* CSLoader::nodeWithFlatBuffers(const flatbuffers::NodeTree *nodetree)
 {
     Node* node = nullptr;
-    
+  
+    std::string childrenReaderPrefix;
+  
     std::string classname = nodetree->classname()->c_str();
 //    CCLOG("classname = %s", classname.c_str());
   
     auto options = nodetree->options();
-    
+  
     if (classname == "ProjectNode")
     {
         auto reader = ProjectNodeReader::getInstance();
@@ -785,6 +787,15 @@ Node* CSLoader::nodeWithFlatBuffers(const flatbuffers::NodeTree *nodetree)
         if (filePath != "" && FileUtils::getInstance()->isFileExist(filePath))
         {
             node = createNodeWithFlatBuffersFile(filePath);
+          
+            // Use the children reader prefix from any custom class created in the ProjectNOde
+            if ( !_lastChildrenReaderPrefix.empty() )
+            {
+              childrenReaderPrefix = _lastChildrenReaderPrefix;
+              _childrenReaderPrefixStack.push_back(childrenReaderPrefix);
+            }
+            _lastChildrenReaderPrefix = "";
+          
             reader->setPropsWithFlatBuffers(node, options->data());
             
             cocostudio::timeline::ActionTimeline* action = cocostudio::timeline::ActionTimelineCache::getInstance()->createActionWithFlatBuffersFile(filePath);
@@ -813,10 +824,24 @@ Node* CSLoader::nodeWithFlatBuffers(const flatbuffers::NodeTree *nodetree)
         {
             classname = customClassName;
         }
-        std::string readername = getGUIClassName(classname);
+      
+        std::string readername;
+        if ( !_childrenReaderPrefixStack.empty() )
+        {
+          readername.append(_childrenReaderPrefixStack.back());
+        }
+        readername.append(getGUIClassName(classname));
         readername.append("Reader");
         
         NodeReaderProtocol* reader = dynamic_cast<NodeReaderProtocol*>(ObjectFactory::getInstance()->createObject(readername));
+      
+        // If any, push the children reader prefix
+        childrenReaderPrefix = reader->childrenReaderPrefix();
+        if ( !childrenReaderPrefix.empty() )
+        {
+          _childrenReaderPrefixStack.push_back(childrenReaderPrefix);
+        }
+      
         node = reader->createNodeWithFlatBuffers(options->data());
         
         Widget* widget = dynamic_cast<Widget*>(node);
@@ -869,7 +894,21 @@ Node* CSLoader::nodeWithFlatBuffers(const flatbuffers::NodeTree *nodetree)
             }
         }
     }
-    
+  
+    // If any, pop the children reader prefix
+    if ( !childrenReaderPrefix.empty() )
+    {
+      if (classname == "ProjectNode")
+      {
+        _lastChildrenReaderPrefix = "";
+      }
+      else
+      {
+        _lastChildrenReaderPrefix = _childrenReaderPrefixStack.back();
+      }
+      _childrenReaderPrefixStack.pop_back();
+    }
+  
 //    _loadingNodeParentHierarchy.pop_back();
     
     return node;

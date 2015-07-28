@@ -146,6 +146,9 @@ protected:
     std::string _monoCocos2dxVersion;
     
     Node* _rootNode;
+  
+    std::string _lastChildrenReaderPrefix;
+    std::vector<std::string> _childrenReaderPrefixStack;
 //    std::vector<Node*> _loadingNodeParentHierarchy;
 };
 
