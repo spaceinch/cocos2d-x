@@ -30,6 +30,8 @@
 #include "cocos2d.h"
 #include "base/ObjectFactory.h"
 
+#include <unordered_set>
+
 namespace flatbuffers
 {
     struct FlatBufferBuilder;
@@ -100,7 +102,8 @@ public:
     
     cocos2d::Node* createNodeWithFlatBuffersForSimulator(const std::string& filename);
     cocos2d::Node* nodeWithFlatBuffersForSimulator(const flatbuffers::NodeTree* nodetree);
-    
+  
+    void setAsyncLoadingPlist(const std::string& plist);
 protected:
     
     cocos2d::Node* loadNode(const rapidjson::Value& json);
@@ -144,7 +147,10 @@ protected:
     std::string _jsonPath;
     
     std::string _monoCocos2dxVersion;
-    
+  
+    // Contains all plists that will be loaded asynchronously
+    std::unordered_set<std::string> _asyncLoadingPlistSet;
+  
     Node* _rootNode;
   
     std::string _lastChildrenReaderPrefix;

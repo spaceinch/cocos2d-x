@@ -759,7 +759,10 @@ Node* CSLoader::nodeWithFlatBuffersFile(const std::string &fileName)
 //    CCLOG("textureSize = %d", textureSize);
     for (int i = 0; i < textureSize; ++i)
     {
-        SpriteFrameCache::getInstance()->addSpriteFramesWithFile(textures->Get(i)->c_str());        
+      if ( _asyncLoadingPlistSet.find(textures->Get(i)->c_str()) == _asyncLoadingPlistSet.end() )
+      {
+        SpriteFrameCache::getInstance()->addSpriteFramesWithFile(textures->Get(i)->c_str());
+      }
     }
     
     Node* node = nodeWithFlatBuffers(csparsebinary->nodeTree());
@@ -1134,6 +1137,11 @@ Node* CSLoader::createNodeWithFlatBuffersForSimulator(const std::string& filenam
     fbs->deleteFlatBufferBuilder();
     
     return node;
+}
+
+void CSLoader::setAsyncLoadingPlist(const std::string& plist)
+{
+  _asyncLoadingPlistSet.insert(plist);
 }
 
 Node* CSLoader::nodeWithFlatBuffersForSimulator(const flatbuffers::NodeTree *nodetree)
