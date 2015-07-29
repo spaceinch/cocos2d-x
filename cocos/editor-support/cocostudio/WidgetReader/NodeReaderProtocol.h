@@ -57,6 +57,7 @@ namespace cocostudio
                                                                                      flatbuffers::FlatBufferBuilder* builder) = 0;
         virtual void setPropsWithFlatBuffers(cocos2d::Node* node, const flatbuffers::Table* nodeOptions) = 0;
         virtual cocos2d::Node* createNodeWithFlatBuffers(const flatbuffers::Table* nodeOptions) = 0;
+        virtual std::string childrenReaderPrefix() { return ""; }
     };
 }
 
