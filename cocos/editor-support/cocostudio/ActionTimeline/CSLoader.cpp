@@ -1141,7 +1141,23 @@ Node* CSLoader::createNodeWithFlatBuffersForSimulator(const std::string& filenam
 
 void CSLoader::setAsyncLoadingPlist(const std::string& plist)
 {
-  _asyncLoadingPlistSet.insert(plist);
+  std::string fullPlist = plist;
+  
+  static const std::string Extension = ".plist";
+  if ( plist.size() > Extension.size() )
+  {
+    std::string ext = plist.substr(plist.size() - Extension.size(), std::string::npos);
+    if ( ext != Extension )
+    {
+      fullPlist = plist + Extension;
+    }
+  }
+  else
+  {
+    fullPlist = plist + Extension;
+  }
+  
+  _asyncLoadingPlistSet.insert(fullPlist);
 }
 
 Node* CSLoader::nodeWithFlatBuffersForSimulator(const flatbuffers::NodeTree *nodetree)
