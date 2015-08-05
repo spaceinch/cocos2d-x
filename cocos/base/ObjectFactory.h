@@ -57,6 +57,10 @@ public:
     cocos2d::Ref* createObject(const std::string &name);
 
     void registerType(const TInfo &t);
+  
+    //! Replaces an already registered type
+    void overrideType(const TInfo &t);
+
     void removeAll();
 
 protected:
