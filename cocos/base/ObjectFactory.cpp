@@ -120,7 +120,20 @@ Ref* ObjectFactory::createObject(const std::string &name)
 
 void ObjectFactory::registerType(const TInfo &t)
 {
-    _typeMap.insert(std::make_pair(t._class, t));
+  _typeMap.insert(std::make_pair(t._class, t));
+}
+
+void ObjectFactory::overrideType(const TInfo &t)
+{
+  auto result = _typeMap.insert(std::make_pair(t._class, t));
+  
+  bool keyAlreadyExisted = result.second == false;
+  assert(keyAlreadyExisted && "Overriding assumes that the reader already exists");
+  
+  if (keyAlreadyExisted)
+  {
+    result.first->second = t;
+  }
 }
 
 NS_CC_END
