@@ -23,6 +23,7 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include <functional>
+#include <cassert>
 #include "base/ObjectFactory.h"
 
 
