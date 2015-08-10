@@ -23,8 +23,8 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include <functional>
+#include <cassert>
 #include "base/ObjectFactory.h"
-
 
 NS_CC_BEGIN
 
