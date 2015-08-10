@@ -26,7 +26,6 @@ THE SOFTWARE.
 #include <cassert>
 #include "base/ObjectFactory.h"
 
-
 NS_CC_BEGIN
 
 ObjectFactory::TInfo::TInfo(void)
