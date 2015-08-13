@@ -392,6 +392,10 @@ public:
     const Mat4& getMatrix(MATRIX_STACK_TYPE type);
     void resetMatrixStack();
 
+    //! Multiplies time provided by cocos by the specified factor. ONLY USE FOR DEBUG!!
+    void setDebugTimeScale(float);
+    float getDebugTimeScale() const;
+  
 protected:
     void purgeDirector();
     bool _purgeDirectorInNextLoop; // this flag will be set to true in end()
@@ -500,6 +504,8 @@ protected:
     /* Console for the director */
     Console *_console;
 
+    float m_timeScale = 1.0f;
+  
     // GLView will recreate stats labels to fit visible rect
     friend class GLView;
 };

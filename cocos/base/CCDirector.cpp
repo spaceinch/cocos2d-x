@@ -264,7 +264,7 @@ void Director::drawScene()
     //tick before glClear: issue #533
     if (! _paused)
     {
-        _scheduler->update(_deltaTime);
+        _scheduler->update(getDeltaTime());
         _eventDispatcher->dispatchEvent(_eventAfterUpdate);
     }
 
@@ -356,7 +356,7 @@ void Director::calculateDeltaTime()
 }
 float Director::getDeltaTime() const
 {
-    return _deltaTime;
+    return _deltaTime * m_timeScale;
 }
 void Director::setOpenGLView(GLView *openGLView)
 {
@@ -1257,6 +1257,16 @@ void Director::setEventDispatcher(EventDispatcher* dispatcher)
         CC_SAFE_RELEASE(_eventDispatcher);
         _eventDispatcher = dispatcher;
     }
+}
+
+void Director::setDebugTimeScale(float scale)
+{
+  m_timeScale = std::abs(scale);
+}
+
+float Director::getDebugTimeScale() const
+{
+  return m_timeScale;
 }
 
 /***************************************************
