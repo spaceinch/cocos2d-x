@@ -23,12 +23,17 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include "ui/UIScrollView.h"
+#include "platform/CCPlatformConfig.h"
 
 NS_CC_BEGIN
 
 namespace ui {
 
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+static const float AUTOSCROLLMAXSPEED = 1300.0f;
+#else
 static const float AUTOSCROLLMAXSPEED = 1000.0f;
+#endif
 
 const Vec2 SCROLLDIR_UP = Vec2(0.0f, 1.0f);
 const Vec2 SCROLLDIR_DOWN = Vec2(0.0f, -1.0f);
