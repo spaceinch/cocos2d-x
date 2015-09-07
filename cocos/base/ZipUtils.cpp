@@ -562,38 +562,6 @@ bool ZipFile::setFilter(const std::string &filter)
         // clear existing file list
         _data->fileList.clear();
       
-        CC_BREAK_IF(unzGoToFirstFile(_data->zipFile) != UNZ_OK);
-        std::string curFilePath;
-        unz_file_info curFileInfo;
-        int err = 0;
-      
-        do
-        {
-          CC_BREAK_IF(getCurrentFileInfo(&curFilePath, &curFileInfo) != UNZ_OK);
-          unz_file_pos posInfo;
-          int posErr = unzGetFilePos(_data->zipFile, &posInfo);
-          if (posErr == UNZ_OK)
-          {
-            // cache info about filtered files only (like 'assets/')
-            if (filter.empty()
-                || curFilePath.substr(0, filter.length()) == filter)
-            {
-              ZipEntryInfo entry;
-              entry.pos = posInfo;
-              entry.uncompressed_size = static_cast<uLong>(curFileInfo.uncompressed_size);
-              _data->fileList[curFilePath] = entry;
-              
-              CCLOG("ZipUtils: Added entry %s, uncompressed_size=%lu", curFilePath.c_str(), entry.uncompressed_size);
-            }
-          }
-          
-          err = unzGoToNextFile(_data->zipFile);
-        } while (err == UNZ_OK);
-      
-        ret = true;
-      
-      /*
-        
         // UNZ_MAXFILENAMEINZIP + 1 - it is done so in unzLocateFile
         char szCurrentFileName[UNZ_MAXFILENAMEINZIP + 1];
         unz_file_info64 fileInfo;
@@ -622,7 +590,7 @@ bool ZipFile::setFilter(const std::string &filter)
             err = unzGoToNextFile64(_data->zipFile, &fileInfo,
                                     szCurrentFileName, sizeof(szCurrentFileName) - 1);
         }
-        ret = true;*/
+        ret = true;
         
     } while(false);
     
@@ -644,14 +612,6 @@ bool ZipFile::fileExists(const std::string &fileName) const
 
 unsigned char *ZipFile::getFileData(const std::string &fileName, ssize_t *size)
 {
-    CCLOG("ZipUtils: Attempting to read %s", fileName.c_str());
-  
-    if ( !fileExists(fileName) )
-    {
-      CCLOG("ZipUtils: File does not exist");
-      return nullptr;
-    }
-  
     unsigned char * buffer = nullptr;
     if (size)
         *size = 0;
