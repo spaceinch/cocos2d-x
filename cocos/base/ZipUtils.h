@@ -288,6 +288,8 @@ typedef struct unz_file_info_s unz_file_info;
         
         /** Internal data like zip file pointer / file list array and so on */
         ZipFilePrivate *_data;
+      
+        std::string _zipFileName;
     };
 } // end of namespace cocos2d
 #endif // __SUPPORT_ZIPUTILS_H__

@@ -536,6 +536,7 @@ ZipFile::ZipFile()
 ZipFile::ZipFile(const std::string &zipFile, const std::string &filter)
 : _data(new ZipFilePrivate)
 {
+    _zipFileName = zipFile;
     _data->zipFile = unzOpen(zipFile.c_str());
     setFilter(filter);
 }
@@ -560,7 +561,7 @@ bool ZipFile::setFilter(const std::string &filter)
         
         // clear existing file list
         _data->fileList.clear();
-        
+      
         // UNZ_MAXFILENAMEINZIP + 1 - it is done so in unzLocateFile
         char szCurrentFileName[UNZ_MAXFILENAMEINZIP + 1];
         unz_file_info64 fileInfo;
@@ -615,6 +616,8 @@ unsigned char *ZipFile::getFileData(const std::string &fileName, ssize_t *size)
     if (size)
         *size = 0;
 
+    unzFile file = nullptr;
+  
     do
     {
         CC_BREAK_IF(!_data->zipFile);
@@ -624,24 +627,33 @@ unsigned char *ZipFile::getFileData(const std::string &fileName, ssize_t *size)
         CC_BREAK_IF(it ==  _data->fileList.end());
         
         ZipEntryInfo fileInfo = it->second;
-        
-        int nRet = unzGoToFilePos(_data->zipFile, &fileInfo.pos);
+      
+        file = unzOpen(_zipFileName.c_str());
+      
+        int nRet = unzGoToFilePos(file, &fileInfo.pos);
         CC_BREAK_IF(UNZ_OK != nRet);
-        
-        nRet = unzOpenCurrentFile(_data->zipFile);
+
+        nRet = unzOpenCurrentFile(file);
         CC_BREAK_IF(UNZ_OK != nRet);
-        
-        buffer = (unsigned char*)malloc(fileInfo.uncompressed_size);
-        int CC_UNUSED nSize = unzReadCurrentFile(_data->zipFile, buffer, static_cast<unsigned int>(fileInfo.uncompressed_size));
+      
+        buffer = (unsigned char*)malloc(fileInfo.uncompressed_size + 1);
+        buffer[fileInfo.uncompressed_size] = '\0';
+        int CC_UNUSED nSize = unzReadCurrentFile(file, buffer, static_cast<unsigned int>(fileInfo.uncompressed_size));
         CCASSERT(nSize == 0 || nSize == (int)fileInfo.uncompressed_size, "the file size is wrong");
         
         if (size)
         {
             *size = fileInfo.uncompressed_size;
         }
-        unzCloseCurrentFile(_data->zipFile);
+        unzCloseCurrentFile(file);
     } while (0);
-    
+  
+  
+    if ( file != nullptr )
+    {
+      unzClose(file);
+    }
+  
     return buffer;
 }
 

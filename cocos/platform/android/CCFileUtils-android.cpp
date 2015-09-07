@@ -227,9 +227,9 @@ Data FileUtilsAndroid::getData(const std::string& filename, bool forString)
         
         // Expansion files take priority
         std::string expansionFilePath = "assets/" + relativePath;
-        for (auto it = _expansionFileNames.rbegin(); it != _expansionFileNames.rend() && data == nullptr; ++it)
+        for (auto it = _expansionFiles.rbegin(); data == nullptr && it != _expansionFiles.rend(); ++it)
         {
-            data = getFileDataFromZip(*it, expansionFilePath, &size);
+          data = (*it)->getFileData(expansionFilePath, &size);
         }
         
         // Try from the APK
@@ -359,10 +359,10 @@ unsigned char* FileUtilsAndroid::getFileData(const std::string& filename, const 
         
         // Expansion files take priority
         std::string expansionFilePath = "assets/" + relativePath;
-        for (auto it = _expansionFileNames.rbegin(); it != _expansionFileNames.rend() && data == nullptr; ++it)
+        for (auto it = _expansionFiles.rbegin(); data == nullptr && it != _expansionFiles.rend(); ++it)
         {
           ssize_t localSize = 0;
-          data = getFileDataFromZip(*it, expansionFilePath, &localSize);
+          data = (*it)->getFileData(expansionFilePath, &localSize);
           if ( data )
           {
             *size = localSize;
