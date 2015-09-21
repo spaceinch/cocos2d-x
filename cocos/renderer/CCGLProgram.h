@@ -38,6 +38,9 @@ THE SOFTWARE.
 #include "base/ccTypes.h"
 #include "platform/CCGL.h"
 #include "math/CCMath.h"
+#ifdef DIRECTX_ENABLED
+#include "DirectXMath.h"
+#endif
 
 /**
  * @addtogroup renderer
@@ -76,6 +79,36 @@ struct Uniform
     /**String of the uniform name.*/
     std::string name;
 };
+
+#ifdef DIRECTX_ENABLED
+
+struct ShaderConstantBuffer
+{
+	DirectX::XMFLOAT4X4 MVP;
+};
+
+struct ShaderDescriptor
+{
+	std::string name;
+	std::vector<D3D11_INPUT_ELEMENT_DESC> inputLayout;
+	std::vector<Uniform> uniformValues;
+
+	ShaderDescriptor(const std::string& n) : name(n) {}
+	ShaderDescriptor & Input(LPCSTR SemanticName, UINT SemanticIndex, DXGI_FORMAT Format, UINT InputSlot, UINT AlignedByteOffset, D3D11_INPUT_CLASSIFICATION InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA, UINT InstanceDataStepRate = 0)
+	{
+		const D3D11_INPUT_ELEMENT_DESC description = { SemanticName, SemanticIndex, Format, InputSlot, AlignedByteOffset, InputSlotClass, InstanceDataStepRate };
+		inputLayout.push_back(description);
+		return *this;
+	}
+	ShaderDescriptor & Const(const std::string& name, GLint size, GLint type)
+	{
+		const Uniform uniform = { 0, size, type, name };
+		uniformValues.push_back(uniform);
+		return *this;
+	}
+};
+
+#endif
 
 /** GLProgram
  Class that implements a glProgram
@@ -307,13 +340,19 @@ public:
     /**Destructor.*/
     virtual ~GLProgram();
 
+
+#ifdef DIRECTX_ENABLED
+	static GLProgram* createWithHLSL(const ShaderDescriptor &vertexShader, const ShaderDescriptor &pixelShader);
+	bool initWithHLSL(const ShaderDescriptor &vertexShader, const ShaderDescriptor &pixelShader);
+#endif
     /** @{
     Create or Initializes the GLProgram with a vertex and fragment with bytes array.
      * @js initWithString.
      * @lua initWithString.
+
      */
-    static GLProgram* createWithByteArrays(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray);
-    bool initWithByteArrays(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray);
+    static GLProgram* createWithByteArrays(const std::string &vShaderByteArray, const std::string &fShaderByteArray);
+    bool initWithByteArrays(const std::string &vShaderByteArray, const std::string &fShaderByteArray);
     static GLProgram* createWithByteArrays(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray, const std::string& compileTimeDefines);
     bool initWithByteArrays(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray, const std::string& compileTimeDefines);
 
@@ -330,12 +369,13 @@ public:
 
     static GLProgram* createWithFilenames(const std::string& vShaderFilename, const std::string& fShaderFilename, const std::string& compileTimeDefines);
     bool initWithFilenames(const std::string& vShaderFilename, const std::string& fShaderFilename, const std::string& compileTimeDefines);
+	const Uniform* getUniform(const std::string& name) const;
     /**
     @}
     */
 
     /**@{ Get the uniform or vertex attribute by string name in shader, return null if it does not exist.*/
-    Uniform* getUniform(const std::string& name);
+	Uniform* getUniform(const std::string& name);
     VertexAttrib* getVertexAttrib(const std::string& name);
     /**@}*/
 
@@ -352,6 +392,8 @@ public:
     bool link();
     /** it will call glUseProgram() */
     void use();
+
+	void set();
 /** It will create 4 uniforms:
     - kUniformPMatrix
     - kUniformMVMatrix
@@ -363,8 +405,10 @@ public:
  */
     void updateUniforms();
 
+#ifndef DIRECTX_ENABLED
     /** calls retrieves the named uniform location for this shader program. */
     GLint getUniformLocationForName(const char* name) const;
+#endif
 
     /** calls glUniform1i only if the values are different than the previous call for this same shader program.
      * @js setUniformLocationI32
@@ -444,7 +488,7 @@ public:
      Update the builtin uniforms if they are different than the previous call for this same shader program.
      @param modelView modelView matrix applied to the built in uniform of the shader.
      */
-    void setUniformsForBuiltins(const Mat4 &modelView);
+    void setUniformsForBuiltins(const Mat4 &modelView, bool transposed = false);
 
     /** returns the vertexShader error log */
     std::string getVertexShaderLog() const;
@@ -493,15 +537,37 @@ protected:
 
     /**OpenGL handle for program.*/
     GLuint            _program;
-    /**OpenGL handle for vertex shader.*/
-    GLuint            _vertShader;
+#ifdef DIRECTX_ENABLED
+	ID3D11InputLayout *_inputLayout;
+	ID3D11VertexShader *_vertexShader;
+	ID3D11PixelShader *_pixelShader;
+	ID3D11Buffer *_constantBufferVS;
+	ID3D11Buffer *_constantBufferPS;
+
+	static const int UNIFORM_BUFFER_SIZE = 128;
+	unsigned char _uniformBufferVS[UNIFORM_BUFFER_SIZE];
+	unsigned char _uniformBufferPS[UNIFORM_BUFFER_SIZE];
+	std::unordered_map<std::string, Uniform> _uniformsDescription;
+	bool _uniformDirtyVS, _uniformDirtyPS;
+	int _uniformPSStart;
+
+	void updateUniform(int location, unsigned char *input, int size);
+
+	static int s_programCount;
+	std::string _shaderId;
+#else
+	/**OpenGL handle for vertex shader.*/
+	GLuint            _vertShader;
     /**OpenGL handle for fragment shader.*/
     GLuint            _fragShader;
-    /**Built in uniforms.*/
+#endif
+	/**Built in uniforms.*/
     GLint             _builtInUniforms[UNIFORM_MAX];
     /**Indicate whether it has a offline shader compiler or not.*/
     bool              _hasShaderCompiler;
 
+#ifndef DIRECTX_ENABLED
+#endif
     struct flag_struct {
         unsigned int usesTime:1;
         unsigned int usesNormal:1;

@@ -381,7 +381,8 @@ void MotionStreak::onDraw(const Mat4 &transform, uint32_t flags)
     getGLProgram()->use();
     getGLProgram()->setUniformsForBuiltins(transform);
 
-    GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX );
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);
     GL::blendFunc( _blendFunc.src, _blendFunc.dst );
 
     GL::bindTexture2D( _texture->getName() );
@@ -391,6 +392,9 @@ void MotionStreak::onDraw(const Mat4 &transform, uint32_t flags)
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, _colorPointer);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, (GLsizei)_nuPoints*2);
+#else
+	CCASSERT(false, "CCMotionStreak is not supported");
+#endif
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _nuPoints*2);
 }
 

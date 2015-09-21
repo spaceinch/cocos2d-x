@@ -77,6 +77,9 @@ void PrimitiveCommand::init(float globalOrder, GLuint textureID, GLProgramState*
 
 void PrimitiveCommand::execute() const
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "PrimitiveCommand::execute is not supported");
+#else
     //Set texture
     GL::bindTexture2D(_textureID);
     
@@ -87,6 +90,7 @@ void PrimitiveCommand::execute() const
     
     _primitive->draw();
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,_primitive->getCount());
+#endif
 }
 
 NS_CC_END

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2012      Pierre-David Bélanger
  * Copyright (c) 2012      cocos2d-x.org
  * Copyright (c) 2013-2014 Chukong Technologies Inc.
@@ -63,6 +63,7 @@ ClippingNode::ClippingNode()
 : _stencil(nullptr)
 , _alphaThreshold(0.0f)
 , _inverted(false)
+#ifndef DIRECTX_ENABLED
 , _currentStencilEnabled(GL_FALSE)
 , _currentStencilWriteMask(~0)
 , _currentStencilFunc(GL_ALWAYS)
@@ -75,6 +76,7 @@ ClippingNode::ClippingNode()
 ,  _currentAlphaTestEnabled(GL_FALSE)
 , _currentAlphaTestFunc(GL_ALWAYS)
 , _currentAlphaTestRef(1)
+#endif
 {
 
 }
@@ -135,7 +137,13 @@ bool ClippingNode::init(Node *stencil)
     static bool once = true;
     if (once)
     {
+#ifndef DIRECTX_ENABLED
         glGetIntegerv(GL_STENCIL_BITS, &g_sStencilBits);
+#else
+		D3D11_DEPTH_STENCIL_VIEW_DESC stencilViewDescription;
+		GLViewImpl::sharedOpenGLView()->GetDepthStencilView()->GetDesc(&stencilViewDescription);
+		g_sStencilBits = (stencilViewDescription.Format == DXGI_FORMAT_D24_UNORM_S8_UINT || stencilViewDescription.Format == DXGI_FORMAT_D32_FLOAT_S8X24_UINT) ? 8 : 0;
+#endif
         if (g_sStencilBits <= 0)
         {
             CCLOG("Stencil buffer is not enabled.");
@@ -233,6 +241,7 @@ void ClippingNode::drawFullScreenQuadClearStencil()
     director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     director->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     
+#ifndef DIRECTX_ENABLED
     Vec2 vertices[] = {
         Vec2(-1.0f, -1.0f),
         Vec2(1.0f, -1.0f),
@@ -257,6 +266,11 @@ void ClippingNode::drawFullScreenQuadClearStencil()
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, 4);
+#else
+	// This isn't correct: it wouldn't work with inverted or nested clipping nodes. Fortunately, we aren't using those on MIRLOM
+	GLViewImpl *view = GLViewImpl::sharedOpenGLView();
+	view->GetContext()->ClearDepthStencilView(view->GetDepthStencilView(), D3D11_CLEAR_STENCIL, 1.0, 0);
+#endif
     
     director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
@@ -293,10 +307,11 @@ void ClippingNode::visit(Renderer *renderer, const Mat4 &parentTransform, uint32
         // since glAlphaTest do not exists in OES, use a shader that writes
         // pixel only if greater than an alpha threshold
         GLProgram *program = GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE_ALPHA_TEST_NO_MV);
-        GLint alphaValueLocation = glGetUniformLocation(program->getProgram(), GLProgram::UNIFORM_NAME_ALPHA_TEST_VALUE);
+        GLint alphaValueLocation = program->getUniformLocation(GLProgram::UNIFORM_NAME_ALPHA_TEST_VALUE);
         // set our alphaThreshold
         program->use();
         program->setUniformLocationWith1f(alphaValueLocation, _alphaThreshold);
+		program->set();
         // we need to recursively apply this shader to all the nodes in the stencil node
         // FIXME: we should have a way to apply shader to all nodes without having to do this
         setProgram(_stencil, program);
@@ -407,8 +422,13 @@ void ClippingNode::onBeforeVisit()
     // mask of all layers less than or equal to the current (ie: for layer 3: 00000111)
     _mask_layer_le = mask_layer | mask_layer_l;
 
-    // manually save the stencil state
+	///////////////////////////////////
+	// SAVE DEPTH STENCIL STATE
+#ifndef DIRECTX_ENABLED
+	// manually save the depth test state
+	glGetBooleanv(GL_DEPTH_WRITEMASK, &_currentDepthWriteMask);
 
+	// manually save the stencil state
     _currentStencilEnabled = glIsEnabled(GL_STENCIL_TEST);
     glGetIntegerv(GL_STENCIL_WRITEMASK, (GLint *)&_currentStencilWriteMask);
     glGetIntegerv(GL_STENCIL_FUNC, (GLint *)&_currentStencilFunc);
@@ -417,8 +437,15 @@ void ClippingNode::onBeforeVisit()
     glGetIntegerv(GL_STENCIL_FAIL, (GLint *)&_currentStencilFail);
     glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, (GLint *)&_currentStencilPassDepthFail);
     glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, (GLint *)&_currentStencilPassDepthPass);
+#else
+	_originalDepthStencilStateDescription = DXStateCache::getInstance().getDepthStencilState();
+	_originalStencilReferenceValue = DXStateCache::getInstance().getStencilRef();
+#endif
 
-    // enable stencil use
+	///////////////////////////////////
+	// CLEAR STENCIL BUFFER
+#ifndef DIRECTX_ENABLED
+	// enable stencil use
     glEnable(GL_STENCIL_TEST);
 //    RenderState::StateBlock::_defaultState->setStencilTest(true);
 
@@ -430,10 +457,6 @@ void ClippingNode::onBeforeVisit()
     glStencilMask(mask_layer);
 //    RenderState::StateBlock::_defaultState->setStencilWrite(mask_layer);
 
-    // manually save the depth test state
-
-    glGetBooleanv(GL_DEPTH_WRITEMASK, &_currentDepthWriteMask);
-
     // disable depth test while drawing the stencil
     //glDisable(GL_DEPTH_TEST);
     // disable update to the depth buffer while drawing the stencil,
@@ -443,9 +466,6 @@ void ClippingNode::onBeforeVisit()
     glDepthMask(GL_FALSE);
     RenderState::StateBlock::_defaultState->setDepthWrite(false);
 
-    ///////////////////////////////////
-    // CLEAR STENCIL BUFFER
-
     // manually clear the stencil buffer by drawing a fullscreen rectangle on it
     // setup the stencil test func like this:
     // for each pixel in the fullscreen rectangle
@@ -454,6 +474,21 @@ void ClippingNode::onBeforeVisit()
     //     if in inverted mode: set the current layer value to 1 in the stencil buffer
     glStencilFunc(GL_NEVER, mask_layer, mask_layer);
     glStencilOp(!_inverted ? GL_ZERO : GL_REPLACE, GL_KEEP, GL_KEEP);
+#else
+    _currentDepthStencilStateDescription = D3D11_DEPTH_STENCIL_DESC(_originalDepthStencilStateDescription);
+    _currentDepthStencilStateDescription.StencilEnable = true;
+    _currentDepthStencilStateDescription.StencilWriteMask = mask_layer;
+    _currentDepthStencilStateDescription.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    _currentDepthStencilStateDescription.FrontFace.StencilFunc = D3D11_COMPARISON_NEVER;
+    _currentStencilReferenceValue = mask_layer;
+    _currentDepthStencilStateDescription.StencilReadMask = mask_layer;
+    _currentDepthStencilStateDescription.FrontFace.StencilFailOp = !_inverted ? D3D11_STENCIL_OP_ZERO : D3D11_STENCIL_OP_REPLACE;
+    _currentDepthStencilStateDescription.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+    _currentDepthStencilStateDescription.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    _currentDepthStencilStateDescription.BackFace = _currentDepthStencilStateDescription.FrontFace;
+
+    DXStateCache::getInstance().setDepthStencilState(_currentDepthStencilStateDescription, _currentStencilReferenceValue);
+#endif
 
     // draw a fullscreen solid rectangle to clear the stencil buffer
     //ccDrawSolidRect(Vec2::ZERO, ccpFromSize([[Director sharedDirector] winSize]), Color4F(1, 1, 1, 1));
@@ -461,7 +496,7 @@ void ClippingNode::onBeforeVisit()
 
     ///////////////////////////////////
     // DRAW CLIPPING STENCIL
-
+#ifndef DIRECTX_ENABLED
     // setup the stencil test func like this:
     // for each pixel in the stencil node
     //     never draw it into the frame buffer
@@ -493,12 +528,19 @@ void ClippingNode::onBeforeVisit()
         glAlphaFunc(GL_GREATER, _alphaThreshold);
 #endif
     }
+#else
+	_currentDepthStencilStateDescription.FrontFace.StencilFailOp = !_inverted ? D3D11_STENCIL_OP_REPLACE : D3D11_STENCIL_OP_ZERO;
+	_currentDepthStencilStateDescription.BackFace = _currentDepthStencilStateDescription.FrontFace;
+
+	DXStateCache::getInstance().setDepthStencilState(_currentDepthStencilStateDescription, _currentStencilReferenceValue);
+#endif
 
     //Draw _stencil
 }
 
 void ClippingNode::onAfterDrawStencil()
 {
+#ifndef DIRECTX_ENABLED
     // restore alpha test state
     if (_alphaThreshold < 1)
     {
@@ -538,6 +580,17 @@ void ClippingNode::onAfterDrawStencil()
 //    RenderState::StateBlock::_defaultState->setStencilOperation(RenderState::STENCIL_OP_KEEP, RenderState::STENCIL_OP_KEEP, RenderState::STENCIL_OP_KEEP);
 
     // draw (according to the stencil test func) this node and its childs
+#else
+
+	_currentDepthStencilStateDescription.DepthWriteMask = _originalDepthStencilStateDescription.DepthWriteMask;
+	_currentDepthStencilStateDescription.FrontFace.StencilFunc = D3D11_COMPARISON_EQUAL;
+	_currentStencilReferenceValue = _mask_layer_le;
+	_currentDepthStencilStateDescription.StencilReadMask = _mask_layer_le;
+	_currentDepthStencilStateDescription.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	_currentDepthStencilStateDescription.BackFace = _currentDepthStencilStateDescription.FrontFace;
+
+	DXStateCache::getInstance().setDepthStencilState(_currentDepthStencilStateDescription, _currentStencilReferenceValue);
+#endif
 }
 
 
@@ -545,7 +598,7 @@ void ClippingNode::onAfterVisit()
 {
     ///////////////////////////////////
     // CLEANUP
-
+#ifndef DIRECTX_ENABLED
     // manually restore the stencil state
     glStencilFunc(_currentStencilFunc, _currentStencilRef, _currentStencilValueMask);
 //    RenderState::StateBlock::_defaultState->setStencilFunction((RenderState::StencilFunction)_currentStencilFunc, _currentStencilRef, _currentStencilValueMask);
@@ -561,6 +614,9 @@ void ClippingNode::onAfterVisit()
         glDisable(GL_STENCIL_TEST);
 //        RenderState::StateBlock::_defaultState->setStencilTest(false);
     }
+#else
+	DXStateCache::getInstance().setDepthStencilState(_originalDepthStencilStateDescription, _originalStencilReferenceValue);
+#endif
 
     // we are done using this layer, decrement
     s_layer--;

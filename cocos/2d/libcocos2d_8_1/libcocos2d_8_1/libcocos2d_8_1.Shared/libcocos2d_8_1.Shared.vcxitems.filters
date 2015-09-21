@@ -673,9 +673,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\CCGL.h">
       <Filter>platform\winrt</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\CCGL_Angle.h">
-      <Filter>platform\winrt</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\CCPThreadWinRT.h">
       <Filter>platform\winrt</Filter>
     </ClInclude>
@@ -1869,6 +1866,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\CCTextureCube.h">
       <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\ID3D11Provider.h">
+      <Filter>platform\winrt</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -3844,6 +3844,8 @@
     </Filter>
     <Filter Include="cocostudio\reader\WidgetReader\GameNodeDReader">
       <UniqueIdentifier>{4cfeb8e0-8355-4a28-aff7-3e96e400bad1}</UniqueIdentifier>
+    <Filter Include="renderer\shaders">
+      <UniqueIdentifier>{75320d46-6997-444e-bd2d-7c6614cbd96e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -3872,84 +3874,6 @@
     <None Include="$(MSBuildThisFileDirectory)..\..\..\..\math\Vec4.inl">
       <Filter>math</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_3D_Color.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_3D_ColorTex.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_3D_PositionTex.vert">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_Label.vert">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_Label_df.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_Label_df_glow.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_Label_normal.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_Label_outline.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_Position_uColor.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_Position_uColor.vert">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionColor.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionColor.vert">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionColorLengthTexture.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionColorLengthTexture.vert">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTexture.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTexture.vert">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTexture_uColor.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTexture_uColor.vert">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTextureA8Color.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTextureA8Color.vert">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTextureColor.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTextureColor.vert">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTextureColor_noMVP.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTextureColor_noMVP.vert">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_PositionTextureColorAlphaTest.frag">
-      <Filter>renderer</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\ccShader_Position_uColor-no-gl_PointSize.vert">
-      <Filter>renderer</Filter>
-    </None>
     <None Include="$(MSBuildThisFileDirectory)..\..\..\libcocos2d.vcxproj.filters">
       <Filter>2d</Filter>
     </None>
@@ -3962,5 +3886,86 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)..\..\..\..\physics3d\CMakeLists.txt" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\ui\shaders\ccShader_UIGrayScale_PS.hlsl">
+      <Filter>ui\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_3D_Color_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_3D_ColorTex_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_3D_PositionTex_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_df_glow_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_df_normal_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_normal_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_outline_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Position_uColor_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Position_uColor_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionColor_noMVP_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionColor_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionColor_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionColorLengthTexture_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionColorLengthTexture_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTexture_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTexture_uColor_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTexture_uColor_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTexture_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureA8Color_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureA8Color_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureColor_noMVP_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureColor_noMVP_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureColor_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureColor_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureColorAlphaTest_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

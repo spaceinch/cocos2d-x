@@ -241,8 +241,13 @@ protected:
     //for QuadCommand
     V3F_C4B_T2F _quadVerts[VBO_SIZE];
     GLushort _quadIndices[INDEX_VBO_SIZE];
-    GLuint _quadVAO;
+#ifdef DIRECTX_ENABLED
+	ID3D11Buffer *_bufferVertex;
+	ID3D11Buffer *_bufferIndex;
+#else
+	GLuint _quadVAO;
     GLuint _quadbuffersVBO[2]; //0: vertex  1: indices
+#endif
     int _numberQuads;
     
     bool _glViewAssigned;

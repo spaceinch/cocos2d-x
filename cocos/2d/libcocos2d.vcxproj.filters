@@ -735,6 +735,11 @@
     </ClCompile>
     <ClCompile Include="..\..\external\tinyxml2\tinyxml2.cpp">
       <Filter>external\tinyxml2</Filter>
+    <ClCompile Include="..\platform\wp8\CCGLViewImpl-wp8.cpp">
+      <Filter>platform\wp8</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\wp8\DirectXBase.cpp">
+      <Filter>platform\wp8</Filter>
     </ClCompile>
     <ClCompile Include="..\..\external\unzip\ioapi_mem.cpp">
       <Filter>external\unzip</Filter>
@@ -3058,6 +3063,8 @@
     </ClInclude>
     <ClInclude Include="..\ui\UIWebView-inl.h">
       <Filter>ui\UIWidgets</Filter>
+    <ClInclude Include="..\platform\wp8\DirectXBase.h">
+      <Filter>platform\wp8</Filter>
     </ClInclude>
     <ClInclude Include="..\ui\UIWebView.h">
       <Filter>ui\UIWidgets</Filter>
@@ -3076,6 +3083,8 @@
     </ClInclude>
     <ClInclude Include="..\editor-support\cocostudio\ActionTimeline\CSLoader.h">
       <Filter>cocostudio\TimelineAction</Filter>
+    <ClInclude Include="..\platform\winrt\CCPlatformDefine-winrt.h">
+      <Filter>platform\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\ui\UILayoutComponent.h">
       <Filter>ui\Layouts</Filter>
@@ -3798,5 +3807,91 @@
     <None Include="..\3d\CCAnimationCurve.inl">
       <Filter>3d</Filter>
     </None>
+    <None Include="..\3d\CCAnimationCurve.inl">
+      <Filter>3d</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\renderer\shaders\ccShader_3D_Color_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_3D_ColorTex_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_3D_PositionTex_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_Label_df_glow_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_Label_df_normal_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_Label_normal_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_Label_outline_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_Label_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_Position_uColor_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_Position_uColor_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionColor_noMVP_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionColor_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionColor_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionColorLengthTexture_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionColorLengthTexture_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTexture_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTexture_uColor_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTexture_uColor_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTexture_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTextureA8Color_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTextureA8Color_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTextureColor_noMVP_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTextureColor_noMVP_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTextureColor_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTextureColor_VS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_PositionTextureColorAlphaTest_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\ui\shaders\ccShader_UIGrayScale_PS.hlsl">
+      <Filter>ui\shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

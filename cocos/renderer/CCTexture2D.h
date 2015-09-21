@@ -540,6 +540,30 @@ protected:
     friend class SpriteFrameCache;
     friend class TextureCache;
     friend class ui::Scale9Sprite;
+
+#ifdef DIRECTX_ENABLED
+	ID3D11Texture2D *_texture;
+	ID3D11ShaderResourceView *_textureView;
+	bool _renderTargetTexture;
+
+	static int s_TextureCount;
+
+public:
+	ID3D11ShaderResourceView * const * getView() const
+	{
+		return &_textureView;
+	}
+
+	ID3D11Texture2D * getTexture()
+	{
+		return _texture;
+	}
+
+	void prepareForRenderTarget()
+	{
+		_renderTargetTexture = true;
+	}
+#endif
 };
 
 

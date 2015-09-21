@@ -2,7 +2,7 @@
 Copyright (c) 2008-2010 Ricardo Quesada
 Copyright (c) 2010-2013 cocos2d-x.org
 Copyright (c) 2011      Zynga Inc.
-Copyright (c) 2013-2015 Chukong Technologies Inc.
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -47,8 +47,6 @@ THE SOFTWARE.
 #include "renderer/CCTextureCache.h"
 #include "renderer/ccGLStateCache.h"
 #include "renderer/CCRenderer.h"
-#include "renderer/CCRenderState.h"
-#include "renderer/CCFrameBuffer.h"
 #include "2d/CCCamera.h"
 #include "base/CCUserDefault.h"
 #include "base/ccFPSImages.h"
@@ -65,6 +63,10 @@ THE SOFTWARE.
 
 #if CC_ENABLE_SCRIPT_BINDING
 #include "CCScriptSupport.h"
+#endif
+
+#if CC_USE_PHYSICS
+#include "physics/CCPhysicsWorld.h"
 #endif
 
 /**
@@ -105,7 +107,6 @@ Director* Director::getInstance()
 }
 
 Director::Director()
-: _isStatusLabelUpdated(true)
 {
 }
 
@@ -141,11 +142,8 @@ bool Director::init(void)
     _winSizeInPoints = Size::ZERO;
 
     _openGLView = nullptr;
-    _defaultFBO = nullptr;
-    
-    _contentScaleFactor = 1.0f;
 
-    _console = new (std::nothrow) Console;
+    _contentScaleFactor = 1.0f;
 
     // scheduler
     _scheduler = new (std::nothrow) Scheduler();
@@ -162,12 +160,15 @@ bool Director::init(void)
     _eventAfterUpdate->setUserData(this);
     _eventProjectionChanged = new (std::nothrow) EventCustom(EVENT_PROJECTION_CHANGED);
     _eventProjectionChanged->setUserData(this);
+
+
     //init TextureCache
     initTextureCache();
     initMatrixStack();
 
     _renderer = new (std::nothrow) Renderer;
-    RenderState::initialize();
+
+    _console = new (std::nothrow) Console;
 
     return true;
 }
@@ -184,7 +185,6 @@ Director::~Director(void)
     CC_SAFE_RELEASE(_notificationNode);
     CC_SAFE_RELEASE(_scheduler);
     CC_SAFE_RELEASE(_actionManager);
-    CC_SAFE_DELETE(_defaultFBO);
     
     delete _eventAfterUpdate;
     delete _eventAfterDraw;
@@ -218,7 +218,11 @@ void Director::setDefaultValues(void)
     _displayStats = conf->getValue("cocos2d.x.display_fps", Value(false)).asBool();
 
     // GL projection
-    std::string projection = conf->getValue("cocos2d.x.gl.projection", Value("3d")).asString();
+#ifndef DIRECTX_ENABLED
+	std::string projection = conf->getValue("cocos2d.x.gl.projection", Value("3d")).asString();
+#else
+	std::string projection = conf->getValue("cocos2d.x.gl.projection", Value("2d")).asString();
+#endif
     if (projection == "3d")
         _projection = Projection::_3D;
     else if (projection == "2d")
@@ -248,6 +252,8 @@ void Director::setGLDefaultValues()
     CCASSERT(_openGLView, "opengl view should not be null");
 
     setAlphaBlending(true);
+    // FIXME: Fix me, should enable/disable depth test according the depth format as cocos2d-iphone did
+    // [self setDepthTest: view_.depthFormat];
     setDepthTest(false);
     setProjection(_projection);
 }
@@ -271,7 +277,7 @@ void Director::drawScene()
     }
 
     _renderer->clear();
-    experimental::FrameBuffer::clearAllFBOs();
+
     /* to avoid flickr, nextScene MUST be here: after tick and before draw.
      * FIXME: Which bug is this one. It seems that it can't be reproduced with v0.9
      */
@@ -284,8 +290,12 @@ void Director::drawScene()
     
     if (_runningScene)
     {
-#if (CC_USE_PHYSICS || (CC_USE_3D_PHYSICS && CC_ENABLE_BULLET_INTEGRATION) || CC_USE_NAVMESH)
-        _runningScene->stepPhysicsAndNavigation(_deltaTime);
+#if CC_USE_PHYSICS
+        auto physicsWorld = _runningScene->getPhysicsWorld();
+        if (physicsWorld && physicsWorld->isAutoStep())
+        {
+            physicsWorld->update(_deltaTime, false);
+        }
 #endif
         //clear draw stats
         _renderer->clearDrawStats();
@@ -294,6 +304,12 @@ void Director::drawScene()
         _runningScene->render(_renderer);
         
         _eventDispatcher->dispatchEvent(_eventAfterVisit);
+#if CC_USE_PHYSICS
+        if(physicsWorld)
+        {
+            physicsWorld->_updateBodyTransform = false;
+        }
+#endif
     }
 
     // draw the notifications node
@@ -382,7 +398,7 @@ void Director::setOpenGLView(GLView *openGLView)
         // set size
         _winSizeInPoints = _openGLView->getDesignResolutionSize();
 
-        _isStatusLabelUpdated = true;
+        createStatsLabel();
 
         if (_openGLView)
         {
@@ -397,9 +413,6 @@ void Director::setOpenGLView(GLView *openGLView)
         {
             _eventDispatcher->setEnabled(true);
         }
-        
-        _defaultFBO = experimental::FrameBuffer::getOrCreateDefaultFBO(_openGLView);
-        _defaultFBO->retain();
     }
 }
 
@@ -410,7 +423,11 @@ TextureCache* Director::getTextureCache() const
 
 void Director::initTextureCache()
 {
+#ifdef EMSCRIPTEN
+    _textureCache = new (std::nothrow) TextureCacheEmscripten();
+#else
     _textureCache = new (std::nothrow) TextureCache();
+#endif // EMSCRIPTEN
 }
 
 void Director::destroyTextureCache()
@@ -590,6 +607,8 @@ const Mat4& Director::getMatrix(MATRIX_STACK_TYPE type)
 void Director::setProjection(Projection projection)
 {
     Size size = _winSizeInPoints;
+	const auto w = std::max(size.width, 1.0f);
+	const auto h = std::max(size.height, 1.0f);
 
     setViewport();
 
@@ -598,9 +617,14 @@ void Director::setProjection(Projection projection)
         case Projection::_2D:
         {
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-
+#ifdef DIRECTX_ENABLED
+			DirectX::XMMATRIX matrix = DirectX::XMMatrixOrthographicOffCenterLH(0, w, 0, h, -1024, 1024);
+			Mat4 orthoMatrix((float *)matrix.r);
+			orthoMatrix.transpose();
+#else
             Mat4 orthoMatrix;
             Mat4::createOrthographicOffCenter(0, size.width, 0, size.height, -1024, 1024, &orthoMatrix);
+#endif
             multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, orthoMatrix);
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
             break;
@@ -610,19 +634,34 @@ void Director::setProjection(Projection projection)
         {
             float zeye = this->getZEye();
 
-            Mat4 matrixPerspective, matrixLookup;
-
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
 
-            // issue #1334
+#ifdef DIRECTX_ENABLED
+			const DirectX::XMVECTORF32 eye = { w * 0.5f, h * 0.5f, std::max(zeye, 1.0f) };
+			const DirectX::XMVECTORF32 center = { w * 0.5f, h * 0.5f, 0.0f };
+			const DirectX::XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+
+			auto m = DirectX::XMMatrixPerspectiveFovRH(60 * DirectX::XM_PI / 180.0f, (GLfloat)w / h, 10, zeye + h * 0.5f);
+			Mat4 matrixPerspective((float*)m.r);
+
+			m = DirectX::XMMatrixLookAtRH(eye, center, up);
+			Mat4 matrixLookup((float*)m.r);
+
+			auto final = matrixPerspective * matrixLookup;
+			final.transpose();
+			multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, final);
+#else
+			Mat4 matrixPerspective, matrixLookup;
+			Vec3 eye(size.width / 2, size.height / 2, zeye), center(size.width / 2, size.height / 2, 0.0f), up(0.0f, 1.0f, 0.0f);
+			// issue #1334
             Mat4::createPerspective(60, (GLfloat)size.width/size.height, 10, zeye+size.height/2, &matrixPerspective);
 
             multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, matrixPerspective);
 
-            Vec3 eye(size.width/2, size.height/2, zeye), center(size.width/2, size.height/2, 0.0f), up(0.0f, 1.0f, 0.0f);
+            //Vec3 eye(size.width/2, size.height/2, zeye), center(size.width/2, size.height/2, 0.0f), up(0.0f, 1.0f, 0.0f);
             Mat4::createLookAt(eye, center, up, &matrixLookup);
             multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, matrixLookup);
-            
+#endif
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
             break;
         }
@@ -638,7 +677,9 @@ void Director::setProjection(Projection projection)
     }
 
     _projection = projection;
-    GL::setProjectionMatrixDirty();
+#ifndef DIRECTX_ENABLED
+	GL::setProjectionMatrixDirty();
+#endif
 
     _eventDispatcher->dispatchEvent(_eventProjectionChanged);
 }
@@ -669,11 +710,19 @@ void Director::setAlphaBlending(bool on)
 {
     if (on)
     {
-        GL::blendFunc(CC_BLEND_SRC, CC_BLEND_DST);
+#ifndef DIRECTX_ENABLED
+		GL::blendFunc(CC_BLEND_SRC, CC_BLEND_DST);
+#else
+		DXStateCache::getInstance().setBlend(CC_BLEND_SRC, CC_BLEND_DST);
+#endif
     }
     else
     {
-        GL::blendFunc(GL_ONE, GL_ZERO);
+#ifndef DIRECTX_ENABLED
+		GL::blendFunc(GL_ONE, GL_ZERO);
+#else
+		DXStateCache::getInstance().setBlend(GL_ONE, GL_ZERO);
+#endif
     }
 
     CHECK_GL_ERROR_DEBUG();
@@ -687,9 +736,6 @@ void Director::setDepthTest(bool on)
 void Director::setClearColor(const Color4F& clearColor)
 {
     _renderer->setClearColor(clearColor);
-    auto defaultFBO = experimental::FrameBuffer::getOrCreateDefaultFBO(_openGLView);
-    
-    if(defaultFBO) defaultFBO->setClearColor(clearColor);
 }
 
 static void GLToClipTransform(Mat4 *transformOut)
@@ -700,6 +746,12 @@ static void GLToClipTransform(Mat4 *transformOut)
     CCASSERT(nullptr != director, "Director is null when seting matrix stack");
 
     auto projection = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
+    //if needed, we need to undo the rotation for Landscape orientation in order to get the correct positions
+    //projection = Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * projection;
+#endif
+
     auto modelview = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
     *transformOut = projection * modelview;
 }
@@ -708,6 +760,9 @@ Vec2 Director::convertToGL(const Vec2& uiPoint)
 {
     Mat4 transform;
     GLToClipTransform(&transform);
+#ifdef DIRECTX_ENABLED
+	transform.transpose();
+#endif
 
     Mat4 transformInv = transform.getInversed();
 
@@ -915,17 +970,7 @@ void Director::restart()
 }
 
 void Director::reset()
-{    
-    if (_runningScene)
-    {
-        _runningScene->onExit();
-        _runningScene->cleanup();
-        _runningScene->release();
-    }
-    
-    _runningScene = nullptr;
-    _nextScene = nullptr;
-
+{
     // cleanup scheduler
     getScheduler()->unscheduleAll();
     
@@ -935,13 +980,22 @@ void Director::reset()
         _eventDispatcher->removeAllEventListeners();
     }
     
+    if (_runningScene)
+    {
+        _runningScene->onExit();
+        _runningScene->cleanup();
+        _runningScene->release();
+    }
+    
+    _runningScene = nullptr;
+    _nextScene = nullptr;
+    
     // remove all objects, but don't release it.
     // runWithScene might be executed after 'end'.
     _scenesStack.clear();
     
     stopAnimation();
     
-    CC_SAFE_RELEASE_NULL(_notificationNode);
     CC_SAFE_RELEASE_NULL(_FPSLabel);
     CC_SAFE_RELEASE_NULL(_drawnBatchesLabel);
     CC_SAFE_RELEASE_NULL(_drawnVerticesLabel);
@@ -978,9 +1032,11 @@ void Director::reset()
     // cocos2d-x specific data structures
     UserDefault::destroyInstance();
     
-    GL::invalidateStateCache();
-
-    RenderState::finalize();
+#ifndef DIRECTX_ENABLED
+	GL::invalidateStateCache();
+#else
+	DXStateCache::getInstance().invalidateStateCache();
+#endif
     
     destroyTextureCache();
 }
@@ -1006,9 +1062,6 @@ void Director::restartDirector()
 {
     reset();
     
-    // RenderState need to be reinitialized
-    RenderState::initialize();
-
     // Texture cache need to be reinitialized
     initTextureCache();
     
@@ -1095,12 +1148,6 @@ void Director::resume()
 // updates the FPS every frame
 void Director::showStats()
 {
-    if (_isStatusLabelUpdated)
-    {
-        createStatsLabel();
-        _isStatusLabelUpdated = false;
-    }
-
     static unsigned long prevCalls = 0;
     static unsigned long prevVerts = 0;
     static float prevDeltaTime  = 0.016f; // 60FPS
@@ -1246,7 +1293,7 @@ void Director::setContentScaleFactor(float scaleFactor)
     if (scaleFactor != _contentScaleFactor)
     {
         _contentScaleFactor = scaleFactor;
-        _isStatusLabelUpdated = true;
+        createStatsLabel();
     }
 }
 
@@ -1303,9 +1350,9 @@ void DisplayLinkDirector::startAnimation()
 
     _invalid = false;
 
-    _cocos2d_thread_id = std::this_thread::get_id();
-
+#ifndef WP8_SHADER_COMPILER
     Application::getInstance()->setAnimationInterval(_animationInterval);
+#endif
 
     // fix issue #3509, skip one fps to avoid incorrect time calculation.
     setNextDeltaTimeZero(true);
@@ -1337,7 +1384,7 @@ void DisplayLinkDirector::stopAnimation()
     _invalid = true;
 }
 
-void DisplayLinkDirector::setAnimationInterval(float interval)
+void DisplayLinkDirector::setAnimationInterval(double interval)
 {
     _animationInterval = interval;
     if (! _invalid)

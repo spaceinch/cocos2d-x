@@ -93,6 +93,9 @@ void TrianglesCommand::generateMaterialID()
 
 void TrianglesCommand::useMaterial() const
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "TrianglesCommand::useMaterial is not supported");
+#else
     //Set texture
     GL::bindTexture2D(_textureID);
     
@@ -100,6 +103,7 @@ void TrianglesCommand::useMaterial() const
     GL::blendFunc(_blendType.src, _blendType.dst);
     
     _glProgramState->apply(_mv);
+#endif
 }
 
 NS_CC_END

@@ -796,7 +796,9 @@ void VolatileTextureMgr::reloadAllTextures()
         if (vt->_hasMipmaps) {
             vt->_texture->generateMipmap();
         }
+#ifndef DIRECTX_ENABLED
         vt->_texture->setTexParameters(vt->_texParams);
+#endif
     }
 
     _isReloading = false;

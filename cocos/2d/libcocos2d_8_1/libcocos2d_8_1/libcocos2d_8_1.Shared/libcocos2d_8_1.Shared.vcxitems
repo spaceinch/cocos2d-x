@@ -493,7 +493,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\CCFreeTypeFont.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\CCGL.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\CCGLViewImpl-winrt.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\CCGL_Angle.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\CCPlatformDefine-winrt.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\CCPrecompiledShaders.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\CCPThreadWinRT.h" />
@@ -503,6 +502,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\inet_pton_winrt.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\InputEvent.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\InputEventTypes.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\ID3D11Provider.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\Keyboard-winrt.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\pch.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\platform\winrt\sha1.h" />
@@ -1280,5 +1280,167 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)..\..\..\..\physics3d\CMakeLists.txt" />
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_3D_ColorTex_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_3D_Color_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_3D_PositionTex_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_df_glow_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_df_normal_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_normal_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_outline_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionColorLengthTexture_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionColorLengthTexture_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionColor_noMVP_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionColor_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionColor_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureA8Color_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureA8Color_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureColorAlphaTest_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureColor_noMVP_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureColor_noMVP_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureColor_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTextureColor_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTexture_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTexture_uColor_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTexture_uColor_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_PositionTexture_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Position_uColor_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Position_uColor_VS.hlsl">
+      <ShaderType>Vertex</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <DisableOptimizations>false</DisableOptimizations>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\ui\shaders\ccShader_UIGrayScale_PS.hlsl">
+      <ShaderType>Pixel</ShaderType>
+      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>4.0_level_9_1</ShaderModel>
+      <DisableOptimizations>false</DisableOptimizations>
+    </FxCompile>
   </ItemGroup>
 </Project>

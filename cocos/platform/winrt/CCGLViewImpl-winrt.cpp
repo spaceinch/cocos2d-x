@@ -32,6 +32,7 @@ THE SOFTWARE.
 #include "CCWinRTUtils.h"
 #include "deprecated/CCNotificationCenter.h"
 #include <map>
+#include "ID3D11Provider.h"
 
 using namespace Platform;
 using namespace Concurrency;
@@ -81,6 +82,7 @@ GLViewImpl::GLViewImpl()
 	, m_windowVisible(true)
     , m_width(0)
     , m_height(0)
+	, m_d3d11Provider(nullptr)
     , m_orientation(DisplayOrientations::Landscape)
     , m_appShouldExit(false)
 {
@@ -115,11 +117,13 @@ bool GLViewImpl::initWithFullScreen(const std::string& viewName)
     return initWithRect(viewName, Rect(0, 0, m_width, m_height), 1.0f);
 }
 
-bool GLViewImpl::Create(float width, float height, float dpi, DisplayOrientations orientation)
+bool GLViewImpl::Create(ID3D11Provider *d3d11Provider, float width, float height, float dpi, DisplayOrientations orientation)
 {
     m_orientation = orientation;
     m_dpi = dpi;
+	m_d3d11Provider = d3d11Provider;
     UpdateForWindowSizeChange(width, height);
+
     return true;
 }
 
@@ -171,7 +175,6 @@ void GLViewImpl::setIMEKeyboardState(bool bOpen, const std::string& str)
 
 void GLViewImpl::swapBuffers()
 {
-    
 }
 
 bool GLViewImpl::isOpenGLReady()
@@ -400,11 +403,8 @@ void GLViewEventHandler::OnGLFWWindowSizeFunCallback(GLFWwindow *windows, int wi
 
 void GLViewImpl::UpdateWindowSize()
 {
-    float width, height;
-
-    width = m_width;
-    height = m_height;
-
+    float width  = m_width;
+	float height = m_height;
 
     //CCSize designSize = getDesignResolutionSize();
     if(!m_initialized)
@@ -469,6 +469,35 @@ Vec2 GLViewImpl::GetPoint(PointerEventArgs^ args) {
 	return TransformToOrientation(args->CurrentPoint->Position);
 }
 
+void GLViewImpl::setViewPortInPoints(float x , float y , float w , float h)
+{
+#ifdef DIRECTX_ENABLED
+	DXStateCache::getInstance().setViewport((GLint)  (x * _scaleX + _viewPortRect.origin.x),
+                                            (GLint)  (y * _scaleY + _viewPortRect.origin.y),
+                                            (GLsizei)(w * _scaleX),
+                                            (GLsizei)(h * _scaleY));
+#else
+    glViewport((GLint) (x * _scaleX + _viewPortRect.origin.x),
+        (GLint) (y * _scaleY + _viewPortRect.origin.y),
+        (GLsizei) (w * _scaleX),
+        (GLsizei) (h * _scaleY));
+#endif
+}
+
+void GLViewImpl::setScissorInPoints(float x , float y , float w , float h)
+{
+#ifdef DIRECTX_ENABLED
+	DXStateCache::getInstance().setScissor((GLint)  (x * _scaleX + _viewPortRect.origin.x),
+                                           (GLint)  ((_designResolutionSize.height - y - h) * _scaleY + _viewPortRect.origin.y),
+                                           (GLsizei)(w * _scaleX),
+                                           (GLsizei)(h * _scaleY));
+#else
+    glScissor((GLint) (x * _scaleX + _viewPortRect.origin.x),
+        (GLint) (y * _scaleY + _viewPortRect.origin.y),
+        (GLsizei) (w * _scaleX),
+        (GLsizei) (h * _scaleY));
+#endif
+}
 
 void GLViewImpl::QueueBackKeyPress()
 {
@@ -480,6 +509,7 @@ void GLViewImpl::QueuePointerEvent(PointerEventType type, PointerEventArgs^ args
 {
     std::shared_ptr<PointerEvent> e(new PointerEvent(type, args));
     mInputEvents.push(e);
+#endif
 }
 
 void GLViewImpl::QueueWinRTKeyboardEvent(WinRTKeyboardEventType type, KeyEventArgs^ args)
@@ -498,13 +528,45 @@ void GLViewImpl::QueueEvent(std::shared_ptr<InputEvent>& event)
     mInputEvents.push(event);
 }
 
+void GLViewImpl::QueueEvent(std::shared_ptr<Event>& event)
+{
+	mEvents.push(event);
+}
+
 void GLViewImpl::ProcessEvents()
 {
-    std::shared_ptr<InputEvent> e;
-    while (mInputEvents.try_pop(e))
+    std::shared_ptr<InputEvent> inputEvent;
+	while (mInputEvents.try_pop(inputEvent))
     {
-        e->execute();
+		inputEvent->execute();
     }
+
+	auto eventDispatcher = Director::getInstance()->getEventDispatcher();
+	std::shared_ptr<Event> event;
+	while (mEvents.try_pop(event))
+	{
+		eventDispatcher->dispatchEvent(event.get());
+	}
+}
+
+ID3D11Device2* GLViewImpl::GetDevice()
+{
+	return m_d3d11Provider ? m_d3d11Provider->GetDevice() : nullptr;
+}
+
+ID3D11DeviceContext2* GLViewImpl::GetContext()
+{
+	return m_d3d11Provider ? m_d3d11Provider->GetContext() : nullptr;
+}
+
+ID3D11DepthStencilView* GLViewImpl::GetDepthStencilView()
+{
+	return m_d3d11Provider ? m_d3d11Provider->GetDepthStencilView() : nullptr;
+}
+
+ID3D11RenderTargetView* const* GLViewImpl::GetRenderTargetView() const
+{
+	return m_d3d11Provider ? m_d3d11Provider->GetRenderTargetView() : nullptr;
 }
 
 NS_CC_END

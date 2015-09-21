@@ -40,7 +40,11 @@ NS_CC_EXT_BEGIN
 #define SCROLL_DEACCEL_DIST  1.0f
 #define BOUNCE_DURATION      0.15f
 #define INSET_RATIO          0.2f
-#define MOVE_INCH            7.0f/160.0f
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+	#define MOVE_INCH            7.0f/160.0f
+#else
+	#define MOVE_INCH            50.0f/160.0f
+#endif
 #define BOUNCE_BACK_FACTOR   0.35f
 
 static float convertDistanceFromPointToInch(float pointDis)
@@ -64,6 +68,7 @@ ScrollView::ScrollView()
 , _maxScale(0.0f)
 , _scissorRestored(false)
 , _touchListener(nullptr)
+, _previousDistanceWasZero(false)
 {
 
 }
@@ -552,7 +557,11 @@ void ScrollView::onBeforeDraw()
             }
         }
         else {
+#ifndef DIRECTX_ENABLED
             glEnable(GL_SCISSOR_TEST);
+#else
+			DXStateCache::getInstance().enableScissor(true);
+#endif
             glview->setScissorInPoints(frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
         }
     }
@@ -579,7 +588,11 @@ void ScrollView::onAfterDraw()
             glview->setScissorInPoints(_parentScissorRect.origin.x, _parentScissorRect.origin.y, _parentScissorRect.size.width, _parentScissorRect.size.height);
         }
         else {
+#ifndef DIRECTX_ENABLED
             glDisable(GL_SCISSOR_TEST);
+#else
+			DXStateCache::getInstance().enableScissor(false);
+#endif
         }
     }
 }
@@ -607,6 +620,8 @@ void ScrollView::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t
 
     if (!_children.empty())
     {
+		generateGroupCommand();
+
         int i=0;
 		
 		// draw children zOrder < 0
@@ -633,6 +648,8 @@ void ScrollView::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t
 			Node *child = _children.at(i);
 			child->visit(renderer, _modelViewTransform, flags);
         }
+
+		renderer->popGroup();
     }
     else if (visibleByCamera)
     {
@@ -770,7 +787,18 @@ void ScrollView::onTouchMoved(Touch* touch, Event* event)
                 newX     = _container->getPosition().x + moveDistance.x;
                 newY     = _container->getPosition().y + moveDistance.y;
 
-                _scrollDistance = moveDistance;
+				if (moveDistance == Vec2::ZERO) {
+					// We only set the _scrollDistance to zero when two
+					// (or more) consecutive moveDistance vectors are zero.
+					if (_previousDistanceWasZero) {
+						_scrollDistance = Vec2::ZERO;
+					}
+					_previousDistanceWasZero = true;
+				}
+				else {
+					_previousDistanceWasZero = false;
+					_scrollDistance = moveDistance;
+				}
                 this->setContentOffset(Vec2(newX, newY));
             }
         }
@@ -827,7 +855,7 @@ void ScrollView::onTouchCancelled(Touch* touch, Event* event)
 
 Rect ScrollView::getViewRect()
 {
-    Vec2 screenPos = this->convertToWorldSpace(Vec2::ZERO);
+   Vec2 screenPos = this->convertToWorldSpace(Vec2::ZERO);
     
     float scaleX = this->getScaleX();
     float scaleY = this->getScaleY();
@@ -850,5 +878,17 @@ Rect ScrollView::getViewRect()
     }
 
     return Rect(screenPos.x, screenPos.y, _viewSize.width*scaleX, _viewSize.height*scaleY);
+}
+
+void ScrollView::generateGroupCommand()
+{
+	// I think we should use the renderer that was passed as parameter to the 'visit' method
+	// but we have to use the same renderer that 'beforeDraw' and 'afterDraw' methods so
+	// we keep the order of these three commands.
+	Renderer * renderer = Director::getInstance()->getRenderer();
+
+	_groupCommand.init(_globalZOrder);
+	renderer->addCommand(&_groupCommand);
+	renderer->pushGroup(_groupCommand.getRenderQueueID());
 }
 NS_CC_EXT_END

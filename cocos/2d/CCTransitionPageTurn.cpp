@@ -50,10 +50,15 @@ TransitionPageTurn::~TransitionPageTurn()
 /** creates a base transition with duration and incoming scene */
 TransitionPageTurn * TransitionPageTurn::create(float t, Scene *scene, bool backwards)
 {
+#ifndef DIRECTX_ENABLED
     TransitionPageTurn * transition = new (std::nothrow) TransitionPageTurn();
     transition->initWithDuration(t,scene,backwards);
     transition->autorelease();
     return transition;
+#else
+	CCASSERT(false, "TransitionPageTurn is not supported");
+	return nullptr;
+#endif
 }
 
 /** initializes a transition with duration and incoming scene */

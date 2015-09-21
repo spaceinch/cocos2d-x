@@ -93,7 +93,10 @@ void PolygonBatch::add (const Texture2D* addTexture,
 
 void PolygonBatch::flush () {
 	if (!_verticesCount) return;
-
+	
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Not supported");
+#else
 	GL::bindTexture2D(_texture->getName());
 	GL::bindVAO(0);
 	glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
@@ -111,6 +114,7 @@ void PolygonBatch::flush () {
 	_trianglesCount = 0;
 
 	CHECK_GL_ERROR_DEBUG();
+#endif
 }
 
 }

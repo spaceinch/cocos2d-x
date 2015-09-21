@@ -70,6 +70,32 @@ static Color4F s_color(1.0f,1.0f,1.0f,1.0f);
 static int s_pointSizeLocation = -1;
 static GLfloat s_pointSize = 1.0f;
 
+#ifdef EMSCRIPTEN
+static GLuint s_bufferObject = 0;
+static GLuint s_bufferSize = 0;
+
+static void setGLBufferData(void *buf, GLuint bufSize)
+{
+    if(s_bufferSize < bufSize)
+    {
+        if(s_bufferObject)
+        {
+            glDeleteBuffers(1, &s_bufferObject);
+        }
+        glGenBuffers(1, &s_bufferObject);
+        s_bufferSize = bufSize;
+
+        glBindBuffer(GL_ARRAY_BUFFER, s_bufferObject);
+        glBufferData(GL_ARRAY_BUFFER, bufSize, buf, GL_DYNAMIC_DRAW);
+    }
+    else
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, s_bufferObject);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, bufSize, buf);
+    }
+}
+
+#endif // EMSCRIPTEN
 
 static void lazy_init()
 {
@@ -110,16 +136,24 @@ void drawPoint(const Vec2& point)
     p.x = point.x;
     p.y = point.y;
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
     s_shader->use();
     s_shader->setUniformsForBuiltins();
 
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
     s_shader->setUniformLocationWith1f(s_pointSizeLocation, s_pointSize);
 
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POSITION);
+
+#ifdef EMSCRIPTEN
+    setGLBufferData(&p, 8);
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, &p);
+#endif // EMSCRIPTEN
 
     glDrawArrays(GL_POINTS, 0, 1);
+#endif
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,1);
 }
@@ -128,19 +162,25 @@ void drawPoints( const Vec2 *points, unsigned int numberOfPoints )
 {
     lazy_init();
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
     s_shader->use();
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
     s_shader->setUniformLocationWith1f(s_pointSizeLocation, s_pointSize);
 
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POSITION);
     // FIXME: Mac OpenGL error. arrays can't go out of scope before draw is executed
     Vec2* newPoints = new (std::nothrow) Vec2[numberOfPoints];
 
     // iPhone and 32-bit machines optimization
     if( sizeof(Vec2) == sizeof(Vec2) )
     {
+#ifdef EMSCRIPTEN
+        setGLBufferData((void*) points, numberOfPoints * sizeof(Vec2));
+        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, points);
+#endif // EMSCRIPTEN
     }
     else
     {
@@ -149,12 +189,20 @@ void drawPoints( const Vec2 *points, unsigned int numberOfPoints )
             newPoints[i].x = points[i].x;
             newPoints[i].y = points[i].y;
         }
+#ifdef EMSCRIPTEN
+        // Suspect Emscripten won't be emitting 64-bit code for a while yet,
+        // but want to make sure this continues to work even if they do.
+        setGLBufferData(newPoints, numberOfPoints * sizeof(Vec2));
+        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, newPoints);
+#endif // EMSCRIPTEN
     }
 
     glDrawArrays(GL_POINTS, 0, (GLsizei) numberOfPoints);
 
     CC_SAFE_DELETE_ARRAY(newPoints);
+#endif
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, numberOfPoints);
 }
@@ -173,9 +221,16 @@ void drawLine(const Vec2& origin, const Vec2& destination)
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
+#ifdef EMSCRIPTEN
+    setGLBufferData(vertices, 16);
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+#endif // EMSCRIPTEN
     glDrawArrays(GL_LINES, 0, 2);
+#endif
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,2);
 }
@@ -208,12 +263,18 @@ void drawPoly(const Vec2 *poli, unsigned int numberOfPoints, bool closePolygon)
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 
     // iPhone and 32-bit machines optimization
     if( sizeof(Vec2) == sizeof(Vec2) )
     {
+#ifdef EMSCRIPTEN
+        setGLBufferData((void*) poli, numberOfPoints * sizeof(Vec2));
+        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, poli);
+#endif // EMSCRIPTEN
 
         if( closePolygon )
             glDrawArrays(GL_LINE_LOOP, 0, (GLsizei) numberOfPoints);
@@ -229,7 +290,12 @@ void drawPoly(const Vec2 *poli, unsigned int numberOfPoints, bool closePolygon)
             newPoli[i].x = poli[i].x;
             newPoli[i].y = poli[i].y;
         }
+#ifdef EMSCRIPTEN
+        setGLBufferData(newPoli, numberOfPoints * sizeof(Vec2));
+        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, newPoli);
+#endif // EMSCRIPTEN
 
         if( closePolygon )
             glDrawArrays(GL_LINE_LOOP, 0, (GLsizei) numberOfPoints);
@@ -238,6 +304,7 @@ void drawPoly(const Vec2 *poli, unsigned int numberOfPoints, bool closePolygon)
 
         CC_SAFE_DELETE_ARRAY(newPoli);
     }
+#endif
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, numberOfPoints);
 }
@@ -250,6 +317,7 @@ void drawSolidPoly(const Vec2 *poli, unsigned int numberOfPoints, Color4F color)
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &color.r, 1);
 
+#ifndef DIRECTX_ENABLED
     GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 
     // FIXME: Mac OpenGL error. arrays can't go out of scope before draw is executed
@@ -258,21 +326,32 @@ void drawSolidPoly(const Vec2 *poli, unsigned int numberOfPoints, Color4F color)
     // iPhone and 32-bit machines optimization
     if (sizeof(Vec2) == sizeof(Vec2))
     {
+#ifdef EMSCRIPTEN
+        setGLBufferData((void*) poli, numberOfPoints * sizeof(Vec2));
+        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, poli);
+#endif // EMSCRIPTEN
     }
     else
     {
         // Mac on 64-bit
         for(unsigned int i = 0; i < numberOfPoints; i++)
         {
-            newPoli[i].set(poli[i].x, poli[i].y);
+            newPoli[i] = Vec2( poli[i].x, poli[i].y );
         }
+#ifdef EMSCRIPTEN
+        setGLBufferData(newPoli, numberOfPoints * sizeof(Vec2));
+        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, newPoli);
-    }
+#endif // EMSCRIPTEN
+    }    
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, (GLsizei) numberOfPoints);
 
     CC_SAFE_DELETE_ARRAY(newPoli);
+#endif
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, numberOfPoints);
 }
 
@@ -305,11 +384,17 @@ void drawCircle( const Vec2& center, float radius, float angle, unsigned int seg
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
 
+#ifndef DIRECTX_ENABLED
     GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 
+#ifdef EMSCRIPTEN
+    setGLBufferData(vertices, sizeof(GLfloat)*2*(segments+2));
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+#endif // EMSCRIPTEN
     glDrawArrays(GL_LINE_STRIP, 0, (GLsizei) segments+additionalSegment);
-
+#endif
     ::free( vertices );
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,segments+additionalSegment);
@@ -344,12 +429,19 @@ void drawSolidCircle( const Vec2& center, float radius, float angle, unsigned in
     s_shader->use();
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
-    
+
+#ifndef DIRECTX_ENABLED
     GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
     
+#ifdef EMSCRIPTEN
+    setGLBufferData(vertices, sizeof(GLfloat)*2*(segments+2));
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-
+#endif // EMSCRIPTEN
+    
     glDrawArrays(GL_TRIANGLE_FAN, 0, (GLsizei) segments+1);
+#endif
     
     ::free( vertices );
     
@@ -381,11 +473,18 @@ void drawQuadBezier(const Vec2& origin, const Vec2& control, const Vec2& destina
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
 
+#ifndef DIRECTX_ENABLED
     GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 
+#ifdef EMSCRIPTEN
+    setGLBufferData(vertices, (segments + 1) * sizeof(Vec2));
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+#endif // EMSCRIPTEN
     glDrawArrays(GL_LINE_STRIP, 0, (GLsizei) segments + 1);
-    CC_SAFE_DELETE_ARRAY(vertices);
+#endif
+	CC_SAFE_DELETE_ARRAY(vertices);
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,segments+1);
 }
@@ -433,10 +532,17 @@ void drawCardinalSpline( PointArray *config, float tension,  unsigned int segmen
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*)&s_color.r, 1);
 
+#ifndef DIRECTX_ENABLED
     GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 
+#ifdef EMSCRIPTEN
+    setGLBufferData(vertices, (segments + 1) * sizeof(Vec2));
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+#endif // EMSCRIPTEN
     glDrawArrays(GL_LINE_STRIP, 0, (GLsizei) segments + 1);
+#endif
 
     CC_SAFE_DELETE_ARRAY(vertices);
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,segments+1);
@@ -462,10 +568,18 @@ void drawCubicBezier(const Vec2& origin, const Vec2& control1, const Vec2& contr
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POSITION);
 
+#ifdef EMSCRIPTEN
+    setGLBufferData(vertices, (segments + 1) * sizeof(Vec2));
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
+#else
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+#endif // EMSCRIPTEN
     glDrawArrays(GL_LINE_STRIP, 0, (GLsizei) segments + 1);
+#endif
+
     CC_SAFE_DELETE_ARRAY(vertices);
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,segments+1);

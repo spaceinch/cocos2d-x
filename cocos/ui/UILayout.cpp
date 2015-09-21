@@ -329,6 +329,9 @@ void Layout::stencilClippingVisit(Renderer *renderer, const Mat4& parentTransfor
     
 void Layout::onBeforeVisitStencil()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::onBeforeVisitStencil is not supported");
+#else
     s_layer++;
     GLint mask_layer = 0x1 << s_layer;
     GLint mask_layer_l = mask_layer - 1;
@@ -371,10 +374,14 @@ void Layout::onBeforeVisitStencil()
 //                                                                RenderState::STENCIL_OP_REPLACE,
 //                                                                RenderState::STENCIL_OP_KEEP,
 //                                                                RenderState::STENCIL_OP_KEEP);
+#endif
 }
     
 void Layout::drawFullScreenQuadClearStencil()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::drawFullScreenQuadClearStencil is not supported");
+#else
     Director* director = Director::getInstance();
     CCASSERT(nullptr != director, "Director is null when seting matrix stack");
 
@@ -412,10 +419,14 @@ void Layout::drawFullScreenQuadClearStencil()
     
     director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+#endif
 }
 
 void Layout::onAfterDrawStencil()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::onAfterDrawStencil is not supported");
+#else
     glDepthMask(_currentDepthWriteMask);
     RenderState::StateBlock::_defaultState->setDepthWrite(_currentDepthWriteMask != 0);
 
@@ -430,12 +441,15 @@ void Layout::onAfterDrawStencil()
 //                                                                RenderState::STENCIL_OP_KEEP,
 //                                                                RenderState::STENCIL_OP_KEEP,
 //                                                                RenderState::STENCIL_OP_KEEP);
-
+#endif
 }
 
 
 void Layout::onAfterVisitStencil()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::onAfterVisitStencil is not supported");
+#else
     glStencilFunc(_currentStencilFunc, _currentStencilRef, _currentStencilValueMask);
 //    RenderState::StateBlock::_defaultState->setStencilFunction(
 //                                                               (RenderState::StencilFunction)_currentStencilFunc,
@@ -455,10 +469,14 @@ void Layout::onAfterVisitStencil()
 //        RenderState::StateBlock::_defaultState->setStencilTest(false);
     }
     s_layer--;
+#endif
 }
     
 void Layout::onBeforeVisitScissor()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::onBeforeVisitScissor");
+#else
     auto glview = Director::getInstance()->getOpenGLView();
     // apply scissor test
     _scissorOldState = glview->isScissorEnabled();
@@ -477,10 +495,14 @@ void Layout::onBeforeVisitScissor()
                                    clippingRect.size.width,
                                    clippingRect.size.height);
     }
+#endif
 }
 
 void Layout::onAfterVisitScissor()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::onAfterVisitScissor is not supported");
+#else
     if (_scissorOldState)
     {
         // revert scissor box
@@ -497,6 +519,7 @@ void Layout::onAfterVisitScissor()
     {
         // revert scissor test
         glDisable(GL_SCISSOR_TEST);
+#endif
     }
 }
     
@@ -519,6 +542,9 @@ void Layout::scissorClippingVisit(Renderer *renderer, const Mat4& parentTransfor
 
 void Layout::setClippingEnabled(bool able)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::setClippingEnabled is not supported");
+#else
     if (able == _clippingEnabled)
     {
         return;
@@ -560,6 +586,7 @@ void Layout::setClippingEnabled(bool able)
         default:
             break;
     }
+#endif
 }
     
 void Layout::setClippingType(ClippingType type)
