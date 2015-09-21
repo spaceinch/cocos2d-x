@@ -1236,6 +1236,7 @@ void Renderer::setClearColor(const Color4F &clearColor)
 #ifndef DIRECTX_ENABLED
     _clearColor = clearColor;
 #else
+	DXStateCache::getInstance().setClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	DXStateCache::getInstance().clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 #endif
 }
