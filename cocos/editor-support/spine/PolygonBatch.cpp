@@ -35,85 +35,131 @@ USING_NS_CC;
 
 namespace spine {
 
-PolygonBatch* PolygonBatch::createWithCapacity (ssize_t capacity) {
-	PolygonBatch* batch = new PolygonBatch();
-	batch->initWithCapacity(capacity);
-	batch->autorelease();
-	return batch;
-}
+	PolygonBatch* PolygonBatch::createWithCapacity(ssize_t capacity) {
+		PolygonBatch* batch = new PolygonBatch();
+		batch->initWithCapacity(capacity);
+		batch->autorelease();
+		return batch;
+	}
 
-PolygonBatch::PolygonBatch () :
-	_capacity(0),
-	_vertices(nullptr), _verticesCount(0),
-	_triangles(nullptr), _trianglesCount(0),
-	_texture(nullptr)
-{}
+	PolygonBatch::PolygonBatch() :
+		_capacity(0),
+		_vertices(nullptr), _verticesCount(0),
+		_triangles(nullptr), _trianglesCount(0),
+		_texture(nullptr),
+		_bufferVertex(nullptr),
+		_bufferIndex(nullptr)
+	{}
 
-bool PolygonBatch::initWithCapacity (ssize_t capacity) {
-	// 32767 is max index, so 32767 / 3 - (32767 / 3 % 3) = 10920.
-	CCASSERT(capacity <= 10920, "capacity cannot be > 10920");
-	CCASSERT(capacity >= 0, "capacity cannot be < 0");
-	_capacity = capacity;
-	_vertices = MALLOC(V2F_C4B_T2F, capacity);
-	_triangles = MALLOC(GLushort, capacity * 3);
-	return true;
-}
+	bool PolygonBatch::initWithCapacity(ssize_t capacity) {
+		// 32767 is max index, so 32767 / 3 - (32767 / 3 % 3) = 10920.
+		CCASSERT(capacity <= 10920, "capacity cannot be > 10920");
+		CCASSERT(capacity >= 0, "capacity cannot be < 0");
+		_capacity = capacity;
+		_vertices = MALLOC(V2F_C4B_T2F, capacity);
+		_triangles = MALLOC(GLushort, capacity * 3);
+		return true;
+	}
 
-PolygonBatch::~PolygonBatch () {
-	FREE(_vertices);
-	FREE(_triangles);
-}
+	PolygonBatch::~PolygonBatch() {
+		DXResourceManager::getInstance().remove(&_bufferIndex);
+		DXResourceManager::getInstance().remove(&_bufferVertex);
+		FREE(_vertices);
+		FREE(_triangles);
+	}
 
-void PolygonBatch::add (const Texture2D* addTexture,
+	void PolygonBatch::add(const Texture2D* addTexture,
 		const float* addVertices, const float* uvs, int addVerticesCount,
 		const int* addTriangles, int addTrianglesCount,
 		Color4B* color) {
 
-	if (
-		addTexture != _texture
-		|| _verticesCount + (addVerticesCount >> 1) > _capacity
-		|| _trianglesCount + addTrianglesCount > _capacity * 3) {
-		this->flush();
-		_texture = addTexture;
+		if (
+			addTexture != _texture
+			|| _verticesCount + (addVerticesCount >> 1) > _capacity
+			|| _trianglesCount + addTrianglesCount > _capacity * 3) {
+			this->flush();
+			_texture = addTexture;
+		}
+
+		for (int i = 0; i < addTrianglesCount; ++i, ++_trianglesCount)
+			_triangles[_trianglesCount] = addTriangles[i] + _verticesCount;
+
+		for (int i = 0; i < addVerticesCount; i += 2, ++_verticesCount) {
+			V2F_C4B_T2F* vertex = _vertices + _verticesCount;
+			vertex->vertices.x = addVertices[i];
+			vertex->vertices.y = addVertices[i + 1];
+			vertex->colors = *color;
+			vertex->texCoords.u = uvs[i];
+			vertex->texCoords.v = uvs[i + 1];
+		}
 	}
 
-	for (int i = 0; i < addTrianglesCount; ++i, ++_trianglesCount)
-		_triangles[_trianglesCount] = addTriangles[i] + _verticesCount;
+	void PolygonBatch::flush() {
+		if (!_verticesCount) return;
 
-	for (int i = 0; i < addVerticesCount; i += 2, ++_verticesCount) {
-		V2F_C4B_T2F* vertex = _vertices + _verticesCount;
-		vertex->vertices.x = addVertices[i];
-		vertex->vertices.y = addVertices[i + 1];
-		vertex->colors = *color;
-		vertex->texCoords.u = uvs[i];
-		vertex->texCoords.v = uvs[i + 1];
-	}
-}
+#ifndef DIRECTX_ENABLED
+		GL::bindTexture2D(_texture->getName());
+		GL::bindVAO(0);
+		glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
+		glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
+		glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORDS);
+		glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), &_vertices[0].vertices);
+		glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V2F_C4B_T2F), &_vertices[0].colors);
+		glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORDS, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), &_vertices[0].texCoords);
 
-void PolygonBatch::flush () {
-	if (!_verticesCount) return;
-	
-#ifdef DIRECTX_ENABLED
-	CCASSERT(false, "Not supported");
+		glDrawElements(GL_TRIANGLES, _trianglesCount, GL_UNSIGNED_SHORT, _triangles);
 #else
-	GL::bindTexture2D(_texture->getName());
-	GL::bindVAO(0);
-	glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
-	glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
-	glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORDS);
-	glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), &_vertices[0].vertices);
-	glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V2F_C4B_T2F), &_vertices[0].colors);
-	glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORDS, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), &_vertices[0].texCoords);
+		if (!_bufferIndex || !_bufferVertex)
+			mapBuffers();
 
-	glDrawElements(GL_TRIANGLES, _trianglesCount, GL_UNSIGNED_SHORT, _triangles);
+		D3D11_MAPPED_SUBRESOURCE resource;
+		GLViewImpl::sharedOpenGLView()->GetContext()->Map(_bufferVertex, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+		memcpy(resource.pData, _vertices, sizeof(_vertices[0]) * _capacity);
+		GLViewImpl::sharedOpenGLView()->GetContext()->Unmap(_bufferVertex, 0);
 
-	CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _verticesCount);
+		DXStateCache::getInstance().setPSTexture(0, _texture->getView());
+		UINT stride = sizeof(V3F_C4B_T2F);
+		UINT offset = 0;
+		GLViewImpl::sharedOpenGLView()->GetContext()->IASetIndexBuffer(_bufferIndex, DXGI_FORMAT_R16_UINT, 0);
+		GLViewImpl::sharedOpenGLView()->GetContext()->IASetVertexBuffers(0, 1, &_bufferVertex, &stride, &offset);
+		
+		DXStateCache::getInstance().setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	_verticesCount = 0;
-	_trianglesCount = 0;
-
-	CHECK_GL_ERROR_DEBUG();
+		GLViewImpl::sharedOpenGLView()->GetContext()->DrawIndexed(_trianglesCount, 0/*startIndex*/, 0);
 #endif
-}
+		CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _verticesCount);
+
+		_verticesCount = 0;
+		_trianglesCount = 0;
+
+		//CHECK_GL_ERROR_DEBUG();
+	}
+
+	void PolygonBatch::mapBuffers() {
+#ifdef DIRECTX_ENABLED
+	DXResourceManager::getInstance().remove(&_bufferVertex);
+	DXResourceManager::getInstance().remove(&_bufferIndex);
+
+	GLViewImpl *view = GLViewImpl::sharedOpenGLView();
+
+	D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
+	vertexBufferData.pSysMem = _vertices;
+	vertexBufferData.SysMemPitch = 0;
+	vertexBufferData.SysMemSlicePitch = 0;
+
+	CD3D11_BUFFER_DESC vertexBufferDescription(_capacity, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	DX::ThrowIfFailed(view->GetDevice()->CreateBuffer(&vertexBufferDescription, &vertexBufferData, &_bufferVertex));
+	DXResourceManager::getInstance().add(&_bufferVertex);
+
+	D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
+	indexBufferData.pSysMem = _triangles;
+	indexBufferData.SysMemPitch = 0;
+	indexBufferData.SysMemSlicePitch = 0;
+
+	CD3D11_BUFFER_DESC indexBufferDescription(_capacity * 3, D3D11_BIND_INDEX_BUFFER);
+	DX::ThrowIfFailed(view->GetDevice()->CreateBuffer(&indexBufferDescription, &indexBufferData, &_bufferIndex));
+	DXResourceManager::getInstance().add(&_bufferIndex);
+#endif
+	}
 
 }
