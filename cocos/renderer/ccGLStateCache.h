@@ -211,6 +211,7 @@ public:
 	void clearColor(float r, float g, float b, float a);
 	void clearDepth(float z);
 	void setClearColor(float r, float g, float b, float a);
+	const FLOAT* getClearColor() const;
 	void setClearDepth(float z);
 	void setClearStencil(uint8_t s);
 

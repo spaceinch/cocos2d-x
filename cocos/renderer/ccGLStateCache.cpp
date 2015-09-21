@@ -513,6 +513,11 @@ void DXStateCache::setClearColor(float r, float g, float b, float a)
 	_clearColor[3] = a;
 }
 
+const FLOAT* DXStateCache::getClearColor() const
+{
+	return _clearColor;
+}
+
 void DXStateCache::setClearDepth(float z)
 {
 	_clearDepth = z;

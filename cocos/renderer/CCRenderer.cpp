@@ -1147,6 +1147,7 @@ void Renderer::setClearColor(const Color4F &clearColor)
     _clearColor = clearColor;
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 #else
+	DXStateCache::getInstance().setClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	DXStateCache::getInstance().clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 #endif
 }
