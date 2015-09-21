@@ -825,8 +825,13 @@ namespace ui {
                 break;
             case State::GRAY:
             {
+#ifndef DIRECTX_ENABLED
                 auto program = GLProgram::createWithByteArrays(ccPositionTextureColor_noMVP_vert,
                                                                ccUIGrayScale_frag);
+#else
+				auto program = GLProgram::createWithHLSL(ccPositionTextureColor_noMVP_vert,
+														 ccUIGrayScale_frag);
+#endif
                 glState = GLProgramState::getOrCreateWithGLProgram(program);
             }
             default:

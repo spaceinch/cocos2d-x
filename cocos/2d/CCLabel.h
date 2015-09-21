@@ -288,7 +288,7 @@ CC_CONSTRUCTOR_ACCESS:
     virtual ~Label();
 
 protected:
-    void onDraw(const Mat4& transform, bool transformUpdated);
+    void onDraw(const Mat4& transform, uint32_t flags);
 
     struct LetterInfo
     {

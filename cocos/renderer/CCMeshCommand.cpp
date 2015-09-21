@@ -192,6 +192,7 @@ MeshCommand::~MeshCommand()
 
 void MeshCommand::applyRenderState()
 {
+#ifndef DIRECTX_ENABLED
     _renderStateCullFace = glIsEnabled(GL_CULL_FACE);
     _renderStateDepthTest = glIsEnabled(GL_DEPTH_TEST);
     glGetBooleanv(GL_DEPTH_WRITEMASK, &_renderStateDepthWrite);
@@ -211,10 +212,12 @@ void MeshCommand::applyRenderState()
     {
         glDepthMask(GL_TRUE);
     }
+#endif
 }
 
 void MeshCommand::restoreRenderState()
 {
+#ifndef DIRECTX_ENABLED
     if (_renderStateCullFace)
     {
         glEnable(GL_CULL_FACE);
@@ -234,6 +237,7 @@ void MeshCommand::restoreRenderState()
     }
     
     glDepthMask(_renderStateDepthTest);
+#endif
 }
 
 void MeshCommand::genMaterialID(GLuint texID, void* glProgramState, GLuint vertexBuffer, GLuint indexBuffer, const BlendFunc& blend)
@@ -250,11 +254,16 @@ void MeshCommand::genMaterialID(GLuint texID, void* glProgramState, GLuint verte
 
 void MeshCommand::MatrixPalleteCallBack( GLProgram* glProgram, Uniform* uniform)
 {
+#ifndef DIRECTX_ENABLED
     glUniform4fv( uniform->location, (GLsizei)_matrixPaletteSize, (const float*)_matrixPalette );
+#endif
 }
 
 void MeshCommand::preBatchDraw()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::preBatchDraw is not supported");
+#else
     // Set material
     GL::bindTexture2D(_textureID);
     GL::blendFunc(_blendType.src, _blendType.dst);
@@ -271,9 +280,13 @@ void MeshCommand::preBatchDraw()
         _glProgramState->applyAttributes();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
     }
+#endif
 }
 void MeshCommand::batchDraw()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::batchDraw is not supported");
+#else
     // set render state
     applyRenderState();
     
@@ -295,9 +308,13 @@ void MeshCommand::batchDraw()
     glDrawElements(_primitive, (GLsizei)_indexCount, _indexFormat, 0);
     
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _indexCount);
+#endif
 }
 void MeshCommand::postBatchDraw()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::postBatchDraw is not supported");
+#else
     //restore render state
     restoreRenderState();
     if (_vao)
@@ -309,10 +326,14 @@ void MeshCommand::postBatchDraw()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
+#endif
 }
 
 void MeshCommand::execute()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::execute is not supported");
+#else
     // set render state
     applyRenderState();
     // Set material
@@ -344,10 +365,14 @@ void MeshCommand::execute()
     restoreRenderState();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif
 }
 
 void MeshCommand::buildVAO()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::buildVAO is not supported");
+#else
     releaseVAO();
     glGenVertexArrays(1, &_vao);
     GL::bindVAO(_vao);
@@ -366,20 +391,28 @@ void MeshCommand::buildVAO()
     GL::bindVAO(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+#endif
 }
 void MeshCommand::releaseVAO()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::releaseVAO is not supported");
+#else
     if (_vao)
     {
         glDeleteVertexArrays(1, &_vao);
         _vao = 0;
         GL::bindVAO(0);
     }
+#endif
 }
 
 
 void MeshCommand::setLightUniforms()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::setLightUniforms is not supported");
+#else
     Director *director = Director::getInstance();
     auto scene = director->getRunningScene();
     const auto& conf = Configuration::getInstance();
@@ -515,10 +548,14 @@ void MeshCommand::setLightUniforms()
         }
         glProgram->setUniformLocationWith4f(glProgram->getUniformLocationForName("u_color"), _displayColor.x * ambient.x, _displayColor.y * ambient.y, _displayColor.z * ambient.z, _displayColor.w);
     }
+#endif
 }
 
 void MeshCommand::resetLightUniformValues()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::resetLightUniformValues is not supported");
+#else
     const auto& conf = Configuration::getInstance();
     int maxDirLight = conf->getMaxSupportDirLightInShader();
     int maxPointLight = conf->getMaxSupportPointLightInShader();
@@ -537,6 +574,7 @@ void MeshCommand::resetLightUniformValues()
     s_spotLightUniformInnerAngleCosValues.assign(maxSpotLight, 0.0f);
     s_spotLightUniformOuterAngleCosValues.assign(maxSpotLight, 0.0f);
     s_spotLightUniformRangeInverseValues.assign(maxSpotLight, 0.0f);
+#endif
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)

@@ -31,6 +31,7 @@ NS_CC_BEGIN
 
 class TextureAtlas;
 class GLProgram;
+class Texture2D;
 
 class CC_DLL BatchCommand : public RenderCommand
 {
@@ -47,7 +48,7 @@ public:
 protected:
     //Material
     int32_t _materialID;
-    GLuint _textureID;
+    Texture2D* _texture;
     GLProgram* _shader;
     BlendFunc _blendType;
 

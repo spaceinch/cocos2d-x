@@ -351,20 +351,20 @@ void Label::updateShaderProgram()
         break;
     case cocos2d::LabelEffect::OUTLINE: 
         setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_OUTLINE));
-        _uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
+        _uniformEffectColor = getGLProgram()->getUniformLocation("u_effectColor");
         break;
     case cocos2d::LabelEffect::GLOW:
         if (_useDistanceField)
         {
             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_DISTANCEFIELD_GLOW));
-            _uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
+            _uniformEffectColor = getGLProgram()->getUniformLocation("u_effectColor");
         }
         break;
     default:
         return;
     }
     
-    _uniformTextColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_textColor");
+    _uniformTextColor = getGLProgram()->getUniformLocation("u_textColor");
 }
 
 void Label::setFontAtlas(FontAtlas* atlas,bool distanceFieldEnabled /* = false */, bool useA8Shader /* = false */)
@@ -825,7 +825,7 @@ void Label::setFontScale(float fontScale)
     Node::setScale(_fontScale);
 }
 
-void Label::onDraw(const Mat4& transform, bool transformUpdated)
+void Label::onDraw(const Mat4& transform, uint32_t flags)
 {
     CC_PROFILER_START("Label - draw");
 
@@ -837,18 +837,21 @@ void Label::onDraw(const Mat4& transform, bool transformUpdated)
 
     auto glprogram = getGLProgram();
     glprogram->use();
-    GL::blendFunc( _blendFunc.src, _blendFunc.dst );
+
+#ifndef DIRECTX_ENABLED
+	GL::blendFunc(_blendFunc.src, _blendFunc.dst);
+#else
+	DXStateCache::getInstance().setBlend(_blendFunc.src, _blendFunc.dst);
+#endif
 
     if (_currentLabelType == LabelType::TTF)
     {
-        glprogram->setUniformLocationWith4f(_uniformTextColor,
-            _textColorF.r,_textColorF.g,_textColorF.b,_textColorF.a);
+        glprogram->setUniformLocationWith4f(_uniformTextColor,_textColorF.r,_textColorF.g,_textColorF.b,_textColorF.a);
     }
 
     if (_currLabelEffect == LabelEffect::OUTLINE || _currLabelEffect == LabelEffect::GLOW)
     {
-         glprogram->setUniformLocationWith4f(_uniformEffectColor,
-             _effectColorF.r,_effectColorF.g,_effectColorF.b,_effectColorF.a);
+         glprogram->setUniformLocationWith4f(_uniformEffectColor,_effectColorF.r,_effectColorF.g,_effectColorF.b,_effectColorF.a);
     }
 
     if(_shadowEnabled && _shadowBlurRadius <= 0)
@@ -857,6 +860,9 @@ void Label::onDraw(const Mat4& transform, bool transformUpdated)
     }
 
     glprogram->setUniformsForBuiltins(transform);
+#ifdef DIRECTX_ENABLED
+	glprogram->set();
+#endif
 
     for(const auto &child: _children)
     {
@@ -1332,7 +1338,7 @@ void Label::updateColor()
     Color4B color4( _displayedColor.r, _displayedColor.g, _displayedColor.b, _displayedOpacity );
 
     // special opacity for premultiplied textures
-    if (_isOpacityModifyRGB)
+    //if (_isOpacityModifyRGB)
     {
         color4.r *= _displayedOpacity/255.0f;
         color4.g *= _displayedOpacity/255.0f;

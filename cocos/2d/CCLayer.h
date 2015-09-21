@@ -300,6 +300,17 @@ protected:
     Color4F  _squareColors[4];
     CustomCommand _customCommand;
     Vec3 _noMVPVertices[4];
+
+#ifndef DIRECTX_ENABLED
+	void UpdateVertexBuffer() {}
+#else
+	ID3D11Buffer *_bufferVertex;
+	ID3D11Buffer *_bufferIndex;
+	bool _bufferDirty;
+
+	void UpdateVertexBuffer();
+#endif
+
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(LayerColor);
 

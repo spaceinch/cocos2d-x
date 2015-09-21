@@ -28,7 +28,11 @@
 
 NS_CC_BEGIN
 
+#ifdef DIRECTX_ENABLED
+const ShaderDescriptor ccUIGrayScale_frag = ShaderDescriptor("UIGrayScale");
+#else
 //include the gray scale shader
 #include "ccShader_grayscale.frag"
+#endif
 
 NS_CC_END

@@ -31,6 +31,7 @@
 #include "2d/CCActionTween.h"
 #include "extensions/ExtensionMacros.h"
 #include "extensions/ExtensionExport.h"
+#include "renderer/CCGroupCommand.h"
 
 NS_CC_EXT_BEGIN
 
@@ -298,6 +299,8 @@ protected:
 
     Rect getViewRect();
 
+	void generateGroupCommand();
+
     /**
      * scroll view delegate
      */
@@ -341,6 +344,7 @@ protected:
      * scroll speed
      */
     Vec2 _scrollDistance;
+	bool _previousDistanceWasZero;
     /**
      * Touch point
      */
@@ -374,6 +378,7 @@ protected:
     
     CustomCommand _beforeDrawCommand;
     CustomCommand _afterDrawCommand;
+	GroupCommand  _groupCommand;
 };
 
 // end of GUI group

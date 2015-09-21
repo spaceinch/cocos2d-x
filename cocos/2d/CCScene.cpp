@@ -136,27 +136,27 @@ void Scene::render(Renderer* renderer)
             continue;
         }
         
-        director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-        director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, Camera::_visitingCamera->getViewProjectionMatrix());
+        //director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+        //director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, Camera::_visitingCamera->getViewProjectionMatrix());
         
         //visit the scene
         visit(renderer, transform, 0);
         renderer->render();
         
-        director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+        //director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     }
     //draw with default camera
     if (defaultCamera)
     {
         Camera::_visitingCamera = defaultCamera;
-        director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-        director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, Camera::_visitingCamera->getViewProjectionMatrix());
+        //director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+        //director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, Camera::_visitingCamera->getViewProjectionMatrix());
         
         //visit the scene
         visit(renderer, transform, 0);
         renderer->render();
         
-        director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+        //director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     }
     Camera::_visitingCamera = nullptr;
 }

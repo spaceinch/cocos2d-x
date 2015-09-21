@@ -45,7 +45,9 @@ Mesh::Mesh()
 , _blend(BlendFunc::ALPHA_NON_PREMULTIPLIED)
 , _visibleChanged(nullptr)
 {
-    
+#ifdef DIRECTX_ENABLED
+    CCASSERT(false, "Mesh is not supported");
+#endif
 }
 Mesh::~Mesh()
 {

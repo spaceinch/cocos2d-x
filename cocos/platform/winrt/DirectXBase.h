@@ -29,7 +29,6 @@
 #include <wincodec.h>
 #include <agile.h>
 #include <DirectXMath.h>
-#include "DirectXHelper.h"
 
 #pragma warning (disable: 4449)
 using namespace Windows::UI::ViewManagement;
@@ -41,7 +40,7 @@ internal:
    DirectXBase();
 
 public:
-   virtual void Initialize(Windows::UI::Core::CoreWindow^ window, Windows::UI::Xaml::Controls::SwapChainBackgroundPanel^ panel, float dpi);
+   virtual void Initialize(Windows::UI::Core::CoreWindow^ window, Windows::UI::Xaml::Controls::SwapChainPanel^ panel, float dpi);
    virtual void CreateDeviceIndependentResources();
    virtual void CreateDeviceResources();
    virtual void SetDpi(float dpi);
@@ -50,10 +49,16 @@ public:
    virtual void Present();
    virtual float ConvertDipsToPixels(float dips);
 
+internal:
+   virtual ID3D11Device1*                 GetDevice()                 { return m_d3dDevice.Get(); }
+   virtual ID3D11DeviceContext1*          GetContext()                { return m_d3dContext.Get(); }
+   virtual ID3D11DepthStencilView*        GetDepthStencilView()       { return m_depthStencilView.Get(); }
+   virtual ID3D11RenderTargetView* const* GetRenderTargetView() const { return m_renderTargetView.GetAddressOf(); }
+
 protected private:
 
    Platform::Agile<Windows::UI::Core::CoreWindow>         m_window;
-   Windows::UI::Xaml::Controls::SwapChainBackgroundPanel^ m_panel;
+   Windows::UI::Xaml::Controls::SwapChainPanel^           m_panel;
 
    // Direct2D Objects
    Microsoft::WRL::ComPtr<ID2D1Factory1>                  m_d2dFactory;

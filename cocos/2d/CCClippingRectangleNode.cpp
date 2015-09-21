@@ -39,6 +39,9 @@ void ClippingRectangleNode::setClippingRegion(const Rect &clippingRegion)
 
 void ClippingRectangleNode::onBeforeVisitScissor()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "ClippingRectangleNode::onBeforeVisitScissor is not supported");
+#else
     if (_clippingEnabled) {
         glEnable(GL_SCISSOR_TEST);
         
@@ -58,14 +61,19 @@ void ClippingRectangleNode::onBeforeVisitScissor()
                                    _clippingRegion.size.width * scaleX,
                                    _clippingRegion.size.height * scaleY);
     }
+#endif
 }
 
 void ClippingRectangleNode::onAfterVisitScissor()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "ClippingRectangleNode::onAfterVisitScissor is not supported");
+#else
     if (_clippingEnabled)
     {
         glDisable(GL_SCISSOR_TEST);
     }
+#endif
 }
 
 void ClippingRectangleNode::visit(Renderer *renderer, const Mat4 &parentTransform, uint32_t parentFlags)
