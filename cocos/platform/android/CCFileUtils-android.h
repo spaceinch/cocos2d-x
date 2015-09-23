@@ -45,6 +45,16 @@ NS_CC_BEGIN
  * @{
  */
 
+/// SpaceInch modification for expansion files
+class FileSystemProtocol
+{
+public:
+  virtual ~FileSystemProtocol() {}
+  virtual bool isFileExist(const std::string& file) = 0;
+  virtual std::int64_t getSize(const std::string& file) const = 0;
+  virtual char* getData(const std::string& file, std::int64_t& fileSize) const = 0;
+};
+
 class ZipFile;
 
 //! @brief  Helper class to handle file operations
@@ -83,20 +93,19 @@ public:
 
     virtual std::string getWritablePath() const;
     virtual bool isAbsolutePath(const std::string& strPath) const;
-    
+  
     /**
-     *  Adds an expansion file to search for assets
+     * Adds a File System to lookup files
      */
-    void addExpansionFile(const std::string& expansionPath);
+    virtual void addFileSystem(std::shared_ptr<FileSystemProtocol> fileSystem);
   
 private:
     virtual bool isFileExistInternal(const std::string& strFilePath) const;
     Data getData(const std::string& filename, bool forString);
 
     static AAssetManager* assetmanager;
-    
-    std::vector<cocos2d::ZipFile*> _expansionFiles;
-    std::vector<std::string> _expansionFileNames;
+  
+    std::vector<std::shared_ptr<FileSystemProtocol>> _fileSysetems;
 };
 
 // end of platform group
