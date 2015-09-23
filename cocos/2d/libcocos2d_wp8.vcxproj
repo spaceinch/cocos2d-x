@@ -591,6 +591,7 @@
     <ClInclude Include="CCTransitionPageTurn.h" />
     <ClInclude Include="CCTransitionProgress.h" />
     <ClInclude Include="CCTweenFunction.h" />
+    <ClInclude Include="DrawSquare.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\extensions\assets-manager\AssetsManager.cpp" />
@@ -1056,6 +1057,7 @@
     <ClCompile Include="CCTransitionPageTurn.cpp" />
     <ClCompile Include="CCTransitionProgress.cpp" />
     <ClCompile Include="CCTweenFunction.cpp" />
+    <ClCompile Include="DrawSquare.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Windows">
