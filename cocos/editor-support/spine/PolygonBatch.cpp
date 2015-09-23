@@ -114,14 +114,16 @@ namespace spine {
 
 		D3D11_MAPPED_SUBRESOURCE resource;
 		GLViewImpl::sharedOpenGLView()->GetContext()->Map(_bufferVertex, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
-		memcpy(resource.pData, _vertices, sizeof(_vertices[0]) * _capacity);
+		memcpy(resource.pData, _vertices, sizeof(_vertices[0]) * _verticesCount);
 		GLViewImpl::sharedOpenGLView()->GetContext()->Unmap(_bufferVertex, 0);
 
 		DXStateCache::getInstance().setPSTexture(0, _texture->getView());
-		UINT stride = sizeof(V3F_C4B_T2F);
+		UINT stride = sizeof(V2F_C4B_T2F);
 		UINT offset = 0;
-		GLViewImpl::sharedOpenGLView()->GetContext()->IASetIndexBuffer(_bufferIndex, DXGI_FORMAT_R16_UINT, 0);
-		GLViewImpl::sharedOpenGLView()->GetContext()->IASetVertexBuffers(0, 1, &_bufferVertex, &stride, &offset);
+		/*GLViewImpl::sharedOpenGLView()->GetContext()->IASetIndexBuffer(_bufferIndex, DXGI_FORMAT_R16_UINT, 0);
+		GLViewImpl::sharedOpenGLView()->GetContext()->IASetVertexBuffers(0, 1, &_bufferVertex, &stride, &offset);*/
+		DXStateCache::getInstance().setVertexBuffer(_bufferVertex, stride, offset);
+		DXStateCache::getInstance().setIndexBuffer(_bufferIndex);
 		
 		DXStateCache::getInstance().setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -147,7 +149,7 @@ namespace spine {
 	vertexBufferData.SysMemPitch = 0;
 	vertexBufferData.SysMemSlicePitch = 0;
 
-	CD3D11_BUFFER_DESC vertexBufferDescription(_capacity, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	CD3D11_BUFFER_DESC vertexBufferDescription(sizeof(_vertices[0]) * _capacity, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 	DX::ThrowIfFailed(view->GetDevice()->CreateBuffer(&vertexBufferDescription, &vertexBufferData, &_bufferVertex));
 	DXResourceManager::getInstance().add(&_bufferVertex);
 
@@ -156,7 +158,7 @@ namespace spine {
 	indexBufferData.SysMemPitch = 0;
 	indexBufferData.SysMemSlicePitch = 0;
 
-	CD3D11_BUFFER_DESC indexBufferDescription(_capacity * 3, D3D11_BIND_INDEX_BUFFER);
+	CD3D11_BUFFER_DESC indexBufferDescription(sizeof(_triangles[0]) * _capacity * 3, D3D11_BIND_INDEX_BUFFER);
 	DX::ThrowIfFailed(view->GetDevice()->CreateBuffer(&indexBufferDescription, &indexBufferData, &_bufferIndex));
 	DXResourceManager::getInstance().add(&_bufferIndex);
 #endif
