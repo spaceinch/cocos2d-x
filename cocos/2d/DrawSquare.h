@@ -6,7 +6,7 @@
 
 NS_CC_BEGIN
 
-class CC_DLL DrawSquare : public Node
+class CC_DLL DrawSquare : public Node, public BlendProtocol
 {
 public:
 	/** creates a fullscreen black layer */
@@ -50,12 +50,16 @@ protected:
 	void onDraw(const Mat4& transform, uint32_t flags);
 
 	virtual void updateColor() override;
+
+	void DrawSquare::createTexture(const char* path);
+	void DrawSquare::disposeTexture();
 		
 	BlendFunc _blendFunc;
 	Vec2 _squareVertices[4];
 	Color4F  _squareColors[4];
 	CustomCommand _customCommand;
 	Vec3 _noMVPVertices[4];
+	Texture2D* _texture;
 
 	ID3D11Buffer *_bufferVertex;
 	ID3D11Buffer *_bufferIndex;
