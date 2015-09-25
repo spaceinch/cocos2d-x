@@ -45,6 +45,7 @@ public:
 		cocos2d::Color4B* color);
 	void flush ();
 	void mapBuffers ();
+	void SetZ(const float zpos) { _zPosition = zpos; }
 
 protected:
 	PolygonBatch();
@@ -52,11 +53,16 @@ protected:
 	bool initWithCapacity (ssize_t capacity);
 
 	ssize_t _capacity;
-	cocos2d::V2F_C4B_T2F* _vertices; ID3D11Buffer* _bufferVertex;
+	cocos2d::V3F_C4B_T2F* _vertices;
 	int _verticesCount;
-	GLushort* _triangles; ID3D11Buffer* _bufferIndex;
+	GLushort* _triangles;
 	int _trianglesCount;
 	const cocos2d::Texture2D* _texture;
+	float _zPosition;
+#ifdef DIRECTX_ENABLED
+	ID3D11Buffer* _bufferVertex;
+	ID3D11Buffer* _bufferIndex;
+#endif
 };
 
 }
