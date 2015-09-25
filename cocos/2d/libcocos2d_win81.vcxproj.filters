@@ -1325,7 +1325,6 @@
     </ClCompile>
     <ClCompile Include="..\cocos2d.cpp" />
     <ClCompile Include="..\platform\winrt\pch.cpp" />
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CCAction.h">
