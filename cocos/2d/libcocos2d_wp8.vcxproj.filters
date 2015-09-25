@@ -1326,9 +1326,6 @@
     <ClCompile Include="..\base\allocator\CCAllocatorGlobalNewDelete.cpp">
       <Filter>base\allocator</Filter>
     </ClCompile>
-    <ClCompile Include="DrawSquare.cpp">
-      <Filter>2d</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CCAction.h">
@@ -2591,9 +2588,6 @@
     </ClInclude>
     <ClInclude Include="..\physics\CCPhysicsHelper.h">
       <Filter>physics</Filter>
-    </ClInclude>
-    <ClInclude Include="DrawSquare.h">
-      <Filter>2d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
