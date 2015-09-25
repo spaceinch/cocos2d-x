@@ -18,6 +18,7 @@ DrawSquare::DrawSquare()
 #ifdef DIRECTX_ENABLED
 : _bufferVertex(nullptr)
 , _bufferIndex(nullptr)
+, _texture(0)
 #endif
 {
 	// default blend function
@@ -29,6 +30,7 @@ DrawSquare::~DrawSquare()
 #ifdef DIRECTX_ENABLED
 	DXResourceManager::getInstance().remove(&_bufferVertex);
 	DXResourceManager::getInstance().remove(&_bufferIndex);
+	disposeTexture();
 #endif
 }
 
@@ -98,6 +100,7 @@ bool DrawSquare::initWithColor(const Color4B& color, GLfloat w, GLfloat h)
 {
 	if (initDefault())
 	{
+		createTexture("spine/cannon_flip.png");
 
 		// default blend function
 		_blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
@@ -116,7 +119,7 @@ bool DrawSquare::initWithColor(const Color4B& color, GLfloat w, GLfloat h)
 		updateColor();
 		setContentSize(Size(w, h));
 
-		setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_COLOR_NO_MVP));
+		setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR));
 		return true;
 	}
 	return false;
@@ -166,6 +169,17 @@ void DrawSquare::updateColor()
 	}
 }
 
+void DrawSquare::createTexture(const char* path)
+{
+	_texture = Director::getInstance()->getTextureCache()->addImage(path);
+	_texture->retain();
+}
+
+void DrawSquare::disposeTexture()
+{
+	_texture->release();
+}
+
 void DrawSquare::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 {
 	_customCommand.init(_globalZOrder, transform, flags);
@@ -174,11 +188,13 @@ void DrawSquare::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 
 	for (int i = 0; i < 4; ++i)
 	{
-		Vec4 pos;
+		/*Vec4 pos;
 		pos.x = _squareVertices[i].x; pos.y = _squareVertices[i].y; pos.z = _positionZ;
-		pos.w = 1;
-		_modelViewTransform.transformVector(&pos);
-		_noMVPVertices[i] = Vec3(pos.x, pos.y, pos.z) / pos.w;
+		pos.w = 1;*/
+		//_modelViewTransform.transformVector(&pos);
+		_noMVPVertices[i] = Vec3(_squareVertices[i].x,
+								_squareVertices[i].y,
+								_positionZ);//Vec3(pos.x, pos.y, pos.z) / pos.w
 	}
 }
 
@@ -192,6 +208,7 @@ void DrawSquare::onDraw(const Mat4& transform, uint32_t flags)
 
 	GLViewImpl *view = GLViewImpl::sharedOpenGLView();
 
+	DXStateCache::getInstance().setPSTexture(0, _texture->getView());
 	DXStateCache::getInstance().setBlend(_blendFunc.src, _blendFunc.dst);
 	DXStateCache::getInstance().setVertexBuffer(_bufferVertex, sizeof(V3F_C4B_T2F), 0);
 	DXStateCache::getInstance().setIndexBuffer(_bufferIndex);
@@ -212,8 +229,12 @@ void DrawSquare::UpdateVertexBuffer()
 	{
 		vertexData[i].vertices = _noMVPVertices[i];
 		vertexData[i].colors = Color4B(_squareColors[i]);
-		vertexData[i].texCoords = Tex2F(0, 0);
+		//vertexData[i].texCoords = Tex2F(0, 0);
 	}
+	vertexData[0].texCoords = Tex2F(0, 0);
+	vertexData[1].texCoords = Tex2F(1, 0);
+	vertexData[2].texCoords = Tex2F(0, 1);
+	vertexData[3].texCoords = Tex2F(1, 1);
 
 	GLViewImpl *view = GLViewImpl::sharedOpenGLView();
 
