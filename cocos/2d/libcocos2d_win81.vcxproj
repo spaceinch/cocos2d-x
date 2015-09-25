@@ -1534,7 +1534,7 @@
       <ObjectFileOutput>$(OutDir)/Assets/Resources/Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\LoveOfMoneyCSharp\Assets\Resources\Shaders\ /y /f</Command>
+      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\AppCS\Assets\Resources\Shaders\ /y /f</Command>
     </PostBuildEvent>
     <PostBuildEvent />
   </ItemDefinitionGroup>
@@ -1556,7 +1556,7 @@
       <ObjectFileOutput>$(OutDir)/Assets/Resources/Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\LoveOfMoneyCSharp\Assets\Resources\Shaders\ /y /f</Command>
+      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\AppCS\Assets\Resources\Shaders\ /y /f</Command>
     </PostBuildEvent>
     <PostBuildEvent />
   </ItemDefinitionGroup>
@@ -1577,7 +1577,7 @@
       <ObjectFileOutput>$(OutDir)/Assets/Resources/Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\LoveOfMoneyCSharp\Assets\Resources\Shaders\ /y /f</Command>
+      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\AppCS\Assets\Resources\Shaders\ /y /f</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying shaders...</Message>
@@ -1600,7 +1600,7 @@
       <ObjectFileOutput>$(OutDir)/Assets/Resources/Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\LoveOfMoneyCSharp\Assets\Resources\Shaders\ /y /f</Command>
+      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\AppCS\Assets\Resources\Shaders\ /y /f</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying shaders...</Message>
@@ -1624,7 +1624,7 @@
       <ObjectFileOutput>$(OutDir)/Assets/Resources/Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\LoveOfMoneyCSharp\Assets\Resources\Shaders\ /y /f</Command>
+      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\AppCS\Assets\Resources\Shaders\ /y /f</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying shaders...</Message>
@@ -1648,7 +1648,7 @@
       <ObjectFileOutput>$(OutDir)/Assets/Resources/Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\LoveOfMoneyCSharp\Assets\Resources\Shaders\ /y /f</Command>
+      <Command>xcopy $(OutDir)\Assets\Resources\Shaders\*.cso $(SolutionDir)\AppCS\Assets\Resources\Shaders\ /y /f</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying shaders...</Message>
