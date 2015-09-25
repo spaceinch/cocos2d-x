@@ -49,7 +49,8 @@ namespace spine {
 		_triangles(nullptr), _trianglesCount(0),
 		_texture(nullptr),
 		_bufferVertex(nullptr),
-		_bufferIndex(nullptr)
+		_bufferIndex(nullptr),
+		_zPosition(0.0f)
 	{}
 
 	bool PolygonBatch::initWithCapacity(ssize_t capacity) {
@@ -57,7 +58,7 @@ namespace spine {
 		CCASSERT(capacity <= 10920, "capacity cannot be > 10920");
 		CCASSERT(capacity >= 0, "capacity cannot be < 0");
 		_capacity = capacity;
-		_vertices = MALLOC(V2F_C4B_T2F, capacity);
+		_vertices = MALLOC(V3F_C4B_T2F, capacity);
 		_triangles = MALLOC(GLushort, capacity * 3);
 		return true;
 	}
@@ -86,9 +87,10 @@ namespace spine {
 			_triangles[_trianglesCount] = addTriangles[i] + _verticesCount;
 
 		for (int i = 0; i < addVerticesCount; i += 2, ++_verticesCount) {
-			V2F_C4B_T2F* vertex = _vertices + _verticesCount;
+			V3F_C4B_T2F* vertex = _vertices + _verticesCount;
 			vertex->vertices.x = addVertices[i];
 			vertex->vertices.y = addVertices[i + 1];
+			vertex->vertices.z = _zPosition;
 			vertex->colors = *color;
 			vertex->texCoords.u = uvs[i];
 			vertex->texCoords.v = uvs[i + 1];
@@ -104,9 +106,9 @@ namespace spine {
 		glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
 		glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
 		glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORDS);
-		glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), &_vertices[0].vertices);
-		glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V2F_C4B_T2F), &_vertices[0].colors);
-		glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORDS, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), &_vertices[0].texCoords);
+		glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), &_vertices[0].vertices);
+		glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), &_vertices[0].colors);
+		glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORDS, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), &_vertices[0].texCoords);
 
 		glDrawElements(GL_TRIANGLES, _trianglesCount, GL_UNSIGNED_SHORT, _triangles);
 #else
@@ -119,10 +121,8 @@ namespace spine {
 		GLViewImpl::sharedOpenGLView()->GetContext()->Unmap(_bufferVertex, 0);
 
 		DXStateCache::getInstance().setPSTexture(0, _texture->getView());
-		UINT stride = sizeof(V2F_C4B_T2F);
+		UINT stride = sizeof(V3F_C4B_T2F);
 		UINT offset = 0;
-		/*GLViewImpl::sharedOpenGLView()->GetContext()->IASetIndexBuffer(_bufferIndex, DXGI_FORMAT_R16_UINT, 0);
-		GLViewImpl::sharedOpenGLView()->GetContext()->IASetVertexBuffers(0, 1, &_bufferVertex, &stride, &offset);*/
 		DXStateCache::getInstance().setVertexBuffer(_bufferVertex, stride, offset);
 		DXStateCache::getInstance().setIndexBuffer(_bufferIndex);
 		

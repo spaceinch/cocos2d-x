@@ -152,6 +152,8 @@ void SkeletonRenderer::draw (Renderer* renderer, const Mat4& transform, uint32_t
 void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFlags) {
 	getGLProgramState()->apply(transform);
 
+	_batch->SetZ(getPositionZ());
+
 	Color3B nodeColor = getColor();
 	_skeleton->r = nodeColor.r / (float)255;
 	_skeleton->g = nodeColor.g / (float)255;
