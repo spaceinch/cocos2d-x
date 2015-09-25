@@ -321,6 +321,9 @@ void Layout::stencilClippingVisit(Renderer *renderer, const Mat4& parentTransfor
     
 void Layout::onBeforeVisitStencil()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::onBeforeVisitStencil is not supported");
+#else
     s_layer++;
     GLint mask_layer = 0x1 << s_layer;
     GLint mask_layer_l = mask_layer - 1;
@@ -346,10 +349,14 @@ void Layout::onBeforeVisitStencil()
     
     glStencilFunc(GL_NEVER, mask_layer, mask_layer);
     glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
+#endif
 }
     
 void Layout::drawFullScreenQuadClearStencil()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::drawFullScreenQuadClearStencil is not supported");
+#else
     Director* director = Director::getInstance();
     CCASSERT(nullptr != director, "Director is null when seting matrix stack");
 
@@ -387,18 +394,26 @@ void Layout::drawFullScreenQuadClearStencil()
     
     director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+#endif
 }
 
 void Layout::onAfterDrawStencil()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::onAfterDrawStencil is not supported");
+#else
     glDepthMask(_currentDepthWriteMask);
     glStencilFunc(GL_EQUAL, _mask_layer_le, _mask_layer_le);
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+#endif
 }
 
 
 void Layout::onAfterVisitStencil()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::onAfterVisitStencil is not supported");
+#else
     glStencilFunc(_currentStencilFunc, _currentStencilRef, _currentStencilValueMask);
     glStencilOp(_currentStencilFail, _currentStencilPassDepthFail, _currentStencilPassDepthPass);
     glStencilMask(_currentStencilWriteMask);
@@ -407,19 +422,28 @@ void Layout::onAfterVisitStencil()
         glDisable(GL_STENCIL_TEST);
     }
     s_layer--;
+#endif
 }
     
 void Layout::onBeforeVisitScissor()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::onBeforeVisitScissor");
+#else
     Rect clippingRect = getClippingRect();
     glEnable(GL_SCISSOR_TEST);
     auto glview = Director::getInstance()->getOpenGLView();
     glview->setScissorInPoints(clippingRect.origin.x, clippingRect.origin.y, clippingRect.size.width, clippingRect.size.height);
+#endif
 }
 
 void Layout::onAfterVisitScissor()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::onAfterVisitScissor is not supported");
+#else
     glDisable(GL_SCISSOR_TEST);
+#endif
 }
     
 void Layout::scissorClippingVisit(Renderer *renderer, const Mat4& parentTransform, uint32_t parentFlags)
@@ -437,6 +461,9 @@ void Layout::scissorClippingVisit(Renderer *renderer, const Mat4& parentTransfor
 
 void Layout::setClippingEnabled(bool able)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Layout::setClippingEnabled is not supported");
+#else
     if (able == _clippingEnabled)
     {
         return;
@@ -478,6 +505,7 @@ void Layout::setClippingEnabled(bool able)
         default:
             break;
     }
+#endif
 }
     
 void Layout::setClippingType(ClippingType type)

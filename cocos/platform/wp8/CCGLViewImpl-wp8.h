@@ -41,7 +41,8 @@ THE SOFTWARE.
 #include <agile.h>
 #include <DirectXMath.h>
 
-#include <EGL/egl.h>
+#include "platform/wp8-xaml/cpp/IWP8Win.h"
+#include "platform/winrt/DirectXHelper.h"
 
 
 NS_CC_BEGIN
@@ -64,7 +65,6 @@ public:
     const Mat4& getReverseOrientationMatrix () const {return m_reverseOrientationMatrix;};
 
     Windows::Graphics::Display::DisplayOrientations getDeviceOrientation() {return m_orientation;};
-    Size getRenerTargetSize() const { return Size(m_width, m_height); }
 
     virtual void setIMEKeyboardState(bool bOpen);
     virtual void setIMEKeyboardState(bool bOpen, std::string str);
@@ -73,9 +73,7 @@ public:
     void HideKeyboard(Windows::Foundation::Rect r);
 
     // WP8 XAML app
-    virtual bool Create(EGLDisplay eglDisplay, EGLContext eglContext, EGLSurface eglSurface, float width, float height
-        ,Windows::Graphics::Display::DisplayOrientations orientation);
-    virtual void UpdateDevice(EGLDisplay eglDisplay, EGLContext eglContext, EGLSurface eglSurface);
+    virtual bool Create(IWP8Win *window, float width, float height ,Windows::Graphics::Display::DisplayOrientations orientation);
 
 	void OnPointerPressed(Windows::UI::Core::PointerEventArgs^ args);
 	void OnPointerMoved(Windows::UI::Core::PointerEventArgs^ args);
@@ -121,7 +119,10 @@ public:
     void ProcessEvents();
     void AddPointerEvent(PointerEventType type, Windows::UI::Core::PointerEventArgs^ args);
 
-
+	ID3D11Device1* GetDevice();
+	ID3D11DeviceContext1* GetContext();
+	ID3D11DepthStencilView* GetDepthStencilView();
+	ID3D11RenderTargetView* const* GetRenderTargetView() const;
 
 protected:
     GLViewImpl();
@@ -172,16 +173,13 @@ private:
     bool m_running;
 	bool m_initialized;
 
-	Microsoft::WRL::ComPtr<IWinrtEglWindow> m_eglWindow;
-
-	EGLDisplay m_eglDisplay;
-	EGLContext m_eglContext;
-	EGLSurface m_eglSurface;
     Cocos2dEventDelegate^ m_delegate;
     Cocos2dMessageBoxDelegate^ m_messageBoxDelegate;
     Cocos2dEditBoxDelegate^ m_editBoxDelegate;
 
     Concurrency::concurrent_queue<std::shared_ptr<InputEvent>> mInputEvents;
+
+	IWP8Win *m_wp8window;
 };
 
 NS_CC_END

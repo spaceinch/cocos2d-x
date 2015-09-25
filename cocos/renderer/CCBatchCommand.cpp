@@ -32,7 +32,7 @@
 NS_CC_BEGIN
 
 BatchCommand::BatchCommand()
-: _textureID(0)
+: _texture(nullptr)
 , _blendType(BlendFunc::DISABLE)
 , _textureAtlas(nullptr)
 {
@@ -46,7 +46,7 @@ void BatchCommand::init(float globalOrder, GLProgram* shader, BlendFunc blendTyp
     CCASSERT(textureAtlas, "textureAtlas cannot be nill");
     
     RenderCommand::init(globalOrder, modelViewTransform, flags);
-    _textureID = textureAtlas->getTexture()->getName();
+    _texture = textureAtlas->getTexture();
     _blendType = blendType;
     _shader = shader;
     
@@ -69,8 +69,13 @@ void BatchCommand::execute()
     // Set material
     _shader->use();
     _shader->setUniformsForBuiltins(_mv);
-    GL::bindTexture2D(_textureID);
+#ifndef DIRECTX_ENABLED
+    GL::bindTexture2D(_texture->getName()); 
     GL::blendFunc(_blendType.src, _blendType.dst);
+#else
+	DXStateCache::getInstance().setPSTexture(0, _texture->getView());
+	DXStateCache::getInstance().setBlend(_blendType.src, _blendType.dst);
+#endif
 
     // Draw
     _textureAtlas->drawQuads();

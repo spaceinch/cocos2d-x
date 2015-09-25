@@ -101,9 +101,11 @@ void KeyboardEvent::execute()
     default:
         switch (m_type)
         {
-        case Cocos2dKeyEvent::Escape:
-            //Director::getInstance()()->getKeypadDispatcher()->dispatchKeypadMSG(kTypeBackClicked);
+        case Cocos2dKeyEvent::Escape: {
+			EventKeyboard e(EventKeyboard::KeyCode::KEY_ESCAPE, false);
+			Director::getInstance()->getEventDispatcher()->dispatchEvent(&e);
             break;
+		}
         case Cocos2dKeyEvent::Back:
             IMEDispatcher::sharedDispatcher()->dispatchDeleteBackward();
             break;

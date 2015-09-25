@@ -30,7 +30,12 @@
 
 NS_CC_BEGIN
 
+#ifdef DIRECTX_ENABLED
+#include "renderer/CCGLProgram.h"
+extern CC_DLL const ShaderDescriptor ccUIGrayScale_frag;
+#else
 extern CC_DLL const GLchar * ccUIGrayScale_frag;
+#endif
 
 NS_CC_END
 

@@ -1174,8 +1174,13 @@ GLProgramState* Widget::getNormalGLProgramState()const
 
 GLProgramState* Widget::getGrayGLProgramState()const
 {
+#ifndef DIRECTX_ENABLED
     auto program = GLProgram::createWithByteArrays(ccPositionTextureColor_noMVP_vert,
                                                            ccUIGrayScale_frag);
+#else
+	auto program = GLProgram::createWithHLSL(ccPositionTextureColor_noMVP_vert,
+											 ccUIGrayScale_frag);
+#endif
     GLProgramState *glState  = GLProgramState::getOrCreateWithGLProgram(program);
     return glState;
 }

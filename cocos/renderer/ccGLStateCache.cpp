@@ -34,6 +34,8 @@ THE SOFTWARE.
 
 NS_CC_BEGIN
 
+#ifndef DIRECTX_ENABLED
+
 static const int MAX_ATTRIBUTES = 16;
 static const int MAX_ACTIVE_TEXTURE = 16;
 
@@ -244,5 +246,428 @@ void setProjectionMatrixDirty( void )
 }
 
 } // Namespace GL
+
+#else
+
+#include "DirectXHelper.h"
+
+DXStateCache::DXStateCache()
+{
+	_depthStencilState = nullptr;
+	_blendState = nullptr;
+	_vertexBuffer = nullptr;
+	_indexBuffer = nullptr;
+	_rasterizerState = nullptr;
+	_inputLayout = nullptr;
+	_vertexShader = nullptr;
+	_pixelShader = nullptr;
+
+	_clearColor[0] = 0;
+	_clearColor[1] = 0;
+	_clearColor[2] = 0;
+	_clearColor[3] = 1.0f;
+	_clearDepth = 1.0f;
+	_clearStencil = 0;
+
+	_scissorScaling = 1.0f;
+
+	invalidateStateCache();
+}
+
+void DXStateCache::invalidateStateCache()
+{
+	_view = GLViewImpl::sharedOpenGLView();
+	CCASSERT(_view, "GLView not set.");
+
+	DXResourceManager::getInstance().remove(&_depthStencilState);
+	DXResourceManager::getInstance().remove(&_blendState);
+	DXResourceManager::getInstance().remove(&_rasterizerState);
+
+	_vertexBuffer = nullptr;
+	_indexBuffer = nullptr;
+	_rasterizerState = nullptr;
+	_inputLayout = nullptr;
+	_vertexShader = nullptr;
+	_pixelShader = nullptr;
+	_blendState = nullptr;
+	_depthStencilState = nullptr;
+
+	_blendDesc = CD3D11_BLEND_DESC(CD3D11_DEFAULT());
+
+	_rasterizerDesc = CD3D11_RASTERIZER_DESC(CD3D11_DEFAULT());
+	_rasterizerDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+
+	_depthStencilDesc = CD3D11_DEPTH_STENCIL_DESC(CD3D11_DEFAULT());
+	_depthStencilDesc.DepthEnable = false;
+	_depthStencilRef = 0xFF;
+
+	_primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
+
+	memset(_constantBufferVS, 0, sizeof(_constantBufferVS));
+	memset(_constantBufferPS, 0, sizeof(_constantBufferPS));
+	memset(_textureViewsVS, 0, sizeof(_textureViewsVS));
+	memset(_textureViewsPS, 0, sizeof(_textureViewsPS));
+	memset(&_viewportRect, 0, sizeof(_viewportRect));
+	memset(&_scissorRect, 0, sizeof(_scissorRect));
+}
+
+void DXStateCache::setShaders(ID3D11VertexShader *vs, ID3D11PixelShader *ps)
+{
+	if (vs != _vertexShader)
+	{
+		_vertexShader = vs;
+		_view->GetContext()->VSSetShader(_vertexShader, nullptr, 0);
+	}
+
+	if (ps != _pixelShader)
+	{
+		_pixelShader = ps;
+		_view->GetContext()->PSSetShader(_pixelShader, nullptr, 0);
+	}
+}
+
+void DXStateCache::setVertexBuffer(ID3D11Buffer *buffer, UINT stride, UINT offset)
+{
+	if (buffer != _vertexBuffer)
+	{
+		_vertexBuffer = buffer;
+		_view->GetContext()->IASetVertexBuffers(0, 1, &_vertexBuffer, &stride, &offset);
+	}
+}
+
+void DXStateCache::setIndexBuffer(ID3D11Buffer *buffer)
+{
+	if (buffer != _indexBuffer)
+	{
+		_indexBuffer = buffer;
+		_view->GetContext()->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R16_UINT, 0);
+	}
+}
+
+void DXStateCache::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY topology)
+{
+	if (_primitiveTopology != topology)
+	{
+		_primitiveTopology = topology;
+		_view->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	}
+}
+
+void DXStateCache::setInputLayout(ID3D11InputLayout* layout)
+{
+	if (_inputLayout != layout)
+	{
+		_inputLayout = layout;
+		_view->GetContext()->IASetInputLayout(_inputLayout);
+	}
+}
+
+void DXStateCache::setVSConstantBuffer(int index, ID3D11Buffer*const* buffer)
+{
+	CCASSERT(index < MAX_UNITS, "Invalid index of unit.");
+	if (_constantBufferVS[index] != buffer)
+	{
+		_constantBufferVS[index] = buffer;
+		_view->GetContext()->VSSetConstantBuffers(index, 1, _constantBufferVS[index]);
+	}
+}
+
+void DXStateCache::setPSConstantBuffer(int index, ID3D11Buffer*const* buffer)
+{
+	CCASSERT(index < MAX_UNITS, "Invalid index of unit.");
+	if (_constantBufferPS[index] != buffer)
+	{
+		_constantBufferPS[index] = buffer;
+		_view->GetContext()->PSSetConstantBuffers(index, 1, _constantBufferPS[index]);
+	}
+}
+
+void DXStateCache::setVSTexture(int index, ID3D11ShaderResourceView*const* textureView)
+{
+	CCASSERT(index < MAX_UNITS, "Invalid index of unit.");
+	if (_textureViewsVS[index] != textureView)
+	{
+		_textureViewsVS[index] = textureView;
+		_view->GetContext()->VSSetShaderResources(index, 1, _textureViewsVS[index]);
+	}
+}
+
+void DXStateCache::setPSTexture(int index, ID3D11ShaderResourceView*const* textureView)
+{
+	CCASSERT(index < MAX_UNITS, "Invalid index of unit.");
+	if (_textureViewsPS[index] != textureView)
+	{
+		_textureViewsPS[index] = textureView;
+		_view->GetContext()->PSSetShaderResources(index, 1, _textureViewsPS[index]);
+	}
+}
+
+void DXStateCache::setBlend(GLint GLsrc, GLint GLdst)
+{
+	D3D11_BLEND src = GetDXBlend(GLsrc);
+	D3D11_BLEND dst = GetDXBlend(GLdst);
+
+	bool change = src != _blendDesc.RenderTarget[0].SrcBlend || dst != _blendDesc.RenderTarget[0].DestBlend;
+	if (change || _blendState == nullptr)
+	{
+		DXResourceManager::getInstance().remove(&_blendState);
+
+		_blendDesc = CD3D11_BLEND_DESC(CD3D11_DEFAULT());
+		_blendDesc.RenderTarget[0].BlendEnable = true;
+		_blendDesc.RenderTarget[0].SrcBlend = src;
+		_blendDesc.RenderTarget[0].DestBlend = dst;
+		_blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+		_blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		DX::ThrowIfFailed(_view->GetDevice()->CreateBlendState(&_blendDesc, &_blendState));
+
+		_view->GetContext()->OMSetBlendState(_blendState, nullptr, 0xffffffff);
+
+		DXResourceManager::getInstance().add(&_blendState);
+	}
+
+	setRasterizer();
+}
+
+void DXStateCache::setDepthStencilState(const D3D11_DEPTH_STENCIL_DESC& depthStencilDesc, UINT depthStencilRef)
+{
+	bool stateChanged = false;
+	bool changed = false;
+
+	if (memcmp(&depthStencilDesc, &_depthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC)) != 0)
+	{
+		_depthStencilDesc = CD3D11_DEPTH_STENCIL_DESC(depthStencilDesc);
+		stateChanged = true;
+	}
+
+	if (_depthStencilRef != depthStencilRef)
+	{
+		_depthStencilRef = depthStencilRef;
+		changed = true;
+	}
+
+	if (stateChanged || !_depthStencilState)
+	{
+		DXResourceManager::getInstance().remove(&_depthStencilState);
+		DX::ThrowIfFailed(_view->GetDevice()->CreateDepthStencilState(&_depthStencilDesc, &_depthStencilState));
+		DXResourceManager::getInstance().add(&_depthStencilState);
+
+		changed = true;
+	}
+
+	if (changed)
+	{
+		_view->GetContext()->OMSetDepthStencilState(_depthStencilState, _depthStencilRef);
+	}
+}
+
+const D3D11_DEPTH_STENCIL_DESC& DXStateCache::getDepthStencilState() const
+{
+	return _depthStencilDesc;
+}
+
+UINT DXStateCache::getStencilRef() const
+{
+	return _depthStencilRef;
+}
+
+void DXStateCache::clear()
+{
+	auto view = GLViewImpl::sharedOpenGLView();
+	auto context = view->GetContext();
+
+	context->ClearRenderTargetView(*view->GetRenderTargetView(), _clearColor);
+
+	UINT clearFlag = 0;
+	if (_depthStencilDesc.DepthEnable) {
+		clearFlag |= D3D11_CLEAR_DEPTH;
+	}
+	if (_depthStencilDesc.StencilEnable) {
+		clearFlag |= D3D11_CLEAR_STENCIL;
+	}
+	if (clearFlag != 0) {
+		context->ClearDepthStencilView(view->GetDepthStencilView(), clearFlag, _clearDepth, _clearStencil);
+	}
+}
+
+void DXStateCache::clearColor(float r, float g, float b, float a)
+{
+	FLOAT clearColor[] = {r, g, b, a};
+	auto view = GLViewImpl::sharedOpenGLView();
+	auto context = view->GetContext();
+
+	context->ClearRenderTargetView(*view->GetRenderTargetView(), clearColor);
+}
+
+void DXStateCache::clearDepth(float z)
+{
+	auto view = GLViewImpl::sharedOpenGLView();
+	auto context = view->GetContext();
+	context->ClearDepthStencilView(view->GetDepthStencilView(), D3D11_CLEAR_DEPTH, z, 0);
+}
+
+void DXStateCache::setClearColor(float r, float g, float b, float a)
+{
+	_clearColor[0] = r;
+	_clearColor[1] = g;
+	_clearColor[2] = b;
+	_clearColor[3] = a;
+}
+
+const FLOAT* DXStateCache::getClearColor() const
+{
+	return _clearColor;
+}
+
+void DXStateCache::setClearDepth(float z)
+{
+	_clearDepth = z;
+}
+
+void DXStateCache::setClearStencil(uint8_t s)
+{
+	_clearStencil = s;
+}
+
+void DXStateCache::setDepthTest(bool enabled)
+{
+	if (enabled != _depthStencilDesc.DepthEnable) {
+		D3D11_DEPTH_STENCIL_DESC newDepthStencilState = D3D11_DEPTH_STENCIL_DESC(_depthStencilDesc);
+		newDepthStencilState.DepthEnable = enabled;
+		newDepthStencilState.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+		setDepthStencilState(newDepthStencilState, _depthStencilRef);
+	}
+}
+
+bool DXStateCache::isDepthTestEnabled()
+{
+	return _depthStencilDesc.DepthEnable;
+}
+
+void DXStateCache::setDepthMask(bool enabled)
+{
+	if (enabled != isDepthMaskEnabled()) {
+		D3D11_DEPTH_STENCIL_DESC newDepthStencilState = D3D11_DEPTH_STENCIL_DESC(_depthStencilDesc);
+		newDepthStencilState.DepthWriteMask = enabled ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+		setDepthStencilState(newDepthStencilState, _depthStencilRef);
+	}
+}
+
+bool DXStateCache::isDepthMaskEnabled()
+{
+	return (_depthStencilDesc.DepthWriteMask != D3D11_DEPTH_WRITE_MASK_ZERO);
+}
+
+void DXStateCache::setCullTest(bool enabled)
+{
+	// nothing to do
+}
+
+bool DXStateCache::isCullTestEnabled()
+{
+	return false;
+}
+
+void DXStateCache::setViewport(float x, float y, float w, float h)
+{
+	CD3D11_VIEWPORT viewport(x, y, w, h);
+	if (viewport != _viewportRect)
+	{
+		_viewportRect = viewport;
+		_view->GetContext()->RSSetViewports(1, &_viewportRect);
+	}
+}
+
+void DXStateCache::setScissor(float x, float y, float w, float h)
+{
+	CD3D11_RECT rect(x * _scissorScaling, y * _scissorScaling, (x + w) * _scissorScaling, (y + h) * _scissorScaling);
+	if (_scissorRect != rect)
+	{
+		_scissorRect = rect;
+		_view->GetContext()->RSSetScissorRects(1, &_scissorRect);
+	}
+}
+
+void DXStateCache::getScissor(Rect& rect) const
+{
+	rect.origin.x = _scissorRect.left / _scissorScaling;
+	rect.origin.y = _scissorRect.top / _scissorScaling;
+	rect.size.width = (_scissorRect.right / _scissorScaling) - _scissorRect.left;
+	rect.size.height = (_scissorRect.bottom / _scissorScaling) - _scissorRect.top;
+}
+
+void DXStateCache::enableScissor(bool enable)
+{
+	if (_rasterizerDesc.ScissorEnable != (BOOL)enable)
+	{
+		_rasterizerDesc.ScissorEnable = enable;
+		_rasterizerDirty = true;
+	}
+}
+
+bool DXStateCache::isScissorEnabled() const
+{
+	return _rasterizerDesc.ScissorEnable != 0;
+}
+
+void DXStateCache::setScissorScaling(float scaling)
+{
+	_scissorScaling = scaling;
+}
+
+void DXStateCache::setRasterizer()
+{
+	if (_rasterizerDirty || _rasterizerState == nullptr)
+	{
+		DXResourceManager::getInstance().remove(&_rasterizerState);
+		DX::ThrowIfFailed(_view->GetDevice()->CreateRasterizerState(&_rasterizerDesc, &_rasterizerState));
+		DXResourceManager::getInstance().add(&_rasterizerState);
+
+		_rasterizerDirty = false;
+	}
+
+	_view->GetContext()->RSSetState(_rasterizerState);
+}
+
+D3D11_BLEND DXStateCache::GetDXBlend(GLint glBlend) const
+{
+	if (glBlend == GL_ZERO)
+		return D3D11_BLEND_ZERO;
+	else if (glBlend == GL_SRC_COLOR)
+		return D3D11_BLEND_SRC_COLOR;
+	else if (glBlend == GL_ONE_MINUS_SRC_COLOR)
+		return D3D11_BLEND_INV_SRC_COLOR;
+	else if (glBlend == GL_SRC_ALPHA)
+		return D3D11_BLEND_SRC_ALPHA;
+	else if (glBlend == GL_ONE_MINUS_SRC_ALPHA)
+		return D3D11_BLEND_INV_SRC_ALPHA;
+	else if (glBlend == GL_DST_ALPHA)
+		return D3D11_BLEND_DEST_ALPHA;
+	else if (glBlend == GL_ONE_MINUS_DST_ALPHA)
+		return D3D11_BLEND_INV_DEST_ALPHA;
+	else if (glBlend == GL_DST_COLOR)
+		return D3D11_BLEND_DEST_COLOR;
+	else if (glBlend == GL_ONE_MINUS_DST_COLOR)
+		return D3D11_BLEND_INV_DEST_COLOR;
+	else if (glBlend == GL_SRC_ALPHA_SATURATE)
+		return D3D11_BLEND_SRC_ALPHA_SAT;
+	return D3D11_BLEND_ONE;
+}
+
+void DXResourceManager::clear()
+{
+	clearBuffer();
+	clearTexture();
+	clearInputLayout();
+	clearShaderResourceView();
+	clearVS();
+	clearRasterizerState();
+	clearPS();
+	clearBlendState();
+	clearDepthStencilState();
+	clearDepthStencilView();
+	clearRenderTargetView();
+}
+
+#endif
 
 NS_CC_END

@@ -179,7 +179,8 @@ void GridBase::setTextureFlipped(bool flipped)
 
 void GridBase::set2DProjection()
 {
-    Director *director = Director::getInstance();
+#ifndef DIRECTX_ENABLED
+	Director *director = Director::getInstance();
 
     Size    size = director->getWinSizeInPixels();
 
@@ -193,6 +194,7 @@ void GridBase::set2DProjection()
     director->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
 
     GL::setProjectionMatrixDirty();
+#endif
 }
 
 void GridBase::beforeDraw(void)
@@ -209,7 +211,8 @@ void GridBase::beforeDraw(void)
 
 void GridBase::afterDraw(cocos2d::Node *target)
 {
-    _grabber->afterRender(_texture);
+#ifndef DIRECTX_ENABLED
+	_grabber->afterRender(_texture);
 
     // restore projection
     Director *director = Director::getInstance();
@@ -235,6 +238,7 @@ void GridBase::afterDraw(cocos2d::Node *target)
     beforeBlit();
     blit();
     afterBlit();
+#endif
 }
 
 void GridBase::blit(void)
@@ -315,7 +319,8 @@ Grid3D::~Grid3D(void)
 
 void Grid3D::beforeBlit()
 {
-    if(_needDepthTestForBlit)
+#ifndef DIRECTX_ENABLED
+	if (_needDepthTestForBlit)
     {
         _oldDepthTestValue = glIsEnabled(GL_DEPTH_TEST) != GL_FALSE;
         GLboolean depthWriteMask;
@@ -325,11 +330,13 @@ void Grid3D::beforeBlit()
         glEnable(GL_DEPTH_TEST);
         glDepthMask(true);
     }
+#endif
 }
 
 void Grid3D::afterBlit()
 {
-    if(_needDepthTestForBlit)
+#ifndef DIRECTX_ENABLED
+	if (_needDepthTestForBlit)
     {
         if(_oldDepthTestValue)
             glEnable(GL_DEPTH_TEST);
@@ -338,13 +345,15 @@ void Grid3D::afterBlit()
         
         glDepthMask(_oldDepthWriteValue);
     }
+#endif
 }
 
 void Grid3D::blit(void)
 {
     int n = _gridSize.width * _gridSize.height;
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION | GL::VERTEX_ATTRIB_FLAG_TEX_COORD );
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POSITION | GL::VERTEX_ATTRIB_FLAG_TEX_COORD);
     _shaderProgram->use();
     _shaderProgram->setUniformsForBuiltins();;
 
@@ -359,6 +368,7 @@ void Grid3D::blit(void)
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 0, _texCoordinates);
 
     glDrawElements(GL_TRIANGLES, (GLsizei) n*6, GL_UNSIGNED_SHORT, _indices);
+#endif
 }
 
 void Grid3D::calculateVertexPoints(void)
@@ -543,8 +553,8 @@ void TiledGrid3D::blit(void)
 {
     int n = _gridSize.width * _gridSize.height;
 
-    
-    _shaderProgram->use();
+#ifndef DIRECTX_ENABLED
+	_shaderProgram->use();
     _shaderProgram->setUniformsForBuiltins();
 
     //
@@ -559,6 +569,7 @@ void TiledGrid3D::blit(void)
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 0, _texCoordinates);
 
     glDrawElements(GL_TRIANGLES, (GLsizei)n*6, GL_UNSIGNED_SHORT, _indices);
+#endif
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,n*6);
 }

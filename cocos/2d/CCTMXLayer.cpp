@@ -204,6 +204,7 @@ void TMXLayer::parseInternalProperties()
             float alphaFuncValue = alphaFuncVal.asFloat();
             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_ALPHA_TEST));
 
+#ifndef DIRECTX_ENABLED
             GLint alphaValueLocation = glGetUniformLocation(getGLProgram()->getProgram(), GLProgram::UNIFORM_NAME_ALPHA_TEST_VALUE);
 
             // NOTE: alpha test shader is hard-coded to use the equivalent of a glAlphaFunc(GL_GREATER) comparison
@@ -212,6 +213,7 @@ void TMXLayer::parseInternalProperties()
             getGLProgram()->use();
             getGLProgram()->setUniformLocationWith1f(alphaValueLocation, alphaFuncValue);
             CHECK_GL_ERROR_DEBUG();
+#endif
         }
         else
         {

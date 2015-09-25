@@ -61,6 +61,16 @@ void Device::setAccelerometerEnabled(bool isEnabled)
     static Windows::Foundation::EventRegistrationToken sToken;
     static bool sEnabled = false;
 
+	if (isEnabled == sEnabled) {
+		return;
+	}
+
+#if (CC_TARGET_PLATFORM != CC_PLATFORM_WP8)
+	// NOTE: For some reason, when we remove the 'ReadingChanged' delegate from the accelerator on WP8, it
+	// crashes. In order to avoid this and as we want to continue to be able to detect when the device is
+	// upside down, I have disabled the code that disabled the acelerometer for that platform. This will
+	// cause that once it is activated, it will continue in this state until the user closes the application.
+
     // we always need to reset the accelerometer
     if (sAccelerometer)
     {
@@ -68,6 +78,7 @@ void Device::setAccelerometerEnabled(bool isEnabled)
         sAccelerometer = nullptr;
         sEnabled = false;
     }
+#endif
 
 	if (isEnabled)
 	{

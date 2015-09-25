@@ -218,7 +218,11 @@ void Director::setDefaultValues(void)
     _displayStats = conf->getValue("cocos2d.x.display_fps", Value(false)).asBool();
 
     // GL projection
-    std::string projection = conf->getValue("cocos2d.x.gl.projection", Value("3d")).asString();
+#ifndef DIRECTX_ENABLED
+	std::string projection = conf->getValue("cocos2d.x.gl.projection", Value("3d")).asString();
+#else
+	std::string projection = conf->getValue("cocos2d.x.gl.projection", Value("2d")).asString();
+#endif
     if (projection == "3d")
         _projection = Projection::_3D;
     else if (projection == "2d")
@@ -603,6 +607,8 @@ const Mat4& Director::getMatrix(MATRIX_STACK_TYPE type)
 void Director::setProjection(Projection projection)
 {
     Size size = _winSizeInPoints;
+	const auto w = std::max(size.width, 1.0f);
+	const auto h = std::max(size.height, 1.0f);
 
     setViewport();
 
@@ -611,14 +617,14 @@ void Director::setProjection(Projection projection)
         case Projection::_2D:
         {
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
-            if(getOpenGLView() != nullptr)
-            {
-                multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, getOpenGLView()->getOrientationMatrix());
-            }
-#endif
+#ifdef DIRECTX_ENABLED
+			DirectX::XMMATRIX matrix = DirectX::XMMatrixOrthographicOffCenterLH(0, w, 0, h, -1024, 1024);
+			Mat4 orthoMatrix((float *)matrix.r);
+			orthoMatrix.transpose();
+#else
             Mat4 orthoMatrix;
             Mat4::createOrthographicOffCenter(0, size.width, 0, size.height, -1024, 1024, &orthoMatrix);
+#endif
             multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, orthoMatrix);
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
             break;
@@ -628,27 +634,34 @@ void Director::setProjection(Projection projection)
         {
             float zeye = this->getZEye();
 
-            Mat4 matrixPerspective, matrixLookup;
-
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-            
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
-            //if needed, we need to add a rotation for Landscape orientations on Windows Phone 8 since it is always in Portrait Mode
-            GLView* view = getOpenGLView();
-            if(getOpenGLView() != nullptr)
-            {
-                multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, getOpenGLView()->getOrientationMatrix());
-            }
-#endif
-            // issue #1334
+
+#ifdef DIRECTX_ENABLED
+			const DirectX::XMVECTORF32 eye = { w * 0.5f, h * 0.5f, std::max(zeye, 1.0f) };
+			const DirectX::XMVECTORF32 center = { w * 0.5f, h * 0.5f, 0.0f };
+			const DirectX::XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+
+			auto m = DirectX::XMMatrixPerspectiveFovRH(60 * DirectX::XM_PI / 180.0f, (GLfloat)w / h, 10, zeye + h * 0.5f);
+			Mat4 matrixPerspective((float*)m.r);
+
+			m = DirectX::XMMatrixLookAtRH(eye, center, up);
+			Mat4 matrixLookup((float*)m.r);
+
+			auto final = matrixPerspective * matrixLookup;
+			final.transpose();
+			multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, final);
+#else
+			Mat4 matrixPerspective, matrixLookup;
+			Vec3 eye(size.width / 2, size.height / 2, zeye), center(size.width / 2, size.height / 2, 0.0f), up(0.0f, 1.0f, 0.0f);
+			// issue #1334
             Mat4::createPerspective(60, (GLfloat)size.width/size.height, 10, zeye+size.height/2, &matrixPerspective);
 
             multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, matrixPerspective);
 
-            Vec3 eye(size.width/2, size.height/2, zeye), center(size.width/2, size.height/2, 0.0f), up(0.0f, 1.0f, 0.0f);
+            //Vec3 eye(size.width/2, size.height/2, zeye), center(size.width/2, size.height/2, 0.0f), up(0.0f, 1.0f, 0.0f);
             Mat4::createLookAt(eye, center, up, &matrixLookup);
             multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, matrixLookup);
-            
+#endif
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
             break;
         }
@@ -664,7 +677,9 @@ void Director::setProjection(Projection projection)
     }
 
     _projection = projection;
-    GL::setProjectionMatrixDirty();
+#ifndef DIRECTX_ENABLED
+	GL::setProjectionMatrixDirty();
+#endif
 
     _eventDispatcher->dispatchEvent(_eventProjectionChanged);
 }
@@ -695,11 +710,19 @@ void Director::setAlphaBlending(bool on)
 {
     if (on)
     {
-        GL::blendFunc(CC_BLEND_SRC, CC_BLEND_DST);
+#ifndef DIRECTX_ENABLED
+		GL::blendFunc(CC_BLEND_SRC, CC_BLEND_DST);
+#else
+		DXStateCache::getInstance().setBlend(CC_BLEND_SRC, CC_BLEND_DST);
+#endif
     }
     else
     {
-        GL::blendFunc(GL_ONE, GL_ZERO);
+#ifndef DIRECTX_ENABLED
+		GL::blendFunc(GL_ONE, GL_ZERO);
+#else
+		DXStateCache::getInstance().setBlend(GL_ONE, GL_ZERO);
+#endif
     }
 
     CHECK_GL_ERROR_DEBUG();
@@ -726,7 +749,7 @@ static void GLToClipTransform(Mat4 *transformOut)
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
     //if needed, we need to undo the rotation for Landscape orientation in order to get the correct positions
-    projection = Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * projection;
+    //projection = Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * projection;
 #endif
 
     auto modelview = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
@@ -737,6 +760,9 @@ Vec2 Director::convertToGL(const Vec2& uiPoint)
 {
     Mat4 transform;
     GLToClipTransform(&transform);
+#ifdef DIRECTX_ENABLED
+	transform.transpose();
+#endif
 
     Mat4 transformInv = transform.getInversed();
 
@@ -1006,7 +1032,11 @@ void Director::reset()
     // cocos2d-x specific data structures
     UserDefault::destroyInstance();
     
-    GL::invalidateStateCache();
+#ifndef DIRECTX_ENABLED
+	GL::invalidateStateCache();
+#else
+	DXStateCache::getInstance().invalidateStateCache();
+#endif
     
     destroyTextureCache();
 }

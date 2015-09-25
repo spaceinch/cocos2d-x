@@ -22,63 +22,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-
 #pragma once
 
-#include <d3d11_1.h>
-#include <DirectXMath.h>
-#include "EGL/egl.h"
-#include "EGL/eglext.h"
-#include "EGL/eglplatform.h"
-#include "GLES2/gl2.h"
-#include "GLES2/gl2ext.h"
-#include "winrtangle.h"
+#ifndef _DIRECT3D_BASE_H_
+#define _DIRECT3D_BASE_H_
 
-// Helper class that initializes DirectX APIs for 3D rendering.
-ref class DirectXBase abstract
+ref class Direct3DBase abstract
 {
 internal:
-    DirectXBase();
+	Direct3DBase();
 
-    virtual void Initialize();
-    virtual void CreateDeviceResources();
-    virtual void SetDevice(ID3D11Device1* device);
-    virtual void UpdateDevice(ID3D11Device1* device, ID3D11DeviceContext1* context, ID3D11RenderTargetView* renderTargetView);
-    virtual void UpdateForWindowSizeChange(float width, float height);
-    virtual void CreateWindowSizeDependentResources();
-	virtual void OnOrientationChanged(Windows::Graphics::Display::DisplayOrientations orientation);
+	virtual void Initialize(_In_ ID3D11Device1* device);
+	virtual void CreateDeviceResources();
+	virtual void UpdateDevice(_In_ ID3D11Device1* device, _In_ ID3D11DeviceContext1* context, _In_ ID3D11RenderTargetView* renderTargetView);
+	virtual void CreateWindowSizeDependentResources();
+	virtual void UpdateForWindowSizeChange(float width, float height);
+	virtual void Render() = 0;
 
-    virtual void CreateGLResources() = 0;
-
-    void Render();
-
-protected:
-
-    // return true if eglSwapBuffers was called by OnRender
-	virtual bool OnRender() = 0;
-    virtual void OnUpdateDevice() = 0;
-    void CloseAngle();
+	void Clear();
 
 protected private:
-    // Direct3D Objects.
-    ID3D11Device1* m_device;
+	Microsoft::WRL::ComPtr<ID3D11Device1> m_d3dDevice;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext1> m_d3dContext;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTargetView;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_depthStencilView;
 
-    D3D_FEATURE_LEVEL m_featureLevel;
-
-    bool InitializeAngle(ID3D11Device1* device, ID3D11DeviceContext1* context, ID3D11RenderTargetView* renderTargetView);
-
-     // Cached renderer properties.
-    Windows::Foundation::Size m_renderTargetSize;
-    Windows::Foundation::Rect m_windowBounds;
-	Windows::Graphics::Display::DisplayOrientations m_orientation;
-
-    // Angle EGL 
-    bool m_bAngleInitialized;
-	EGLDisplay m_eglDisplay;
-	EGLContext m_eglContext;
-	EGLSurface m_eglSurface;
-	Microsoft::WRL::ComPtr<IWinrtEglWindow> m_eglWindow;
-	Microsoft::WRL::ComPtr<IWinPhone8XamlD3DWindow> m_eglPhoneWindow;
-    DirectX::XMMATRIX m_orientationMatrix;
-    float m_aspectRatio;
+	Windows::Foundation::Size m_renderTargetSize;
+	Windows::Foundation::Rect m_windowBounds;
 };
+
+#endif
+

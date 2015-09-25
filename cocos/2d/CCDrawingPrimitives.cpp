@@ -136,12 +136,14 @@ void drawPoint(const Vec2& point)
     p.x = point.x;
     p.y = point.y;
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
     s_shader->use();
     s_shader->setUniformsForBuiltins();
 
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
     s_shader->setUniformLocationWith1f(s_pointSizeLocation, s_pointSize);
+
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POSITION);
 
 #ifdef EMSCRIPTEN
     setGLBufferData(&p, 8);
@@ -151,6 +153,7 @@ void drawPoint(const Vec2& point)
 #endif // EMSCRIPTEN
 
     glDrawArrays(GL_POINTS, 0, 1);
+#endif
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,1);
 }
@@ -159,12 +162,13 @@ void drawPoints( const Vec2 *points, unsigned int numberOfPoints )
 {
     lazy_init();
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
     s_shader->use();
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
     s_shader->setUniformLocationWith1f(s_pointSizeLocation, s_pointSize);
 
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POSITION);
     // FIXME: Mac OpenGL error. arrays can't go out of scope before draw is executed
     Vec2* newPoints = new (std::nothrow) Vec2[numberOfPoints];
 
@@ -198,6 +202,7 @@ void drawPoints( const Vec2 *points, unsigned int numberOfPoints )
     glDrawArrays(GL_POINTS, 0, (GLsizei) numberOfPoints);
 
     CC_SAFE_DELETE_ARRAY(newPoints);
+#endif
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, numberOfPoints);
 }
@@ -216,7 +221,8 @@ void drawLine(const Vec2& origin, const Vec2& destination)
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 #ifdef EMSCRIPTEN
     setGLBufferData(vertices, 16);
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0);
@@ -224,6 +230,7 @@ void drawLine(const Vec2& origin, const Vec2& destination)
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
 #endif // EMSCRIPTEN
     glDrawArrays(GL_LINES, 0, 2);
+#endif
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,2);
 }
@@ -256,7 +263,8 @@ void drawPoly(const Vec2 *poli, unsigned int numberOfPoints, bool closePolygon)
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 
     // iPhone and 32-bit machines optimization
     if( sizeof(Vec2) == sizeof(Vec2) )
@@ -296,6 +304,7 @@ void drawPoly(const Vec2 *poli, unsigned int numberOfPoints, bool closePolygon)
 
         CC_SAFE_DELETE_ARRAY(newPoli);
     }
+#endif
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, numberOfPoints);
 }
@@ -308,6 +317,7 @@ void drawSolidPoly(const Vec2 *poli, unsigned int numberOfPoints, Color4F color)
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &color.r, 1);
 
+#ifndef DIRECTX_ENABLED
     GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 
     // FIXME: Mac OpenGL error. arrays can't go out of scope before draw is executed
@@ -341,6 +351,7 @@ void drawSolidPoly(const Vec2 *poli, unsigned int numberOfPoints, Color4F color)
     glDrawArrays(GL_TRIANGLE_FAN, 0, (GLsizei) numberOfPoints);
 
     CC_SAFE_DELETE_ARRAY(newPoli);
+#endif
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, numberOfPoints);
 }
 
@@ -373,6 +384,7 @@ void drawCircle( const Vec2& center, float radius, float angle, unsigned int seg
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
 
+#ifndef DIRECTX_ENABLED
     GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 
 #ifdef EMSCRIPTEN
@@ -382,7 +394,7 @@ void drawCircle( const Vec2& center, float radius, float angle, unsigned int seg
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
 #endif // EMSCRIPTEN
     glDrawArrays(GL_LINE_STRIP, 0, (GLsizei) segments+additionalSegment);
-
+#endif
     ::free( vertices );
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,segments+additionalSegment);
@@ -417,7 +429,8 @@ void drawSolidCircle( const Vec2& center, float radius, float angle, unsigned in
     s_shader->use();
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
-    
+
+#ifndef DIRECTX_ENABLED
     GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
     
 #ifdef EMSCRIPTEN
@@ -428,6 +441,7 @@ void drawSolidCircle( const Vec2& center, float radius, float angle, unsigned in
 #endif // EMSCRIPTEN
     
     glDrawArrays(GL_TRIANGLE_FAN, 0, (GLsizei) segments+1);
+#endif
     
     ::free( vertices );
     
@@ -459,6 +473,7 @@ void drawQuadBezier(const Vec2& origin, const Vec2& control, const Vec2& destina
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
 
+#ifndef DIRECTX_ENABLED
     GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 
 #ifdef EMSCRIPTEN
@@ -468,7 +483,8 @@ void drawQuadBezier(const Vec2& origin, const Vec2& control, const Vec2& destina
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
 #endif // EMSCRIPTEN
     glDrawArrays(GL_LINE_STRIP, 0, (GLsizei) segments + 1);
-    CC_SAFE_DELETE_ARRAY(vertices);
+#endif
+	CC_SAFE_DELETE_ARRAY(vertices);
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,segments+1);
 }
@@ -516,6 +532,7 @@ void drawCardinalSpline( PointArray *config, float tension,  unsigned int segmen
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*)&s_color.r, 1);
 
+#ifndef DIRECTX_ENABLED
     GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
 
 #ifdef EMSCRIPTEN
@@ -525,6 +542,7 @@ void drawCardinalSpline( PointArray *config, float tension,  unsigned int segmen
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
 #endif // EMSCRIPTEN
     glDrawArrays(GL_LINE_STRIP, 0, (GLsizei) segments + 1);
+#endif
 
     CC_SAFE_DELETE_ARRAY(vertices);
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,segments+1);
@@ -550,7 +568,8 @@ void drawCubicBezier(const Vec2& origin, const Vec2& control1, const Vec2& contr
     s_shader->setUniformsForBuiltins();
     s_shader->setUniformLocationWith4fv(s_colorLocation, (GLfloat*) &s_color.r, 1);
 
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION );
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POSITION);
 
 #ifdef EMSCRIPTEN
     setGLBufferData(vertices, (segments + 1) * sizeof(Vec2));
@@ -559,6 +578,8 @@ void drawCubicBezier(const Vec2& origin, const Vec2& control1, const Vec2& contr
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
 #endif // EMSCRIPTEN
     glDrawArrays(GL_LINE_STRIP, 0, (GLsizei) segments + 1);
+#endif
+
     CC_SAFE_DELETE_ARRAY(vertices);
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,segments+1);

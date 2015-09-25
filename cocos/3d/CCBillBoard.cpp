@@ -229,7 +229,7 @@ bool BillBoard::calculateBillbaordTransform()
 void BillBoard::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 {
     //FIXME: frustum culling here
-    _quadCommand.init(_globalZOrder, _texture->getName(), getGLProgramState(), _blendFunc, &_quad, 1, _modelViewTransform, flags);
+    _quadCommand.init(_globalZOrder, _texture, getGLProgramState(), _blendFunc, &_quad, 1, _modelViewTransform, flags);
     _quadCommand.setTransparent(true);
     _quadCommand.setSkipBatching(true);
     renderer->addCommand(&_quadCommand);
