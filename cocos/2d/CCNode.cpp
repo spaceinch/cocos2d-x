@@ -218,7 +218,7 @@ bool Node::init()
    {
         if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_BACK)
         {
-            this->onBackClicked();
+            this->onDeviceBackClicked();
         }
    };
   
@@ -253,7 +253,7 @@ std::string Node::getDescription() const
     return StringUtils::format("<Node | Tag = %d", _tag);
 }
 
-void Node::onBackClicked()
+void Node::onDeviceBackClicked()
 {
 }
 
