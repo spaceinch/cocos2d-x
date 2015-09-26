@@ -129,7 +129,8 @@ public:
 
     /// @} end of initializers
 
-
+    // Add ability to intercept back button touch events
+    virtual void onBackClicked();
 
     /// @{
     /// @name Setters & Getters for Graphic Peroperties
