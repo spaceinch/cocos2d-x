@@ -129,6 +129,8 @@ public:
 
     /// @} end of initializers
 
+  
+  
     /// @{
     /// @name Setters & Getters for Graphic Peroperties
 
