@@ -129,9 +129,6 @@ public:
 
     /// @} end of initializers
 
-    // Add ability to intercept back button touch events
-    virtual void onDeviceBackClicked();
-
     /// @{
     /// @name Setters & Getters for Graphic Peroperties
 
@@ -1596,7 +1593,10 @@ protected:
     
     //check whether this camera mask is visible by the current visiting camera
     bool isVisitableByVisitingCamera() const;
-    
+  
+    // Add ability to intercept back button touch events
+    virtual void onDeviceBackClicked();
+  
 #if CC_USE_PHYSICS
     void updatePhysicsBodyTransform(Scene* layer);
     virtual void updatePhysicsBodyPosition(Scene* layer);
