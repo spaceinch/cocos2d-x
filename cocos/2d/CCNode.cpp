@@ -34,6 +34,7 @@ THE SOFTWARE.
 #include <string>
 #include <regex>
 
+#include "cocos2d.h"
 #include "base/CCDirector.h"
 #include "base/CCScheduler.h"
 #include "base/CCEventDispatcher.h"
@@ -211,6 +212,18 @@ Node::~Node()
 
 bool Node::init()
 {
+   // listen for android back button
+   auto listener = EventListenerKeyboard::create();
+   listener->onKeyReleased = [&](EventKeyboard::KeyCode keyCode, Event* event)
+   {
+        if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_BACK)
+        {
+            this->onDeviceBackClicked();
+        }
+   };
+  
+   _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+  
     return true;
 }
 
@@ -238,6 +251,10 @@ void Node::cleanup()
 std::string Node::getDescription() const
 {
     return StringUtils::format("<Node | Tag = %d", _tag);
+}
+
+void Node::onDeviceBackClicked()
+{
 }
 
 // MARK: getters / setters
