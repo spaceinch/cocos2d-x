@@ -78,10 +78,6 @@ FileUtilsAndroid::FileUtilsAndroid()
 
 FileUtilsAndroid::~FileUtilsAndroid()
 {
-    for (auto expansionFile : _expansionFiles)
-    {
-        CC_SAFE_DELETE(expansionFile);
-    }
 }
 
 bool FileUtilsAndroid::init()
@@ -150,7 +146,7 @@ bool FileUtilsAndroid::isFileExistInternal(const std::string& strFilePath) const
     }
 
     bool bFound = false;
-    
+  
     // Check whether file exists in apk.
     if (strFilePath[0] != '/')
     {
@@ -158,11 +154,10 @@ bool FileUtilsAndroid::isFileExistInternal(const std::string& strFilePath) const
 
         // Found "assets/" at the beginning of the path and we don't want it
         if (strFilePath.find(_defaultResRootPath) == 0) s += strlen("assets/");
-        
-        std::string expansionFilePath = "assets/" + std::string(s);
-        for (auto it = _expansionFiles.rbegin(); it != _expansionFiles.rend() && !bFound; ++it)
+      
+        for (auto it = _fileSysetems.rbegin(); it != _fileSysetems.rend() && !bFound; ++it)
         {
-            bFound = (*it)->fileExists(expansionFilePath);
+            bFound = (*it)->isFileExist(std::string(s));
         }
 
         if (!bFound && FileUtilsAndroid::assetmanager) {
@@ -201,6 +196,11 @@ bool FileUtilsAndroid::isAbsolutePath(const std::string& strPath) const
     return false;
 }
 
+void FileUtilsAndroid::addFileSystem(std::shared_ptr<FileSystemProtocol> fileSystem)
+{
+  _fileSysetems.push_back(fileSystem);
+}
+
 Data FileUtilsAndroid::getData(const std::string& filename, bool forString)
 {
     if (filename.empty())
@@ -211,7 +211,7 @@ Data FileUtilsAndroid::getData(const std::string& filename, bool forString)
     unsigned char* data = nullptr;
     ssize_t size = 0;
     string fullPath = fullPathForFilename(filename);
-    
+  
     if (fullPath[0] != '/')
     {
         string relativePath = string();
@@ -225,13 +225,17 @@ Data FileUtilsAndroid::getData(const std::string& filename, bool forString)
         }
         CCLOGINFO("relative path = %s", relativePath.c_str());
         
-        // Expansion files take priority
-        std::string expansionFilePath = "assets/" + relativePath;
-        for (auto it = _expansionFiles.rbegin(); data == nullptr && it != _expansionFiles.rend(); ++it)
+        // FileSystems take priority
+        for (auto it = _fileSysetems.rbegin(); data == nullptr && it != _fileSysetems.rend(); ++it)
         {
-          data = (*it)->getFileData(expansionFilePath, &size);
+            int64_t localSize = 0;
+            data = (unsigned char*) (*it)->getData(relativePath, localSize);
+            if ( data )
+            {
+                size = static_cast<int>(localSize);
+            }
         }
-        
+      
         // Try from the APK
         if ( data == nullptr )
         {
@@ -343,7 +347,7 @@ unsigned char* FileUtilsAndroid::getFileData(const std::string& filename, const 
     }
     
     string fullPath = fullPathForFilename(filename);
-    
+  
     if (fullPath[0] != '/')
     {
         string relativePath = string();
@@ -357,15 +361,14 @@ unsigned char* FileUtilsAndroid::getFileData(const std::string& filename, const 
         }
         LOGD("relative path = %s", relativePath.c_str());
         
-        // Expansion files take priority
-        std::string expansionFilePath = "assets/" + relativePath;
-        for (auto it = _expansionFiles.rbegin(); data == nullptr && it != _expansionFiles.rend(); ++it)
+        // FileSystems files take priority
+        for (auto it = _fileSysetems.rbegin(); data == nullptr && it != _fileSysetems.rend(); ++it)
         {
-          ssize_t localSize = 0;
-          data = (*it)->getFileData(expansionFilePath, &localSize);
+          int64_t localSize = 0;
+          data = (unsigned char*) (*it)->getData(relativePath, localSize);
           if ( data )
           {
-            *size = localSize;
+            *size = static_cast<ssize_t>(localSize);
           }
         }
       
@@ -450,24 +453,6 @@ string FileUtilsAndroid::getWritablePath() const
     else
     {
         return "";
-    }
-}
-
-void FileUtilsAndroid::addExpansionFile(const std::string& expansionFile)
-{
-    std::string expansionPath = getExternalStorageDirectory() + "/Android/obb/" + getPackageNameJNI() + "/" + expansionFile;
-  
-    // Only add the expansion file if it actually exists
-    std::ifstream expansionStream(expansionPath, std::ios::binary);
-    if ( expansionStream.is_open() )
-    {
-        _expansionFiles.push_back(new ZipFile(expansionPath, "assets/"));
-        _expansionFileNames.push_back(expansionPath);
-        LOGI("Adding expansion file to search path %s", expansionPath.c_str());
-    }
-    else // Expansion file does not exist
-    {
-        LOGW("Expansion file does not exist %s", expansionPath.c_str());
     }
 }
 
