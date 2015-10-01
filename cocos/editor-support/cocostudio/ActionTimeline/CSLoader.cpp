@@ -868,7 +868,7 @@ Node * CSLoader::createNode(const Data data, const ccNodeLoadCallback &callback)
         CCLOG("textureSize = %d", textureSize);
         for (int i = 0; i < textureSize; ++i)
         {
-            SpriteFrameCache::getInstance()->addSpriteFramesWithFile(textures->Get(i)->c_str());
+            loader->loadPlist(textures->Get(i)->c_str());
         }
 
         node = loader->nodeWithFlatBuffers(csparsebinary->nodeTree(), callback);
@@ -952,7 +952,7 @@ Node* CSLoader::nodeWithFlatBuffersFile(const std::string &fileName, const ccNod
     CCLOG("textureSize = %d", textureSize);
     for (int i = 0; i < textureSize; ++i)
     {
-        SpriteFrameCache::getInstance()->addSpriteFramesWithFile(textures->Get(i)->c_str());
+        loadPlist(textures->Get(i)->c_str());
     }
     
     Node* node = nodeWithFlatBuffers(csparsebinary->nodeTree(), callback);
@@ -1301,7 +1301,7 @@ Node* CSLoader::createNodeWithFlatBuffersForSimulator(const std::string& filenam
     //    CCLOG("textureSize = %d", textureSize);
     for (int i = 0; i < textureSize; ++i)
     {
-        SpriteFrameCache::getInstance()->addSpriteFramesWithFile(textures->Get(i)->c_str());
+        loadPlist(textures->Get(i)->c_str());
     }
     
     auto nodeTree = csparsebinary->nodeTree();
@@ -1431,6 +1431,20 @@ Node* CSLoader::nodeWithFlatBuffersForSimulator(const flatbuffers::NodeTree *nod
 //    _loadingNodeParentHierarchy.pop_back();
     
     return node;
+}
+
+void CSLoader::setAsyncLoadingPlist(const std::string& plist)
+{
+  _asyncLoadingPlistSet.insert(plist);
+}
+
+void CSLoader::loadPlist(const std::string& plist)
+{
+  auto it = _asyncLoadingPlistSet.find(plist);
+  if ( it == _asyncLoadingPlistSet.end() )
+  {
+    cocos2d::SpriteFrameCache::getInstance()->addSpriteFramesWithFile(plist);
+  }
 }
 
 NS_CC_END
