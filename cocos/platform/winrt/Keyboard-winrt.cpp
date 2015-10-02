@@ -45,11 +45,6 @@ KeyBoardWinRT::KeyBoardWinRT()
 
 }
 
-KeyBoardWinRT::~KeyBoardWinRT()
-{
-
-}
-
 KeyBoardWinRT::KeyBoardWinRT(Windows::UI::Core::CoreDispatcher^ dispatcher, Windows::UI::Xaml::Controls::Panel^ panel)
     : m_dispatcher(dispatcher)
     , m_panel(panel)
