@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include "platform/CCCommon.h"
 #include "platform/CCGLView.h"
 #include "InputEvent.h"
+#include "platform/winrt/DirectXHelper.h"
 
 
 #include <agile.h>
