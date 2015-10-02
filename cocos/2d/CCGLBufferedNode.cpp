@@ -27,18 +27,23 @@ THE SOFTWARE.
 
 GLBufferedNode::GLBufferedNode()
 {
-    for(int i = 0; i < BUFFER_SLOTS; i++)
+#ifndef DIRECTX_ENABLED
+	for (int i = 0; i < BUFFER_SLOTS; i++)
     {
         _bufferObject[i] = 0;
         _bufferSize[i] = 0;
         _indexBufferObject[i] = 0;
         _indexBufferSize[i] = 0;
     }
+#else
+	CCASSERT(false, "GLBufferedNode is not supported");
+#endif
 }
 
 GLBufferedNode::~GLBufferedNode()
 {
-    for(int i = 0; i < BUFFER_SLOTS; i++)
+#ifndef DIRECTX_ENABLED
+	for (int i = 0; i < BUFFER_SLOTS; i++)
     {
         if(_bufferSize[i])
         {
@@ -49,11 +54,13 @@ GLBufferedNode::~GLBufferedNode()
             glDeleteBuffers(1, &(_indexBufferObject[i]));
         }
     }
+#endif
 }
 
 void GLBufferedNode::setGLBufferData(void *buf, GLuint bufSize, int slot)
 {
-    // WebGL doesn't support client-side arrays, so generate a buffer and load the data first.
+#ifndef DIRECTX_ENABLED
+	// WebGL doesn't support client-side arrays, so generate a buffer and load the data first.
     if(_bufferSize[slot] < bufSize)
     {
         if(_bufferObject[slot])
@@ -71,11 +78,13 @@ void GLBufferedNode::setGLBufferData(void *buf, GLuint bufSize, int slot)
         glBindBuffer(GL_ARRAY_BUFFER, _bufferObject[slot]);
         glBufferSubData(GL_ARRAY_BUFFER, 0, bufSize, buf);
     }
+#endif
 }
 
 void GLBufferedNode::setGLIndexData(void *buf, GLuint bufSize, int slot)
 {
-    // WebGL doesn't support client-side arrays, so generate a buffer and load the data first.
+#ifndef DIRECTX_ENABLED
+	// WebGL doesn't support client-side arrays, so generate a buffer and load the data first.
     if(_indexBufferSize[slot] < bufSize)
     {
         if(_indexBufferObject[slot])
@@ -93,5 +102,6 @@ void GLBufferedNode::setGLIndexData(void *buf, GLuint bufSize, int slot)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferObject[slot]);
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, bufSize, buf);
     }
+#endif
 }
 

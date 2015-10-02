@@ -61,6 +61,16 @@ void Device::setAccelerometerEnabled(bool isEnabled)
     static Windows::Foundation::EventRegistrationToken sToken;
     static bool sEnabled = false;
 
+	if (isEnabled == sEnabled) {
+		return;
+	}
+
+#if (CC_TARGET_PLATFORM != CC_PLATFORM_WP8)
+	// NOTE: For some reason, when we remove the 'ReadingChanged' delegate from the accelerator on WP8, it
+	// crashes. In order to avoid this and as we want to continue to be able to detect when the device is
+	// upside down, I have disabled the code that disabled the acelerometer for that platform. This will
+	// cause that once it is activated, it will continue in this state until the user closes the application.
+
     // we always need to reset the accelerometer
     if (sAccelerometer)
     {
@@ -68,6 +78,7 @@ void Device::setAccelerometerEnabled(bool isEnabled)
         sAccelerometer = nullptr;
         sEnabled = false;
     }
+#endif
 
 	if (isEnabled)
 	{
@@ -120,7 +131,7 @@ void Device::setAccelerometerEnabled(bool isEnabled)
                 
             case DisplayOrientations::LandscapeFlipped:
  				acc.x = reading->AccelerationY;
-				acc.y = reading->AccelerationX;
+				acc.y = -reading->AccelerationX;
                     break;
               
             default:
@@ -148,8 +159,8 @@ void Device::setAccelerometerEnabled(bool isEnabled)
                 break;
 
             case DisplayOrientations::LandscapeFlipped:
-                acc.x = -reading->AccelerationY;
-                acc.y = reading->AccelerationX;
+                acc.x = -reading->AccelerationX;
+                acc.y = -reading->AccelerationY;
                 break;
 
             default:
@@ -169,9 +180,15 @@ void Device::setAccelerometerInterval(float interval)
 {
     if (sAccelerometer)
     {
-        int minInterval = sAccelerometer->MinimumReportInterval;
-	    int reqInterval = (int) interval;
-        sAccelerometer->ReportInterval = reqInterval < minInterval ? minInterval : reqInterval;
+        try {
+            int minInterval = sAccelerometer->MinimumReportInterval;
+            int reqInterval = (int) interval;
+            sAccelerometer->ReportInterval = reqInterval < minInterval ? minInterval : reqInterval;
+        }
+        catch (Platform::COMException^)
+        {
+            CCLOG("Device::setAccelerometerInterval not supported on this device");
+        }
     }
     else
     {

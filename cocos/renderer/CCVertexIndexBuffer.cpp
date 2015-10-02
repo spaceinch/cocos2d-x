@@ -42,10 +42,10 @@ bool IndexBuffer::_enableShadowCopy = true;
 bool IndexBuffer::_enableShadowCopy = false;
 #endif
 
-VertexBuffer* VertexBuffer::create(int sizePerVertex, int vertexNumber)
+VertexBuffer* VertexBuffer::create(int sizePerVertex, int vertexNumber, GLenum usage/* = GL_STATIC_DRAW*/)
 {
     auto result = new (std::nothrow) VertexBuffer();
-    if(result && result->init(sizePerVertex, vertexNumber))
+    if(result && result->init(sizePerVertex, vertexNumber, usage))
     {
         result->autorelease();
         return result;
@@ -75,6 +75,9 @@ VertexBuffer::VertexBuffer()
 
 VertexBuffer::~VertexBuffer()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "VertexBuffer::~VertexBuffer is not supported");
+#else
     if(glIsBuffer(_vbo))
     {
         glDeleteBuffers(1, &_vbo);
@@ -83,14 +86,20 @@ VertexBuffer::~VertexBuffer()
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     Director::getInstance()->getEventDispatcher()->removeEventListener(_recreateVBOEventListener);
 #endif
+#endif
 }
 
-bool VertexBuffer::init(int sizePerVertex, int vertexNumber)
+bool VertexBuffer::init(int sizePerVertex, int vertexNumber, GLenum usage/* = GL_STATIC_DRAW*/)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "VertexBuffer::init is not supported");
+	return false;
+#else
     if(0 == sizePerVertex || 0 == vertexNumber)
         return false;
     _sizePerVertex = sizePerVertex;
     _vertexNumber = vertexNumber;
+    _usage = usage;
     
     if(isShadowCopyEnabled())
     {
@@ -99,9 +108,10 @@ bool VertexBuffer::init(int sizePerVertex, int vertexNumber)
     
     glGenBuffers(1, &_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, getSize(), nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, getSize(), nullptr, _usage);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     return true;
+#endif
 }
 
 int VertexBuffer::getSizePerVertex() const
@@ -116,6 +126,10 @@ int VertexBuffer::getVertexNumber() const
 
 bool VertexBuffer::updateVertices(const void* verts, int count, int begin)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "VertexBuffer::updateVertices is not supported");
+	return false;
+#else
     if(count <= 0 || nullptr == verts) return false;
     
     if(begin < 0)
@@ -140,6 +154,7 @@ bool VertexBuffer::updateVertices(const void* verts, int count, int begin)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
     return true;
+#endif
 }
 
 GLuint VertexBuffer::getVBO() const
@@ -149,6 +164,9 @@ GLuint VertexBuffer::getVBO() const
 
 void VertexBuffer::recreateVBO() const
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "VertexBuffer::recreateVBO is not supported");
+#else
     CCLOG("come to foreground of VertexBuffer");
     glGenBuffers(1, &_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -158,12 +176,13 @@ void VertexBuffer::recreateVBO() const
         buffer = &_shadowCopy[0];
     }
     CCLOG("recreate IndexBuffer with size %d %d", getSizePerVertex(), _vertexNumber);
-    glBufferData(GL_ARRAY_BUFFER, _sizePerVertex * _vertexNumber, buffer, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _sizePerVertex * _vertexNumber, buffer, _usage);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     if(!glIsBuffer(_vbo))
     {
         CCLOGERROR("recreate VertexBuffer Error");
     }
+#endif
 }
 
 int VertexBuffer::getSize() const
@@ -171,10 +190,10 @@ int VertexBuffer::getSize() const
     return _sizePerVertex * _vertexNumber;
 }
 
-IndexBuffer* IndexBuffer::create(IndexType type, int number)
+IndexBuffer* IndexBuffer::create(IndexType type, int number, GLenum usage/* = GL_STATIC_DRAW*/)
 {
     auto result = new (std::nothrow) IndexBuffer();
-    if(result && result->init(type, number))
+    if(result && result->init(type, number, usage))
     {
         result->autorelease();
         return result;
@@ -201,6 +220,9 @@ IndexBuffer::IndexBuffer()
 
 IndexBuffer::~IndexBuffer()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "IndexBuffer::~IndexBuffer is not supported");
+#else
     if(glIsBuffer(_vbo))
     {
         glDeleteBuffers(1, &_vbo);
@@ -209,18 +231,24 @@ IndexBuffer::~IndexBuffer()
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     Director::getInstance()->getEventDispatcher()->removeEventListener(_recreateVBOEventListener);
 #endif
+#endif
 }
 
-bool IndexBuffer::init(IndexBuffer::IndexType type, int number)
+bool IndexBuffer::init(IndexBuffer::IndexType type, int number, GLenum usage/* = GL_STATIC_DRAW*/)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "IndexBuffer::init is not supported");
+	return false;
+#else
     if(number <=0 ) return false;
     
     _type = type;
     _indexNumber = number;
+    _usage = usage;
     
     glGenBuffers(1, &_vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, getSize(), nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, getSize(), nullptr, _usage);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     
     if(isShadowCopyEnabled())
@@ -229,6 +257,7 @@ bool IndexBuffer::init(IndexBuffer::IndexType type, int number)
     }
     
     return true;
+#endif
 }
 
 IndexBuffer::IndexType IndexBuffer::getType() const
@@ -248,6 +277,10 @@ int IndexBuffer::getIndexNumber() const
 
 bool IndexBuffer::updateIndices(const void* indices, int count, int begin)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "IndexBuffer::updateIndices is not supported");
+	return false;
+#else
     if(count <= 0 || nullptr == indices) return false;
     
     if(begin < 0)
@@ -272,6 +305,7 @@ bool IndexBuffer::updateIndices(const void* indices, int count, int begin)
     }
     
     return true;
+#endif
 }
 
 int IndexBuffer::getSize() const
@@ -286,6 +320,9 @@ GLuint IndexBuffer::getVBO() const
 
 void IndexBuffer::recreateVBO() const
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "IndexBuffer::recreateVBO is not supported");
+#else
     CCLOG("come to foreground of IndexBuffer");
     glGenBuffers(1, &_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -295,12 +332,13 @@ void IndexBuffer::recreateVBO() const
         buffer = &_shadowCopy[0];
     }
     CCLOG("recreate IndexBuffer with size %d %d ", getSizePerIndex(), _indexNumber);
-    glBufferData(GL_ARRAY_BUFFER, getSize(), buffer, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, getSize(), buffer, _usage);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     if(!glIsBuffer(_vbo))
     {
         CCLOGERROR("recreate IndexBuffer Error");
     }
+#endif
 }
 
 NS_CC_END

@@ -38,10 +38,12 @@ THE SOFTWARE.
 #include <memory>
 #include <wrl/client.h>
 #include <Keyboard-winrt.h>
+#include <d3d11_2.h>
 
 NS_CC_BEGIN
 
 class GLViewImpl;
+class ID3D11Provider;
 
 class CC_DLL GLViewImpl : public GLView
 {
@@ -61,7 +63,7 @@ public:
     virtual void setIMEKeyboardState(bool bOpen);
     virtual void setIMEKeyboardState(bool bOpen, std::string str);
 
-    virtual bool Create(float width, float height, float dpi, Windows::Graphics::Display::DisplayOrientations orientation);
+	virtual bool Create(ID3D11Provider *d3d11Provider, float width, float height, float dpi, Windows::Graphics::Display::DisplayOrientations orientation);
 
     void setDispatcher(Windows::UI::Core::CoreDispatcher^ dispatcher);
     Windows::UI::Core::CoreDispatcher^ getDispatcher() {return m_dispatcher.Get();}
@@ -85,6 +87,7 @@ public:
     void QueueBackKeyPress();
     void QueuePointerEvent(PointerEventType type, Windows::UI::Core::PointerEventArgs^ args);
     void QueueEvent(std::shared_ptr<InputEvent>& event);
+	void QueueEvent(std::shared_ptr<Event>& event);
 
     bool ShowMessageBox(Platform::String^ title, Platform::String^ message);
 
@@ -109,6 +112,11 @@ public:
 	static GLViewImpl* sharedOpenGLView();
 
     void ProcessEvents();
+
+	ID3D11Device2* GetDevice();
+	ID3D11DeviceContext2* GetContext();
+	ID3D11DepthStencilView* GetDepthStencilView();
+	ID3D11RenderTargetView* const* GetRenderTargetView() const;
 
 protected:
     GLViewImpl();
@@ -161,10 +169,13 @@ private:
     Cocos2dEditBoxDelegate^ m_editBoxDelegate;
 
     Concurrency::concurrent_queue<std::shared_ptr<InputEvent>> mInputEvents;
+	Concurrency::concurrent_queue<std::shared_ptr<Event>> mEvents;
 
     Platform::Agile<Windows::UI::Core::CoreDispatcher> m_dispatcher;
     Platform::Agile<Windows::UI::Xaml::Controls::Panel> m_panel;
     KeyBoardWinRT^ m_keyboard;
+
+	ID3D11Provider *m_d3d11Provider;
 };
 
 NS_CC_END

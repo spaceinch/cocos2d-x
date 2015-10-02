@@ -231,8 +231,13 @@ private:
 
 protected:
     GLushort*           _indices;
-    GLuint              _VAOname;
+#ifdef DIRECTX_ENABLED
+	ID3D11Buffer * _bufferVertex;
+	ID3D11Buffer * _bufferIndex;
+#else
+	GLuint              _VAOname;
     GLuint              _buffersVBO[2]; //0: vertex  1: indices
+#endif
     bool                _dirty; //indicates whether or not the array buffer of the VBO needs to be updated
     /** quantity of quads that are going to be drawn */
     ssize_t _totalQuads;

@@ -204,6 +204,7 @@ void TMXLayer::parseInternalProperties()
             float alphaFuncValue = alphaFuncVal.asFloat();
             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_ALPHA_TEST));
 
+#ifndef DIRECTX_ENABLED
             GLint alphaValueLocation = glGetUniformLocation(getGLProgram()->getProgram(), GLProgram::UNIFORM_NAME_ALPHA_TEST_VALUE);
 
             // NOTE: alpha test shader is hard-coded to use the equivalent of a glAlphaFunc(GL_GREATER) comparison
@@ -212,6 +213,7 @@ void TMXLayer::parseInternalProperties()
             getGLProgram()->use();
             getGLProgram()->setUniformLocationWith1f(alphaValueLocation, alphaFuncValue);
             CHECK_GL_ERROR_DEBUG();
+#endif
         }
         else
         {
@@ -288,13 +290,13 @@ Sprite* TMXLayer::reusedTileWithRect(Rect rect)
     else
     {
         // FIXME: HACK: Needed because if "batch node" is nil,
-		// then the Sprite'squad will be reset
+        // then the Sprite'squad will be reset
         _reusedTile->setBatchNode(nullptr);
         
-		// Re-init the sprite
+        // Re-init the sprite
         _reusedTile->setTextureRect(rect, false, rect.size);
         
-		// restore the batch node
+        // restore the batch node
         _reusedTile->setBatchNode(this);
     }
 
@@ -732,4 +734,3 @@ std::string TMXLayer::getDescription() const
 
 
 NS_CC_END
-

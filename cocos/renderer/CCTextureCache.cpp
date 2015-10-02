@@ -114,7 +114,10 @@ void TextureCache::addImageAsync(const std::string &path, const std::function<vo
     
     if (texture != nullptr)
     {
-        callback(texture);
+        if(callback != nullptr)
+        {
+            callback(texture);
+        }
         return;
     }
 
@@ -812,7 +815,9 @@ void VolatileTextureMgr::reloadAllTextures()
         if (vt->_hasMipmaps) {
             vt->_texture->generateMipmap();
         }
+#ifndef DIRECTX_ENABLED
         vt->_texture->setTexParameters(vt->_texParams);
+#endif
     }
 
     _isReloading = false;

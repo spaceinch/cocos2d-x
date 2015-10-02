@@ -156,7 +156,9 @@ public:
 #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_IOS) */
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
-	virtual Size getRenerTargetSize() const = 0;
+#ifndef DIRECTX_ENABLED
+	virtual Size getRenderTargetSize() const = 0;
+#endif
 	virtual const Mat4& getOrientationMatrix() const = 0;
 	virtual const Mat4& getReverseOrientationMatrix() const = 0;
 #endif

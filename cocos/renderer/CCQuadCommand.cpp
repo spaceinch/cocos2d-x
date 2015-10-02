@@ -29,13 +29,13 @@
 #include "renderer/CCGLProgram.h"
 #include "xxhash.h"
 #include "CCRenderer.h"
-
+#include "renderer/CCTexture2D.h"
 NS_CC_BEGIN
 
 
 QuadCommand::QuadCommand()
 :_materialID(0)
-,_textureID(0)
+,_texture(nullptr)
 ,_glProgramState(nullptr)
 ,_blendType(BlendFunc::DISABLE)
 ,_quads(nullptr)
@@ -44,27 +44,35 @@ QuadCommand::QuadCommand()
     _type = RenderCommand::Type::QUAD_COMMAND;
 }
 
-void QuadCommand::init(float globalOrder, GLuint textureID, GLProgramState* glProgramState, BlendFunc blendType, V3F_C4B_T2F_Quad* quad, ssize_t quadCount, const Mat4 &mv)
+void QuadCommand::init(float globalOrder, Texture2D *texture, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
+                       const Mat4& mv, uint32_t flags)
 {
-    CCASSERT(glProgramState, "Invalid GLProgramState");
-    CCASSERT(glProgramState->getVertexAttribsFlags() == 0, "No custom attributes are supported in QuadCommand");
+    CCASSERT(shader, "Invalid GLProgramState");
+    CCASSERT(shader->getVertexAttribsFlags() == 0, "No custom attributes are supported in QuadCommand");
     
-    _globalOrder = globalOrder;
+    RenderCommand::init(globalOrder, mv, flags);
     
     _quadsCount = quadCount;
-    _quads = quad;
+    _quads = quads;
     
     _mv = mv;
     
-    if( _textureID != textureID || _blendType.src != blendType.src || _blendType.dst != blendType.dst || _glProgramState != glProgramState) {
+    if( _texture != texture || _blendType.src != blendType.src || _blendType.dst != blendType.dst || _glProgramState != shader) {
         
-        _textureID = textureID;
+        _texture = texture;
         _blendType = blendType;
-        _glProgramState = glProgramState;
+        _glProgramState = shader;
         
         generateMaterialID();
     }
 }
+
+#ifndef DIRECTX_ENABLED
+void QuadCommand::init(float globalOrder, Texture2D *texture, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount, const Mat4 &mv)
+{
+    init(globalOrder, texture, shader, blendType, quads, quadCount, mv, 0);
+}
+#endif
 
 QuadCommand::~QuadCommand()
 {
@@ -80,7 +88,7 @@ void QuadCommand::generateMaterialID()
     else
     {
         int glProgram = (int)_glProgramState->getGLProgram()->getProgram();
-        int intArray[4] = { glProgram, (int)_textureID, (int)_blendType.src, (int)_blendType.dst};
+        int intArray[4] = { glProgram, (int)_texture->getName(), (int)_blendType.src, (int)_blendType.dst};
         
         _materialID = XXH32((const void*)intArray, sizeof(intArray), 0);
     }
@@ -88,13 +96,18 @@ void QuadCommand::generateMaterialID()
 
 void QuadCommand::useMaterial() const
 {
+#ifndef DIRECTX_ENABLED
     //Set texture
-    GL::bindTexture2D(_textureID);
+    GL::bindTexture2D(_texture->getName());
     
     //set blend mode
     GL::blendFunc(_blendType.src, _blendType.dst);
-    
-    _glProgramState->apply(_mv);
+#else
+	DXStateCache::getInstance().setPSTexture(0, _texture->getView());
+	DXStateCache::getInstance().setBlend(_blendType.src, _blendType.dst);
+#endif
+
+	_glProgramState->apply(_mv);
 }
 
 NS_CC_END

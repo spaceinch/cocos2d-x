@@ -48,6 +48,11 @@ THE SOFTWARE.
 
 #include "deprecated/CCString.h"
 
+#ifdef DIRECTX_ENABLED
+#include "platform/winrt/CCGLViewImpl.h"
+#include "platform/winrt/DirectXHelper.h"
+#endif
+
 
 #if CC_ENABLE_CACHE_TEXTURE_DATA
     #include "renderer/CCTextureCache.h"
@@ -424,17 +429,29 @@ void Texture2D::convertRGBA8888ToRGB5A1(const unsigned char* data, ssize_t dataL
 // conventer function end
 //////////////////////////////////////////////////////////////////////////
 
+#ifdef DIRECTX_ENABLED
+int Texture2D::s_TextureCount = 0;
+#endif
+
 Texture2D::Texture2D()
 : _pixelFormat(Texture2D::PixelFormat::DEFAULT)
 , _pixelsWide(0)
 , _pixelsHigh(0)
+#ifndef DIRECTX_ENABLED
 , _name(0)
+#endif
 , _maxS(0.0)
 , _maxT(0.0)
 , _hasPremultipliedAlpha(false)
 , _hasMipmaps(false)
 , _shaderProgram(nullptr)
 , _antialiasEnabled(true)
+#ifdef DIRECTX_ENABLED
+, _texture(nullptr)
+, _textureView(nullptr)
+, _name(++s_TextureCount)
+, _renderTargetTexture(false)
+#endif
 {
 }
 
@@ -447,19 +464,29 @@ Texture2D::~Texture2D()
     CCLOGINFO("deallocing Texture2D: %p - id=%u", this, _name);
     CC_SAFE_RELEASE(_shaderProgram);
 
-    if(_name)
+#ifdef DIRECTX_ENABLED
+	DXResourceManager::getInstance().remove(&_texture);
+	DXResourceManager::getInstance().remove(&_textureView);
+#else
+	if (_name)
     {
         GL::deleteTexture(_name);
     }
+#endif
 }
 
 void Texture2D::releaseGLTexture()
 {
-    if(_name)
+#ifdef DIRECTX_ENABLED
+	DXResourceManager::getInstance().remove(&_texture);
+	DXResourceManager::getInstance().remove(&_textureView);
+#else
+	if (_name)
     {
         GL::deleteTexture(_name);
     }
     _name = 0;
+#endif
 }
 
 
@@ -577,7 +604,86 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
         return false;
     }
 
-    //Set the row align only when mipmapsNum == 1 and the data is uncompressed
+#ifdef DIRECTX_ENABLED
+	DXResourceManager::getInstance().remove(&_texture);
+	DXResourceManager::getInstance().remove(&_textureView);
+
+
+	GLViewImpl *view = GLViewImpl::sharedOpenGLView();
+
+	DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	const unsigned int bpp = getBitsPerPixelForFormat(pixelFormat);
+	if (pixelFormat == PixelFormat::RGBA4444)
+	{
+		format = DXGI_FORMAT_B4G4R4A4_UNORM;
+		CCASSERT(false, "Texture format RGBA4444 not supported.");
+		// TODO // convertRGBA4444ToBGRA4444(mipmaps->address, mipmaps->len, mipmaps->address);
+	}
+	else if (pixelFormat == PixelFormat::RGB888)
+	{
+		format = DXGI_FORMAT_R8G8B8A8_UNORM;// DXGI_FORMAT_B8G8R8X8_UNORM;
+	}
+	else if (pixelFormat == PixelFormat::A8)
+	{
+		format = DXGI_FORMAT_A8_UNORM;
+	}
+	else if (pixelFormat == PixelFormat::AI88)
+	{
+		format = DXGI_FORMAT_R8G8_UNORM;
+	}
+	else if (pixelFormat != PixelFormat::RGBA8888)
+	{
+		CCASSERT(false, "Texture format not supported.");
+	}
+
+	const int rowPitch = pixelsWide * bpp / 8;
+
+	D3D11_TEXTURE2D_DESC textureDescription;
+	textureDescription.Width = pixelsWide;
+	textureDescription.Height = pixelsHigh;
+	textureDescription.MipLevels = mipmapsNum;
+	textureDescription.ArraySize = 1;
+	textureDescription.Format = format;
+	textureDescription.SampleDesc.Count = 1;
+	textureDescription.SampleDesc.Quality = 0;
+	textureDescription.Usage = D3D11_USAGE_DEFAULT;
+	textureDescription.BindFlags = _renderTargetTexture ? (D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET) : (D3D11_BIND_SHADER_RESOURCE);
+	textureDescription.CPUAccessFlags = 0;
+	textureDescription.MiscFlags = (mipmapsNum > 1) ? D3D11_RESOURCE_MISC_GENERATE_MIPS : 0;
+
+	D3D11_SUBRESOURCE_DATA initData;
+	initData.pSysMem = mipmaps->address;
+	initData.SysMemPitch = static_cast<UINT>(rowPitch);
+	initData.SysMemSlicePitch = static_cast<UINT>(mipmaps->len);
+
+	HRESULT hr = view->GetDevice()->CreateTexture2D(&textureDescription, (mipmapsNum > 1) ? nullptr : &initData, &_texture);
+	if (SUCCEEDED(hr) && _texture != nullptr)
+	{
+		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDescription;
+		memset(&SRVDescription, 0, sizeof(SRVDescription));
+		SRVDescription.Format = format;
+		SRVDescription.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		SRVDescription.Texture2D.MipLevels = (mipmapsNum > 1) ? -1 : 1;
+
+		hr = view->GetDevice()->CreateShaderResourceView(_texture, &SRVDescription, &_textureView);
+		if (FAILED(hr))
+		{
+			_texture = nullptr;
+		}
+
+		if (mipmapsNum > 1)
+		{
+			view->GetContext()->UpdateSubresource(_texture, 0, nullptr, mipmaps->address, static_cast<UINT>(rowPitch), static_cast<UINT>(mipmaps->len));
+			view->GetContext()->GenerateMips(_textureView);
+		}
+
+		DXResourceManager::getInstance().add(&_texture);
+		DXResourceManager::getInstance().add(&_textureView);
+	}
+
+	DX::ThrowIfFailed(hr);
+#else
+	//Set the row align only when mipmapsNum == 1 and the data is uncompressed
     if (mipmapsNum == 1 && !info.compressed)
     {
         unsigned int bytesPerRow = pixelsWide * info.bpp / 8;
@@ -672,6 +778,7 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
         width = MAX(width >> 1, 1);
         height = MAX(height >> 1, 1);
     }
+#endif
 
     _contentSize = Size((float)pixelsWide, (float)pixelsHigh);
     _pixelsWide = pixelsWide;
@@ -692,9 +799,26 @@ bool Texture2D::updateWithData(const void *data,int offsetX,int offsetY,int widt
 {
     if (_name)
     {
+#ifndef DIRECTX_ENABLED
         GL::bindTexture2D(_name);
         const PixelFormatInfo& info = _pixelFormatInfoTables.at(_pixelFormat);
         glTexSubImage2D(GL_TEXTURE_2D,0,offsetX,offsetY,width,height,info.format, info.type,data);
+#else
+		GLViewImpl *view = GLViewImpl::sharedOpenGLView();
+
+		CD3D11_BOX box;
+		box.left = offsetX;
+		box.top = offsetY;
+		box.right = offsetX + width;
+		box.bottom = offsetY + height;
+		box.front = 0;
+		box.back = 1;
+
+		const PixelFormatInfo &info = _pixelFormatInfoTables.at(_pixelFormat);
+		const int rowPitch = _pixelsWide * info.bpp / 8;
+
+		view->GetContext()->UpdateSubresource(_texture, 0, &box, data, rowPitch, 0);
+#endif
 
         return true;
     }
@@ -709,7 +833,7 @@ std::string Texture2D::getDescription() const
 // implementation Texture2D (Image)
 bool Texture2D::initWithImage(Image *image)
 {
-    return initWithImage(image, g_defaultAlphaPixelFormat);
+    return initWithImage(image, PixelFormat::AUTO);
 }
 
 bool Texture2D::initWithImage(Image *image, PixelFormat format)
@@ -765,7 +889,14 @@ bool Texture2D::initWithImage(Image *image, PixelFormat format)
         unsigned char* outTempData = nullptr;
         ssize_t outTempDataLen = 0;
 
-        pixelFormat = convertDataToFormat(tempData, tempDataLen, renderFormat, pixelFormat, &outTempData, &outTempDataLen);
+#ifdef DIRECTX_ENABLED
+		if (pixelFormat == PixelFormat::RGB888)
+		{
+			pixelFormat = PixelFormat::RGBA8888;
+		}
+#endif
+
+		pixelFormat = convertDataToFormat(tempData, tempDataLen, renderFormat, pixelFormat, &outTempData, &outTempDataLen);
 
         initWithData(outTempData, outTempDataLen, pixelFormat, imageWidth, imageHeight, imageSize);
 
@@ -1134,6 +1265,9 @@ bool Texture2D::initWithString(const char *text, const FontDefinition& textDefin
 
 void Texture2D::drawAtPoint(const Vec2& point)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Texture2D::drawAtPoint is not supported");
+#else
     GLfloat    coordinates[] = {
         0.0f,    _maxT,
         _maxS,_maxT,
@@ -1168,10 +1302,14 @@ void Texture2D::drawAtPoint(const Vec2& point)
 #endif // EMSCRIPTEN
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+#endif
 }
 
 void Texture2D::drawInRect(const Rect& rect)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Texture2D::drawInRect is not supported");
+#else
     GLfloat    coordinates[] = {    
         0.0f,    _maxT,
         _maxS,_maxT,
@@ -1200,6 +1338,7 @@ void Texture2D::drawInRect(const Rect& rect)
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 0, coordinates);
 #endif // EMSCRIPTEN
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+#endif
 }
 
 void Texture2D::PVRImagesHavePremultipliedAlpha(bool haveAlphaPremultiplied)
@@ -1215,12 +1354,16 @@ void Texture2D::PVRImagesHavePremultipliedAlpha(bool haveAlphaPremultiplied)
 
 void Texture2D::generateMipmap()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Texture2D::generateMipmap is not supported");
+#else
     CCASSERT(_pixelsWide == ccNextPOT(_pixelsWide) && _pixelsHigh == ccNextPOT(_pixelsHigh), "Mipmap texture only works in POT textures");
     GL::bindTexture2D( _name );
     glGenerateMipmap(GL_TEXTURE_2D);
     _hasMipmaps = true;
 #if CC_ENABLE_CACHE_TEXTURE_DATA
     VolatileTextureMgr::setHasMipmaps(this, _hasMipmaps);
+#endif
 #endif
 }
 
@@ -1231,6 +1374,9 @@ bool Texture2D::hasMipmaps() const
 
 void Texture2D::setTexParameters(const TexParams &texParams)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Texture2D::setTexParameters is not supported");
+#else
     CCASSERT((_pixelsWide == ccNextPOT(_pixelsWide) || texParams.wrapS == GL_CLAMP_TO_EDGE) &&
         (_pixelsHigh == ccNextPOT(_pixelsHigh) || texParams.wrapT == GL_CLAMP_TO_EDGE),
         "GL_CLAMP_TO_EDGE should be used in NPOT dimensions");
@@ -1244,10 +1390,14 @@ void Texture2D::setTexParameters(const TexParams &texParams)
 #if CC_ENABLE_CACHE_TEXTURE_DATA
     VolatileTextureMgr::setTexParameters(this, texParams);
 #endif
+#endif
 }
 
 void Texture2D::setAliasTexParameters()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Texture2D::setAliasTexParameters is not supported");
+#else
     if (! _antialiasEnabled)
     {
         return;
@@ -1276,10 +1426,14 @@ void Texture2D::setAliasTexParameters()
     TexParams texParams = {(GLuint)(_hasMipmaps?GL_NEAREST_MIPMAP_NEAREST:GL_NEAREST),GL_NEAREST,GL_NONE,GL_NONE};
     VolatileTextureMgr::setTexParameters(this, texParams);
 #endif
+#endif
 }
 
 void Texture2D::setAntiAliasTexParameters()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Texture2D::setAntiAliasTexParameters is not supported");
+#else
     if ( _antialiasEnabled )
     {
         return;
@@ -1307,6 +1461,7 @@ void Texture2D::setAntiAliasTexParameters()
 #if CC_ENABLE_CACHE_TEXTURE_DATA
     TexParams texParams = {(GLuint)(_hasMipmaps?GL_LINEAR_MIPMAP_NEAREST:GL_LINEAR),GL_LINEAR,GL_NONE,GL_NONE};
     VolatileTextureMgr::setTexParameters(this, texParams);
+#endif
 #endif
 }
 

@@ -37,8 +37,6 @@ THE SOFTWARE.
 #include "physics/CCPhysicsWorld.h"
 #endif
 
-int g_physicsSceneCount = 0;
-
 NS_CC_BEGIN
 
 Scene::Scene()
@@ -60,10 +58,6 @@ Scene::Scene()
 Scene::~Scene()
 {
 #if CC_USE_PHYSICS
-    if (_physicsWorld)
-    {
-        g_physicsSceneCount--;
-    }
     CC_SAFE_DELETE(_physicsWorld);
 #endif
     Director::getInstance()->getEventDispatcher()->removeEventListener(_event);
@@ -132,6 +126,9 @@ void Scene::render(Renderer* renderer)
     const auto& transform = getNodeToParentTransform();
     for (const auto& camera : _cameras)
     {
+        if (!camera->isVisible())
+            continue;
+        
         Camera::_visitingCamera = camera;
         if (Camera::_visitingCamera->getCameraFlag() == CameraFlag::DEFAULT)
         {
@@ -139,27 +136,27 @@ void Scene::render(Renderer* renderer)
             continue;
         }
         
-        director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-        director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, Camera::_visitingCamera->getViewProjectionMatrix());
+        //director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+        //director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, Camera::_visitingCamera->getViewProjectionMatrix());
         
         //visit the scene
         visit(renderer, transform, 0);
         renderer->render();
         
-        director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+        //director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     }
     //draw with default camera
     if (defaultCamera)
     {
         Camera::_visitingCamera = defaultCamera;
-        director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-        director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, Camera::_visitingCamera->getViewProjectionMatrix());
+        //director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+        //director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, Camera::_visitingCamera->getViewProjectionMatrix());
         
         //visit the scene
         visit(renderer, transform, 0);
         renderer->render();
         
-        director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+        //director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     }
     Camera::_visitingCamera = nullptr;
 }
@@ -175,15 +172,6 @@ void Scene::addChild(Node* child, int zOrder, const std::string &name)
 {
     Node::addChild(child, zOrder, name);
     addChildToPhysicsWorld(child);
-}
-
-void Scene::update(float delta)
-{
-    Node::update(delta);
-    if (nullptr != _physicsWorld && _physicsWorld->isAutoStep())
-    {
-        _physicsWorld->update(delta);
-    }
 }
 
 Scene* Scene::createWithPhysics()
@@ -212,9 +200,7 @@ bool Scene::initWithPhysics()
         this->setContentSize(director->getWinSize());
         CC_BREAK_IF(! (_physicsWorld = PhysicsWorld::construct(*this)));
         
-        this->scheduleUpdate();
         // success
-        g_physicsSceneCount += 1;
         ret = true;
     } while (0);
     return ret;

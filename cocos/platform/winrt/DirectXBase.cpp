@@ -21,6 +21,7 @@
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
 
 #include "DirectXBase.h" 
+#include "DirectXHelper.h"
 #include <windows.ui.xaml.media.dxinterop.h>
 #include <math.h>
 
@@ -38,7 +39,7 @@ DirectXBase::DirectXBase() :
 }
 
 // Initialize the DirectX resources required to run.
-void DirectXBase::Initialize(CoreWindow^ window, SwapChainBackgroundPanel^ panel, float dpi)
+void DirectXBase::Initialize(CoreWindow^ window, SwapChainPanel^ panel, float dpi)
 {
    m_window = window;
    m_panel = panel;
@@ -187,7 +188,7 @@ void DirectXBase::SetDpi(float dpi)
 void DirectXBase::UpdateForWindowSizeChange()
 {
    // Only handle window size changed if there is no pending DPI change.
-   if (m_dpi != DisplayProperties::LogicalDpi)
+   if (m_dpi != DisplayInformation::GetForCurrentView()->LogicalDpi)
       return;
 
    if (m_window->Bounds.Width  != m_windowBounds.Width ||
@@ -272,7 +273,7 @@ void DirectXBase::CreateWindowSizeDependentResources()
             )
          );
 
-      ComPtr<ISwapChainBackgroundPanelNative> panelNative;
+      ComPtr<ISwapChainPanelNative> panelNative;
       DX::ThrowIfFailed(
          reinterpret_cast<IUnknown*>(m_panel)->QueryInterface(IID_PPV_ARGS(&panelNative))
          );

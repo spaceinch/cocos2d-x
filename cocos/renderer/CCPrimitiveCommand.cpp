@@ -49,13 +49,13 @@ PrimitiveCommand::~PrimitiveCommand()
 {
 }
 
-void PrimitiveCommand::init(float globalOrder, GLuint textureID, GLProgramState* glProgramState, BlendFunc blendType, Primitive* primitive,const Mat4& mv)
+void PrimitiveCommand::init(float globalOrder, GLuint textureID, GLProgramState* glProgramState, BlendFunc blendType, Primitive* primitive, const Mat4& mv, uint32_t flags)
 {
     CCASSERT(glProgramState, "Invalid GLProgramState");
     CCASSERT(glProgramState->getVertexAttribsFlags() == 0, "No custom attributes are supported in PrimitiveCommand");
     CCASSERT(primitive != nullptr, "Could not render null primitive");
     
-    _globalOrder = globalOrder;
+    RenderCommand::init(globalOrder, mv, flags);
     
     _primitive = primitive;
     
@@ -70,8 +70,16 @@ void PrimitiveCommand::init(float globalOrder, GLuint textureID, GLProgramState*
     }
 }
 
+void PrimitiveCommand::init(float globalOrder, GLuint textureID, GLProgramState* glProgramState, BlendFunc blendType, Primitive* primitive,const Mat4& mv)
+{
+    init(globalOrder, textureID, glProgramState, blendType, primitive, mv, 0);
+}
+
 void PrimitiveCommand::execute() const
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "PrimitiveCommand::execute is not supported");
+#else
     //Set texture
     GL::bindTexture2D(_textureID);
     
@@ -82,6 +90,7 @@ void PrimitiveCommand::execute() const
     
     _primitive->draw();
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,_primitive->getCount());
+#endif
 }
 
 NS_CC_END

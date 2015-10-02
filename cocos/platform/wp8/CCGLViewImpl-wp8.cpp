@@ -79,9 +79,7 @@ GLViewImpl::GLViewImpl()
 	, m_windowVisible(true)
     , m_width(0)
     , m_height(0)
-    , m_eglDisplay(nullptr)
-    , m_eglContext(nullptr)
-    , m_eglSurface(nullptr)
+	, m_wp8window(nullptr)
     , m_delegate(nullptr)
     , m_messageBoxDelegate(nullptr)
     , m_orientation(DisplayOrientations::Landscape)
@@ -112,23 +110,12 @@ bool GLViewImpl::initWithFullScreen(const std::string& viewName)
 }
 
 
-bool GLViewImpl::Create(EGLDisplay eglDisplay, EGLContext eglContext, EGLSurface eglSurface, float width, float height, DisplayOrientations orientation)
+bool GLViewImpl::Create(IWP8Win *window, float width, float height, DisplayOrientations orientation)
 {
     m_orientation = orientation;
-    m_eglDisplay = eglDisplay;
-    m_eglContext = eglContext;
-    m_eglSurface = eglSurface;
+	m_wp8window = window;
     UpdateForWindowSizeChange(width, height);
     return true;
-}
-
-void GLViewImpl::UpdateDevice(EGLDisplay eglDisplay, EGLContext eglContext, EGLSurface eglSurface)
-{
-    m_eglDisplay = eglDisplay;
-    m_eglContext = eglContext;
-    m_eglSurface = eglSurface;
-
-    //UpdateForWindowSizeChange(width, height);
 }
 
 void GLViewImpl::setIMEKeyboardState(bool bOpen)
@@ -166,14 +153,13 @@ Platform::String^ GLViewImpl::stringToPlatformString(std::string strSrc)
 
 void GLViewImpl::swapBuffers()
 {
-    eglSwapBuffers(m_eglDisplay, m_eglSurface);  
 }
 
 
 bool GLViewImpl::isOpenGLReady()
 {
 	// TODO: need to revisit this
-    return (m_eglDisplay && m_orientation != DisplayOrientations::None);
+	return (m_wp8window && m_wp8window->GetDevice() && m_orientation != DisplayOrientations::None);
 }
 
 void GLViewImpl::end()
@@ -383,18 +369,8 @@ void GLViewEventHandler::OnGLFWWindowSizeFunCallback(GLFWwindow *windows, int wi
 
 void GLViewImpl::UpdateWindowSize()
 {
-    float width, height;
-
-    if(m_orientation == DisplayOrientations::Landscape || m_orientation == DisplayOrientations::LandscapeFlipped)
-    {
-        width = m_height;
-        height = m_width;
-    }
-    else
-    {
-        width = m_width;
-        height = m_height;
-    }
+    float width = m_width;
+    float height = m_height;
 
     UpdateOrientationMatrix();
 
@@ -493,42 +469,68 @@ Vec2 GLViewImpl::GetPoint(PointerEventArgs^ args) {
 
 void GLViewImpl::setViewPortInPoints(float x , float y , float w , float h)
 {
+#ifdef DIRECTX_ENABLED
+#define SET_VIEWPORT		DXStateCache::getInstance().setViewport
+#else
+#define SET_VIEWPORT		glViewport
+#endif
     switch(m_orientation)
 	{
 		case DisplayOrientations::Landscape:
 		case DisplayOrientations::LandscapeFlipped:
-            glViewport((GLint)(y * _scaleY + _viewPortRect.origin.y),
-                       (GLint)(x * _scaleX + _viewPortRect.origin.x),
-                       (GLsizei)(h * _scaleY),
-                       (GLsizei)(w * _scaleX));
+			SET_VIEWPORT((GLint)(y * _scaleY + _viewPortRect.origin.y),
+                         (GLint)(x * _scaleX + _viewPortRect.origin.x),
+                         (GLsizei)(h * _scaleY),
+                         (GLsizei)(w * _scaleX));
 			break;
 
         default:
-            glViewport((GLint)(x * _scaleX + _viewPortRect.origin.x),
-                       (GLint)(y * _scaleY + _viewPortRect.origin.y),
-                       (GLsizei)(w * _scaleX),
-                       (GLsizei)(h * _scaleY));
+			SET_VIEWPORT((GLint)(x * _scaleX + _viewPortRect.origin.x),
+                         (GLint)(y * _scaleY + _viewPortRect.origin.y),
+                         (GLsizei)(w * _scaleX),
+                         (GLsizei)(h * _scaleY));
 	}
+
+#undef SET_VIEWPORT
 }
 
 void GLViewImpl::setScissorInPoints(float x , float y , float w , float h)
 {
-    switch(m_orientation)
+#ifdef DIRECTX_ENABLED
+	switch (m_orientation)
 	{
-		case DisplayOrientations::Landscape:
-		case DisplayOrientations::LandscapeFlipped:
-            glScissor((GLint)(y * _scaleX + _viewPortRect.origin.y),
-                       (GLint)((_viewPortRect.size.width - ((x + w) * _scaleX)) + _viewPortRect.origin.x),
-                       (GLsizei)(h * _scaleY),
-                       (GLsizei)(w * _scaleX));
-			break;
+	case DisplayOrientations::Landscape:
+	case DisplayOrientations::LandscapeFlipped:
+		DXStateCache::getInstance().setScissor((GLint)(y * _scaleX + _viewPortRect.origin.y),
+			(GLint)((_viewPortRect.size.width - ((x + w) * _scaleX)) + _viewPortRect.origin.x),
+			(GLsizei)(h * _scaleY),
+			(GLsizei)(w * _scaleX));
+		break;
 
-        default:
-            glScissor((GLint)(x * _scaleX + _viewPortRect.origin.x),
-                       (GLint)(y * _scaleY + _viewPortRect.origin.y),
-                       (GLsizei)(w * _scaleX),
-                       (GLsizei)(h * _scaleY));
+	default:
+		DXStateCache::getInstance().setScissor((GLint)(x * _scaleX + _viewPortRect.origin.x),
+			(GLint)((_designResolutionSize.height - y - h) * _scaleY + _viewPortRect.origin.y),
+			(GLsizei)(w * _scaleX),
+			(GLsizei)(h * _scaleY));
 	}
+#else
+	switch (m_orientation)
+	{
+	case DisplayOrientations::Landscape:
+	case DisplayOrientations::LandscapeFlipped:
+		glScissor((GLint)(y * _scaleX + _viewPortRect.origin.y),
+			(GLint)((_viewPortRect.size.width - ((x + w) * _scaleX)) + _viewPortRect.origin.x),
+			(GLsizei)(h * _scaleY),
+			(GLsizei)(w * _scaleX));
+		break;
+
+	default:
+		glScissor((GLint)(x * _scaleX + _viewPortRect.origin.x),
+			(GLint)(y * _scaleY + _viewPortRect.origin.y),
+			(GLsizei)(w * _scaleX),
+			(GLsizei)(h * _scaleY));
+	}
+#endif
 }
 
 void GLViewImpl::QueueBackKeyPress()
@@ -555,6 +557,26 @@ void GLViewImpl::ProcessEvents()
     {
         e->execute();
     }
+}
+
+ID3D11Device1* GLViewImpl::GetDevice()
+{
+	return m_wp8window ? m_wp8window->GetDevice() : nullptr;
+}
+
+ID3D11DeviceContext1* GLViewImpl::GetContext()
+{
+	return m_wp8window ? m_wp8window->GetContext() : nullptr;
+}
+
+ID3D11DepthStencilView* GLViewImpl::GetDepthStencilView()
+{
+	return m_wp8window ? m_wp8window->GetDepthStencilView() : nullptr;
+}
+
+ID3D11RenderTargetView* const* GLViewImpl::GetRenderTargetView() const
+{
+	return m_wp8window ? m_wp8window->GetRenderTargetView() : nullptr;
 }
 
 NS_CC_END

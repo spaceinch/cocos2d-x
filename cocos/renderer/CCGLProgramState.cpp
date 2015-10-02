@@ -76,8 +76,12 @@ void UniformValue::apply()
     {
         switch (_uniform->type) {
             case GL_SAMPLER_2D:
+#ifdef DIRECTX_ENABLED
+				CCASSERT(false, "UniformValue::apply is not supported");
+#else
                 _glprogram->setUniformLocationWith1i(_uniform->location, _value.tex.textureUnit);
                 GL::bindTexture2DN(_value.tex.textureUnit, _value.tex.textureId);
+#endif
                 break;
 
             case GL_INT:
@@ -203,6 +207,7 @@ VertexAttribValue::~VertexAttribValue()
 
 void VertexAttribValue::apply()
 {
+#ifndef DIRECTX_ENABLED
     if(_enabled) {
         if(_useCallback) {
             (*_value.callback)(_vertexAttrib);
@@ -217,6 +222,7 @@ void VertexAttribValue::apply()
                                   _value.pointer.pointer);
         }
     }
+#endif
 }
 
 void VertexAttribValue::setCallback(const std::function<void(VertexAttrib*)> &callback)
@@ -282,7 +288,12 @@ GLProgramState::GLProgramState()
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     /** listen the event that renderer was recreated on Android/WP8 */
     CCLOG("create rendererRecreatedListener for GLProgramState");
-    _backToForegroundlistener = EventListenerCustom::create(EVENT_RENDERER_RECREATED, [this](EventCustom*) { _uniformAttributeValueDirty = true; });
+    _backToForegroundlistener = EventListenerCustom::create(EVENT_RENDERER_RECREATED, 
+        [this](EventCustom*) 
+        {
+            CCLOG("Dirty Uniform and Attributes of GLProgramState"); 
+            _uniformAttributeValueDirty = true;
+        });
     Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(_backToForegroundlistener, -1);
 #endif
 }
@@ -303,6 +314,7 @@ bool GLProgramState::init(GLProgram* glprogram)
     _glprogram = glprogram;
     _glprogram->retain();
 
+#ifndef DIRECTX_ENABLED
     for(auto &attrib : _glprogram->_vertexAttribs) {
         VertexAttribValue value(&attrib.second);
         _attributes[attrib.first] = value;
@@ -313,6 +325,7 @@ bool GLProgramState::init(GLProgram* glprogram)
         _uniforms[uniform.second.location] = value;
         _uniformsByName[uniform.first] = uniform.second.location;
     }
+#endif
 
     return true;
 }
@@ -333,13 +346,16 @@ void GLProgramState::apply(const Mat4& modelView)
     applyAttributes();
 
     applyUniforms();
+
+	_glprogram->set();
 }
 
-void GLProgramState::applyGLProgram(const Mat4& modelView)
+void GLProgramState::updateUniformsAndAttributes()
 {
     CCASSERT(_glprogram, "invalid glprogram");
     if(_uniformAttributeValueDirty)
     {
+#ifndef DIRECTX_ENABLED
         for(auto& uniformLocation : _uniformsByName)
         {
             _uniforms[uniformLocation.second]._uniform = _glprogram->getUniform(uniformLocation.first);
@@ -352,18 +368,27 @@ void GLProgramState::applyGLProgram(const Mat4& modelView)
             if(attributeValue.second._enabled)
                 _vertexAttribsFlags |= 1 << attributeValue.second._vertexAttrib->index;
         }
+#endif
         
         _uniformAttributeValueDirty = false;
         
     }
+}
+
+void GLProgramState::applyGLProgram(const Mat4& modelView)
+{
+    CCASSERT(_glprogram, "invalid glprogram");
+    updateUniformsAndAttributes();
     // set shader
     _glprogram->use();
     _glprogram->setUniformsForBuiltins(modelView);
 }
 void GLProgramState::applyAttributes(bool applyAttribFlags)
 {
+#ifndef DIRECTX_ENABLED
     // Don't set attributes if they weren't set
     // Use Case: Auto-batching
+    updateUniformsAndAttributes();
     if(_vertexAttribsFlags) {
         // enable/disable vertex attribs
         if (applyAttribFlags)
@@ -374,10 +399,12 @@ void GLProgramState::applyAttributes(bool applyAttribFlags)
             attribute.second.apply();
         }
     }
+#endif
 }
 void GLProgramState::applyUniforms()
 {
     // set uniforms
+    updateUniformsAndAttributes();
     for(auto& uniform : _uniforms) {
         uniform.second.apply();
     }
@@ -395,6 +422,7 @@ void GLProgramState::setGLProgram(GLProgram *glprogram)
 
 UniformValue* GLProgramState::getUniformValue(GLint uniformLocation)
 {
+    updateUniformsAndAttributes();
     const auto itr = _uniforms.find(uniformLocation);
     if (itr != _uniforms.end())
         return &itr->second;
@@ -403,6 +431,7 @@ UniformValue* GLProgramState::getUniformValue(GLint uniformLocation)
 
 UniformValue* GLProgramState::getUniformValue(const std::string &name)
 {
+    updateUniformsAndAttributes();
     const auto itr = _uniformsByName.find(name);
     if (itr != _uniformsByName.end())
         return &_uniforms[itr->second];
@@ -411,6 +440,7 @@ UniformValue* GLProgramState::getUniformValue(const std::string &name)
 
 VertexAttribValue* GLProgramState::getVertexAttribValue(const std::string &name)
 {
+    updateUniformsAndAttributes();
     const auto itr = _attributes.find(name);
     if( itr != _attributes.end())
         return &itr->second;
@@ -577,18 +607,29 @@ void GLProgramState::setUniformMat4(GLint uniformLocation, const Mat4& value)
 
 void GLProgramState::setUniformTexture(const std::string &uniformName, Texture2D *texture)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "GLProgramState::setUniformTexture (by uniformName + texture) is not supported");
+#else
     CCASSERT(texture, "Invalid texture");
     setUniformTexture(uniformName, texture->getName());
+#endif
 }
 
 void GLProgramState::setUniformTexture(GLint uniformLocation, Texture2D *texture)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "GLProgramState::setUniformTexture (by uniformLocation + texture) is not supported");
+#else
     CCASSERT(texture, "Invalid texture");
     setUniformTexture(uniformLocation, texture->getName());
+#endif
 }
 
 void GLProgramState::setUniformTexture(const std::string &uniformName, GLuint textureId)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "GLProgramState::setUniformTexture (by uniformName + textureId) is not supported");
+#else
     auto v = getUniformValue(uniformName);
     if (v)
     {
@@ -606,10 +647,14 @@ void GLProgramState::setUniformTexture(const std::string &uniformName, GLuint te
     {
         CCLOG("cocos2d: warning: Uniform not found: %s", uniformName.c_str());
     }
+#endif
 }
 
 void GLProgramState::setUniformTexture(GLint uniformLocation, GLuint textureId)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "GLProgramState::setUniformTexture (by uniformLocation + textureId) is not supported");
+#else
     auto v = getUniformValue(uniformLocation);
     if (v)
     {
@@ -627,6 +672,7 @@ void GLProgramState::setUniformTexture(GLint uniformLocation, GLuint textureId)
     {
         CCLOG("cocos2d: warning: Uniform at location not found: %i", uniformLocation);
     }
+#endif
 }
 
 NS_CC_END

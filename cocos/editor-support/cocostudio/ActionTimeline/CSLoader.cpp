@@ -457,7 +457,7 @@ void CSLoader::initNode(Node* node, const rapidjson::Value& json)
     GLubyte red         = (GLubyte)DICTOOL->getIntValue_json(json, RED, 255);
     GLubyte green       = (GLubyte)DICTOOL->getIntValue_json(json, GREEN, 255);
     GLubyte blue        = (GLubyte)DICTOOL->getIntValue_json(json, BLUE, 255);
-    int zorder		    = DICTOOL->getIntValue_json(json, ZORDER);
+    int zorder        = DICTOOL->getIntValue_json(json, ZORDER);
     int tag             = DICTOOL->getIntValue_json(json, TAG);
     int actionTag       = DICTOOL->getIntValue_json(json, ACTION_TAG);
     bool visible        = DICTOOL->getBooleanValue_json(json, VISIBLE);

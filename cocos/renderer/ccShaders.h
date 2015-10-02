@@ -36,11 +36,55 @@ NS_CC_BEGIN
  * @{
  */
 
+#ifdef DIRECTX_ENABLED
+
+extern CC_DLL const ShaderDescriptor ccPosition_uColor_frag;
+extern CC_DLL const ShaderDescriptor ccPosition_uColor_vert;
+extern CC_DLL const ShaderDescriptor ccPositionColor_frag;
+extern CC_DLL const ShaderDescriptor ccPositionColor_vert;
+extern CC_DLL const ShaderDescriptor ccPositionColor_noMVP_vert;
+
+extern CC_DLL const ShaderDescriptor ccPositionTexture_frag;
+extern CC_DLL const ShaderDescriptor ccPositionTexture_vert;
+
+extern CC_DLL const ShaderDescriptor ccPositionTextureA8Color_frag;
+extern CC_DLL const ShaderDescriptor ccPositionTextureA8Color_vert;
+
+extern CC_DLL const ShaderDescriptor ccPositionTextureColor_frag;
+extern CC_DLL const ShaderDescriptor ccPositionTextureColor_vert;
+
+extern CC_DLL const ShaderDescriptor ccPositionTextureColor_noMVP_frag;
+extern CC_DLL const ShaderDescriptor ccPositionTextureColor_noMVP_vert;
+
+extern CC_DLL const ShaderDescriptor ccPositionTextureColorAlphaTest_frag;
+
+extern CC_DLL const ShaderDescriptor ccPositionTexture_uColor_frag;
+extern CC_DLL const ShaderDescriptor ccPositionTexture_uColor_vert;
+
+extern CC_DLL const ShaderDescriptor ccPositionColorLengthTexture_frag;
+extern CC_DLL const ShaderDescriptor ccPositionColorLengthTexture_vert;
+
+extern CC_DLL const ShaderDescriptor ccLabelDistanceFieldNormal_frag;
+extern CC_DLL const ShaderDescriptor ccLabelDistanceFieldGlow_frag;
+extern CC_DLL const ShaderDescriptor ccLabelNormal_frag;
+extern CC_DLL const ShaderDescriptor ccLabelOutline_frag;
+
+extern CC_DLL const ShaderDescriptor ccLabel_vert;
+
+extern CC_DLL const ShaderDescriptor cc3D_PositionTex_vert;
+extern CC_DLL const ShaderDescriptor cc3D_SkinPositionTex_vert;
+extern CC_DLL const ShaderDescriptor cc3D_ColorTex_frag;
+extern CC_DLL const ShaderDescriptor cc3D_Color_frag;
+
+#else
+
 extern CC_DLL const GLchar * ccPosition_uColor_frag;
 extern CC_DLL const GLchar * ccPosition_uColor_vert;
 
 extern CC_DLL const GLchar * ccPositionColor_frag;
 extern CC_DLL const GLchar * ccPositionColor_vert;
+
+extern CC_DLL const GLchar * ccPositionColorTextureAsPointsize_vert;
 
 extern CC_DLL const GLchar * ccPositionTexture_frag;
 extern CC_DLL const GLchar * ccPositionTexture_vert;
@@ -77,6 +121,8 @@ extern CC_DLL const GLchar * cc3D_PositionNormalTex_vert;
 extern CC_DLL const GLchar * cc3D_SkinPositionNormalTex_vert;
 extern CC_DLL const GLchar * cc3D_ColorNormalTex_frag;
 extern CC_DLL const GLchar * cc3D_ColorNormal_frag;
+
+#endif
 // end of shaders group
 /// @}
 

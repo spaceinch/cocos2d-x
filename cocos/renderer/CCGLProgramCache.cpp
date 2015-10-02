@@ -32,6 +32,10 @@ THE SOFTWARE.
 #include "base/ccMacros.h"
 #include "base/CCConfiguration.h"
 
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8  || defined(WP8_SHADER_COMPILER)
+#include "ui/shaders/UIShaders.h"
+#endif
+
 NS_CC_BEGIN
 
 enum {
@@ -40,6 +44,7 @@ enum {
     kShaderType_PositionTextureColorAlphaTest,
     kShaderType_PositionTextureColorAlphaTestNoMV,
     kShaderType_PositionColor,
+    kShaderType_PositionColorTextureAsPointsize,
     kShaderType_PositionColor_noMVP,
     kShaderType_PositionTexture,
     kShaderType_PositionTexture_uColor,
@@ -56,6 +61,9 @@ enum {
     kShaderType_3DPositionNormal,
     kShaderType_3DPositionNormalTex,
     kShaderType_3DSkinPositionNormalTex,
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || defined(WP8_SHADER_COMPILER)
+    kShaderType_PositionColor_noMVP_GrayScale,
+#endif
     kShaderType_MAX,
 };
 
@@ -138,7 +146,12 @@ void GLProgramCache::loadDefaultGLPrograms()
     p = new (std::nothrow) GLProgram();
     loadDefaultGLProgram(p, kShaderType_PositionColor);
     _programs.insert( std::make_pair(GLProgram::SHADER_NAME_POSITION_COLOR, p) );
-
+    
+    // Position, Color, PointSize shader
+    p = new (std::nothrow) GLProgram();
+    loadDefaultGLProgram(p, kShaderType_PositionColorTextureAsPointsize);
+    _programs.insert( std::make_pair(GLProgram::SHADER_NAME_POSITION_COLOR_TEXASPOINTSIZE, p) );
+    
     //
     // Position, Color shader no MVP
     //
@@ -222,6 +235,13 @@ void GLProgramCache::loadDefaultGLPrograms()
     p = new GLProgram();
     loadDefaultGLProgram(p, kShaderType_3DSkinPositionNormalTex);
     _programs.insert(std::make_pair(GLProgram::SHADER_3D_SKINPOSITION_NORMAL_TEXTURE, p));
+
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || defined(WP8_SHADER_COMPILER)
+    p = new GLProgram();
+    loadDefaultGLProgram(p, kShaderType_PositionColor_noMVP_GrayScale);
+    _programs.insert(std::make_pair(GLProgram::SHADER_NAME_POSITION_COLOR_NO_MVP_GRAYSCALE, p));
+#endif
+
 }
 
 void GLProgramCache::reloadDefaultGLPrograms()
@@ -254,6 +274,11 @@ void GLProgramCache::reloadDefaultGLPrograms()
     p->reset();
     loadDefaultGLProgram(p, kShaderType_PositionColor);
     
+    // Position, Color, PointSize shader
+    p = getGLProgram(GLProgram::SHADER_NAME_POSITION_COLOR_TEXASPOINTSIZE);
+    p->reset();
+    loadDefaultGLProgram(p, kShaderType_PositionColorTextureAsPointsize);
+
     //
     // Position, Color shader no MVP
     //
@@ -340,87 +365,125 @@ void GLProgramCache::reloadDefaultGLPrograms()
 
 void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
 {
+#ifdef DIRECTX_ENABLED
+#define INIT_SHADERS initWithHLSL
+#else
+#define INIT_SHADERS initWithByteArrays
+#endif
     switch (type) {
         case kShaderType_PositionTextureColor:
-            p->initWithByteArrays(ccPositionTextureColor_vert, ccPositionTextureColor_frag);
+			p->INIT_SHADERS(ccPositionTextureColor_vert, ccPositionTextureColor_frag);
             break;
         case kShaderType_PositionTextureColor_noMVP:
-            p->initWithByteArrays(ccPositionTextureColor_noMVP_vert, ccPositionTextureColor_noMVP_frag);
+			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTextureColor_noMVP_frag);
             break;
-
         case kShaderType_PositionTextureColorAlphaTest:
-            p->initWithByteArrays(ccPositionTextureColor_vert, ccPositionTextureColorAlphaTest_frag);
+			p->INIT_SHADERS(ccPositionTextureColor_vert, ccPositionTextureColorAlphaTest_frag);
             break;
         case kShaderType_PositionTextureColorAlphaTestNoMV:
-            p->initWithByteArrays(ccPositionTextureColor_noMVP_vert, ccPositionTextureColorAlphaTest_frag);
+			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTextureColorAlphaTest_frag);
             break;
         case kShaderType_PositionColor:  
-            p->initWithByteArrays(ccPositionColor_vert ,ccPositionColor_frag);
+			p->INIT_SHADERS(ccPositionColor_vert, ccPositionColor_frag);
             break;
-        case kShaderType_PositionColor_noMVP:
-            p->initWithByteArrays(ccPositionTextureColor_noMVP_vert ,ccPositionColor_frag);
+        case kShaderType_PositionColorTextureAsPointsize:
+#ifdef DIRECTX_ENABLED
+			p->INIT_SHADERS(ccPositionTextureColor_vert, ccPositionColor_frag);
+			break;
+#else
+			p->INIT_SHADERS(ccPositionColorTextureAsPointsize_vert, ccPositionColor_frag);
+			break;
+#endif
+		case kShaderType_PositionColor_noMVP:
+        #ifdef DIRECTX_ENABLED
+			p->INIT_SHADERS(ccPositionColor_noMVP_vert, ccPositionColor_frag);
+        #else
+            p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionColor_frag);
+        #endif
             break;
         case kShaderType_PositionTexture:
-            p->initWithByteArrays(ccPositionTexture_vert ,ccPositionTexture_frag);
+			p->INIT_SHADERS(ccPositionTexture_vert, ccPositionTexture_frag);
             break;
         case kShaderType_PositionTexture_uColor:
-            p->initWithByteArrays(ccPositionTexture_uColor_vert, ccPositionTexture_uColor_frag);
+			p->INIT_SHADERS(ccPositionTexture_uColor_vert, ccPositionTexture_uColor_frag);
             break;
         case kShaderType_PositionTextureA8Color:
-            p->initWithByteArrays(ccPositionTextureA8Color_vert, ccPositionTextureA8Color_frag);
+			p->INIT_SHADERS(ccPositionTextureA8Color_vert, ccPositionTextureA8Color_frag);
             break;
         case kShaderType_Position_uColor:
-            p->initWithByteArrays(ccPosition_uColor_vert, ccPosition_uColor_frag);
+			p->INIT_SHADERS(ccPosition_uColor_vert, ccPosition_uColor_frag);
             p->bindAttribLocation("aVertex", GLProgram::VERTEX_ATTRIB_POSITION);
             break;
         case kShaderType_PositionLengthTexureColor:
-            p->initWithByteArrays(ccPositionColorLengthTexture_vert, ccPositionColorLengthTexture_frag);
+			p->INIT_SHADERS(ccPositionColorLengthTexture_vert, ccPositionColorLengthTexture_frag);
             break;
 #if CC_TARGET_PLATFORM != CC_PLATFORM_WP8
         case kShaderType_LabelDistanceFieldNormal:
-            p->initWithByteArrays(ccLabel_vert, ccLabelDistanceFieldNormal_frag);
+			p->INIT_SHADERS(ccLabel_vert, ccLabelDistanceFieldNormal_frag);
             break;
         case kShaderType_LabelDistanceFieldGlow:
-            p->initWithByteArrays(ccLabel_vert, ccLabelDistanceFieldGlow_frag);
+			p->INIT_SHADERS(ccLabel_vert, ccLabelDistanceFieldGlow_frag);
             break;
 #endif
         case kShaderType_LabelNormal:
-            p->initWithByteArrays(ccLabel_vert, ccLabelNormal_frag);
+			p->INIT_SHADERS(ccLabel_vert, ccLabelNormal_frag);
             break;
         case kShaderType_LabelOutline:
-            p->initWithByteArrays(ccLabel_vert, ccLabelOutline_frag);
+			p->INIT_SHADERS(ccLabel_vert, ccLabelOutline_frag);
             break;
         case kShaderType_3DPosition:
-            p->initWithByteArrays(cc3D_PositionTex_vert, cc3D_Color_frag);
+			p->INIT_SHADERS(cc3D_PositionTex_vert, cc3D_Color_frag);
             break;
         case kShaderType_3DPositionTex:
-            p->initWithByteArrays(cc3D_PositionTex_vert, cc3D_ColorTex_frag);
+			p->INIT_SHADERS(cc3D_PositionTex_vert, cc3D_ColorTex_frag);
             break;
         case kShaderType_3DSkinPositionTex:
-            p->initWithByteArrays(cc3D_SkinPositionTex_vert, cc3D_ColorTex_frag);
+			p->INIT_SHADERS(cc3D_SkinPositionTex_vert, cc3D_ColorTex_frag);
             break;
         case kShaderType_3DPositionNormal:
-            {
+#ifdef DIRECTX_ENABLED
+			p->INIT_SHADERS(cc3D_PositionTex_vert, cc3D_Color_frag);
+			break;
+#else
+			{
                 std::string def = getShaderMacrosForLight();
-                p->initWithByteArrays((def + std::string(cc3D_PositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormal_frag)).c_str());
+				p->INIT_SHADERS((def + std::string(cc3D_PositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormal_frag)).c_str());
             }
-            break;
+			break;
+#endif
         case kShaderType_3DPositionNormalTex:
-            {
+#ifdef DIRECTX_ENABLED
+			p->INIT_SHADERS(cc3D_PositionTex_vert, cc3D_Color_frag);
+			break;
+#else
+			{
                 std::string def = getShaderMacrosForLight();
-                p->initWithByteArrays((def + std::string(cc3D_PositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormalTex_frag)).c_str());
+				p->INIT_SHADERS((def + std::string(cc3D_PositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormalTex_frag)).c_str());
             }
-            break;
+			break;
+#endif
         case kShaderType_3DSkinPositionNormalTex:
+#ifdef DIRECTX_ENABLED
+			p->INIT_SHADERS(cc3D_PositionTex_vert, cc3D_Color_frag);
+			break;
+#else
             {
                 std::string def = getShaderMacrosForLight();
-                p->initWithByteArrays((def + std::string(cc3D_SkinPositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormalTex_frag)).c_str());
+				p->INIT_SHADERS((def + std::string(cc3D_SkinPositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormalTex_frag)).c_str());
             }
+			break;
+#endif
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || defined(WP8_SHADER_COMPILER)
+        case kShaderType_PositionColor_noMVP_GrayScale:
+			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccUIGrayScale_frag);
             break;
+#endif
         default:
             CCLOG("cocos2d: %s:%d, error shader type", __FUNCTION__, __LINE__);
             return;
     }
+
+#undef INIT_SHADERS
     
     p->link();
     p->updateUniforms();

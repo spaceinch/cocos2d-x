@@ -115,6 +115,9 @@ VertexData::~VertexData()
 
 void VertexData::use()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "VertexData::use is not supported");
+#else
     uint32_t flags(0);
     for(auto& element : _vertexStreams)
     {
@@ -131,6 +134,7 @@ void VertexData::use()
         glVertexAttribPointer(GLint(element.second._stream._semantic),element.second._stream._size,
                               element.second._stream._type,element.second._stream._normalize, element.second._buffer->getSizePerVertex(), (GLvoid*)offet);
     }
+#endif
 }
 
 NS_CC_END

@@ -60,12 +60,14 @@ ParticleSystemQuad::~ParticleSystemQuad()
     {
         CC_SAFE_FREE(_quads);
         CC_SAFE_FREE(_indices);
-        glDeleteBuffers(2, &_buffersVBO[0]);
+#ifndef DIRECTX_ENABLED
+		glDeleteBuffers(2, &_buffersVBO[0]);
         if (Configuration::getInstance()->supportsShareableVAO())
         {
             glDeleteVertexArrays(1, &_VAOname);
             GL::bindVAO(0);
         }
+#endif
     }
 }
 
@@ -346,7 +348,8 @@ void ParticleSystemQuad::updateQuadWithParticle(tParticle* particle, const Vec2&
 }
 void ParticleSystemQuad::postStep()
 {
-    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
+#ifndef DIRECTX_ENABLED
+	glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
     
     // Option 1: Sub Data
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(_quads[0])*_totalParticles, _quads);
@@ -363,6 +366,7 @@ void ParticleSystemQuad::postStep()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
     CHECK_GL_ERROR_DEBUG();
+#endif
 }
 
 // overriding draw method
@@ -372,7 +376,7 @@ void ParticleSystemQuad::draw(Renderer *renderer, const Mat4 &transform, uint32_
     //quad command
     if(_particleIdx > 0)
     {
-        _quadCommand.init(_globalZOrder, _texture->getName(), getGLProgramState(), _blendFunc, _quads, _particleIdx, transform);
+        _quadCommand.init(_globalZOrder, _texture, getGLProgramState(), _blendFunc, _quads, _particleIdx, transform, flags);
         renderer->addCommand(&_quadCommand);
     }
 }
@@ -456,7 +460,8 @@ void ParticleSystemQuad::setTotalParticles(int tp)
 
 void ParticleSystemQuad::setupVBOandVAO()
 {
-    // clean VAO
+#ifndef DIRECTX_ENABLED
+	// clean VAO
     glDeleteBuffers(2, &_buffersVBO[0]);
     glDeleteVertexArrays(1, &_VAOname);
     GL::bindVAO(0);
@@ -492,11 +497,15 @@ void ParticleSystemQuad::setupVBOandVAO()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     CHECK_GL_ERROR_DEBUG();
+#else
+	CCASSERT(false, "CCParticleSystemQuad: VAO feature is not supported");
+#endif
 }
 
 void ParticleSystemQuad::setupVBO()
 {
-    glDeleteBuffers(2, &_buffersVBO[0]);
+#ifndef DIRECTX_ENABLED
+	glDeleteBuffers(2, &_buffersVBO[0]);
     
     glGenBuffers(2, &_buffersVBO[0]);
 
@@ -509,12 +518,17 @@ void ParticleSystemQuad::setupVBO()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     CHECK_GL_ERROR_DEBUG();
+#endif
 }
 
 void ParticleSystemQuad::listenRendererRecreated(EventCustom* event)
 {
+    //when comes to foreground in android, _buffersVBO and _VAOname is a wild handle
+    //before recreating, we need to reset them to 0
+    memset(_buffersVBO, 0, sizeof(_buffersVBO));
     if (Configuration::getInstance()->supportsShareableVAO())
     {
+        _VAOname = 0;
         setupVBOandVAO();
     }
     else
@@ -582,7 +596,8 @@ void ParticleSystemQuad::setBatchNode(ParticleBatchNode * batchNode)
             CC_SAFE_FREE(_quads);
             CC_SAFE_FREE(_indices);
 
-            glDeleteBuffers(2, &_buffersVBO[0]);
+#ifndef DIRECTX_ENABLED
+			glDeleteBuffers(2, &_buffersVBO[0]);
             memset(_buffersVBO, 0, sizeof(_buffersVBO));
             if (Configuration::getInstance()->supportsShareableVAO())
             {
@@ -590,6 +605,7 @@ void ParticleSystemQuad::setBatchNode(ParticleBatchNode * batchNode)
                 GL::bindVAO(0);
                 _VAOname = 0;
             }
+#endif
         }
     }
 }

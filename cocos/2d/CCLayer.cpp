@@ -41,6 +41,9 @@ THE SOFTWARE.
 #include "base/CCEventAcceleration.h"
 #include "base/CCEventListenerAcceleration.h"
 
+#ifdef DIRECTX_ENABLED
+#include "platform/winrt/DirectXHelper.h"
+#endif
 
 #include "deprecated/CCString.h"
 
@@ -438,6 +441,10 @@ __LayerRGBA::__LayerRGBA()
 /// LayerColor
 
 LayerColor::LayerColor()
+#ifdef DIRECTX_ENABLED
+: _bufferVertex(nullptr)
+, _bufferIndex(nullptr)
+#endif
 {
     // default blend function
     _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
@@ -445,6 +452,10 @@ LayerColor::LayerColor()
     
 LayerColor::~LayerColor()
 {
+#ifdef DIRECTX_ENABLED
+	DXResourceManager::getInstance().remove(&_bufferVertex);
+	DXResourceManager::getInstance().remove(&_bufferIndex);
+#endif
 }
 
 /// blendFunc getter
@@ -576,7 +587,7 @@ void LayerColor::updateColor()
 
 void LayerColor::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 {
-    _customCommand.init(_globalZOrder);
+    _customCommand.init(_globalZOrder, transform, flags);
     _customCommand.func = CC_CALLBACK_0(LayerColor::onDraw, this, transform, flags);
     renderer->addCommand(&_customCommand);
     
@@ -594,8 +605,11 @@ void LayerColor::onDraw(const Mat4& transform, uint32_t flags)
 {
     getGLProgram()->use();
     getGLProgram()->setUniformsForBuiltins(transform);
-
-    GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POSITION | GL::VERTEX_ATTRIB_FLAG_COLOR );
+	getGLProgram()->set();
+    
+#ifndef DIRECTX_ENABLED
+	GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POSITION | GL::VERTEX_ATTRIB_FLAG_COLOR);
+    
     //
     // Attributes
     //
@@ -606,13 +620,26 @@ void LayerColor::onDraw(const Mat4& transform, uint32_t flags)
     setGLBufferData(_squareColors, 4 * sizeof(Color4F), 1);
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, 0, 0);
 #else
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, 0, _noMVPVertices);
     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, 0, _squareColors);
 #endif // EMSCRIPTEN
-
+    
     GL::blendFunc( _blendFunc.src, _blendFunc.dst );
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+#else
+	UpdateVertexBuffer();
+
+	GLViewImpl *view = GLViewImpl::sharedOpenGLView();
+
+	DXStateCache::getInstance().setBlend(_blendFunc.src, _blendFunc.dst);
+	DXStateCache::getInstance().setVertexBuffer(_bufferVertex, sizeof(V3F_C4B_T2F), 0);
+	DXStateCache::getInstance().setIndexBuffer(_bufferIndex);
+	DXStateCache::getInstance().setPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	view->GetContext()->DrawIndexed(6, 0, 0);
+#endif
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,4);
 }
@@ -680,7 +707,7 @@ LayerGradient* LayerGradient::create()
 
 bool LayerGradient::init()
 {
-	return initWithColor(Color4B(0, 0, 0, 255), Color4B(0, 0, 0, 255));
+    return initWithColor(Color4B(0, 0, 0, 255), Color4B(0, 0, 0, 255));
 }
 
 bool LayerGradient::initWithColor(const Color4B& start, const Color4B& end)
@@ -990,5 +1017,74 @@ std::string LayerMultiplex::getDescription() const
 {
     return StringUtils::format("<LayerMultiplex | Tag = %d, Layers = %d", _tag, static_cast<int>(_children.size()));
 }
+
+#ifdef DIRECTX_ENABLED
+void LayerColor::UpdateVertexBuffer()
+{
+	const int verticesCount = 4;
+	const int quadCount = 1;
+
+	V3F_C4B_T2F vertexData[verticesCount];
+	for (int i = 0; i < verticesCount; ++i)
+	{
+		vertexData[i].vertices = _noMVPVertices[i];
+		vertexData[i].colors = Color4B(_squareColors[i]);
+		vertexData[i].texCoords = Tex2F(0, 0);
+	}
+
+	GLViewImpl *view = GLViewImpl::sharedOpenGLView();
+
+	if (!_bufferVertex)
+	{
+		D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
+		vertexBufferData.pSysMem = vertexData;
+		vertexBufferData.SysMemPitch = 0;
+		vertexBufferData.SysMemSlicePitch = 0;
+
+		CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertexData[0]) * verticesCount, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+		DX::ThrowIfFailed(view->GetDevice()->CreateBuffer(
+			&vertexBufferDesc,
+			&vertexBufferData,
+			&_bufferVertex));
+
+		DXResourceManager::getInstance().add(&_bufferVertex);
+	}
+	else
+	{
+		D3D11_MAPPED_SUBRESOURCE resource;
+		view->GetContext()->Map(_bufferVertex, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+		memcpy(resource.pData, vertexData, sizeof(vertexData[0]) * verticesCount);
+		view->GetContext()->Unmap(_bufferVertex, 0);
+	}
+
+	if (!_bufferIndex)
+	{
+		GLushort indices[quadCount * 6];
+
+		for (int i = 0; i < quadCount; i++)
+		{
+			indices[i * 6 + 0] = (GLushort)(i * 4 + 0);
+			indices[i * 6 + 1] = (GLushort)(i * 4 + 1);
+			indices[i * 6 + 2] = (GLushort)(i * 4 + 2);
+			indices[i * 6 + 3] = (GLushort)(i * 4 + 3);
+			indices[i * 6 + 4] = (GLushort)(i * 4 + 2);
+			indices[i * 6 + 5] = (GLushort)(i * 4 + 1);
+		}
+
+		D3D11_SUBRESOURCE_DATA indexBufferData = { 0 };
+		indexBufferData.pSysMem = indices;
+		indexBufferData.SysMemPitch = 0;
+		indexBufferData.SysMemSlicePitch = 0;
+
+		CD3D11_BUFFER_DESC indexBufferDesc(sizeof(indices[0]) * quadCount * 6, D3D11_BIND_INDEX_BUFFER);
+		DX::ThrowIfFailed(view->GetDevice()->CreateBuffer(
+			&indexBufferDesc,
+			&indexBufferData,
+			&_bufferIndex));
+
+		DXResourceManager::getInstance().add(&_bufferIndex);
+	}
+}
+#endif
 
 NS_CC_END

@@ -32,7 +32,7 @@
 NS_CC_BEGIN
 
 BatchCommand::BatchCommand()
-: _textureID(0)
+: _texture(nullptr)
 , _blendType(BlendFunc::DISABLE)
 , _textureAtlas(nullptr)
 {
@@ -40,19 +40,24 @@ BatchCommand::BatchCommand()
     _shader = nullptr;
 }
 
-void BatchCommand::init(float globalOrder, GLProgram* shader, BlendFunc blendType, TextureAtlas *textureAtlas, const Mat4& modelViewTransform)
+void BatchCommand::init(float globalOrder, GLProgram* shader, BlendFunc blendType, TextureAtlas *textureAtlas, const Mat4& modelViewTransform, uint32_t flags)
 {
     CCASSERT(shader, "shader cannot be nill");
     CCASSERT(textureAtlas, "textureAtlas cannot be nill");
     
-    _globalOrder = globalOrder;
-    _textureID = textureAtlas->getTexture()->getName();
+    RenderCommand::init(globalOrder, modelViewTransform, flags);
+    _texture = textureAtlas->getTexture();
     _blendType = blendType;
     _shader = shader;
-
+    
     _textureAtlas = textureAtlas;
-
+    
     _mv = modelViewTransform;
+}
+
+void BatchCommand::init(float globalOrder, GLProgram* shader, BlendFunc blendType, TextureAtlas *textureAtlas, const Mat4& modelViewTransform)
+{
+    init(globalOrder, shader, blendType, textureAtlas, modelViewTransform, 0);
 }
 
 BatchCommand::~BatchCommand()
@@ -64,8 +69,13 @@ void BatchCommand::execute()
     // Set material
     _shader->use();
     _shader->setUniformsForBuiltins(_mv);
-    GL::bindTexture2D(_textureID);
+#ifndef DIRECTX_ENABLED
+    GL::bindTexture2D(_texture->getName()); 
     GL::blendFunc(_blendType.src, _blendType.dst);
+#else
+	DXStateCache::getInstance().setPSTexture(0, _texture->getView());
+	DXStateCache::getInstance().setBlend(_blendType.src, _blendType.dst);
+#endif
 
     // Draw
     _textureAtlas->drawQuads();

@@ -226,27 +226,54 @@ Vec2 GLView::getVisibleOrigin() const
 
 void GLView::setViewPortInPoints(float x , float y , float w , float h)
 {
+#ifdef DIRECTX_ENABLED
+	DXStateCache::getInstance().setViewport((GLint)(x * _scaleX + _viewPortRect.origin.x),
+		                                    (GLint)(y * _scaleY + _viewPortRect.origin.y),
+		                                    (GLsizei)(w * _scaleX),
+		                                    (GLsizei)(h * _scaleY));
+#else
     glViewport((GLint)(x * _scaleX + _viewPortRect.origin.x),
                (GLint)(y * _scaleY + _viewPortRect.origin.y),
                (GLsizei)(w * _scaleX),
                (GLsizei)(h * _scaleY));
+#endif
 }
 
 void GLView::setScissorInPoints(float x , float y , float w , float h)
 {
+#ifdef DIRECTX_ENABLED
+	DXStateCache::getInstance().setScissor((GLint)(x * _scaleX + _viewPortRect.origin.x),
+		                                   (GLint)((_designResolutionSize.height - y - h) * _scaleY + _viewPortRect.origin.y),
+		                                   (GLsizei)(w * _scaleX),
+		                                   (GLsizei)(h * _scaleY));
+#else
     glScissor((GLint)(x * _scaleX + _viewPortRect.origin.x),
               (GLint)(y * _scaleY + _viewPortRect.origin.y),
               (GLsizei)(w * _scaleX),
               (GLsizei)(h * _scaleY));
+#endif
 }
 
 bool GLView::isScissorEnabled()
 {
+#ifdef DIRECTX_ENABLED
+	return DXStateCache::getInstance().isScissorEnabled();
+#else
 	return (GL_FALSE == glIsEnabled(GL_SCISSOR_TEST)) ? false : true;
+#endif
 }
 
 Rect GLView::getScissorRect() const
 {
+#ifdef DIRECTX_ENABLED
+	Rect scissor;
+	DXStateCache::getInstance().getScissor(scissor);
+	scissor.origin.x = (scissor.origin.x - _viewPortRect.origin.x) / _scaleX;
+	scissor.origin.y = (scissor.origin.y - _viewPortRect.origin.y) / _scaleY;
+	scissor.size.width /= _scaleX;
+	scissor.size.height /= _scaleY;
+	return scissor;
+#else
 	GLfloat params[4];
 	glGetFloatv(GL_SCISSOR_BOX, params);
 	float x = (params[0] - _viewPortRect.origin.x) / _scaleX;
@@ -254,6 +281,7 @@ Rect GLView::getScissorRect() const
 	float w = params[2] / _scaleX;
 	float h = params[3] / _scaleY;
 	return Rect(x, y, w, h);
+#endif
 }
 
 void GLView::setViewName(const std::string& viewname )

@@ -25,297 +25,158 @@ THE SOFTWARE.
 
 #include "DirectXBase.h"
 #include "DirectXHelper.h"
-
-using namespace DirectX;
-using namespace Microsoft::WRL;
-using namespace Windows::Foundation;
-using namespace Windows::Graphics::Display;
+#include "platform/winrt/DirectXHelper.h"
 
 // Constructor.
 DirectXBase::DirectXBase()
-    : m_bAngleInitialized(false)
-    , m_eglDisplay(nullptr)
-    , m_eglSurface(nullptr)
-    , m_eglContext(nullptr)
-    , m_eglWindow(nullptr)
-    , m_eglPhoneWindow(nullptr)
-    , m_device(nullptr)
 {
 }
 
 // Initialize the Direct3D resources required to run.
-void DirectXBase::Initialize()
+void DirectXBase::Initialize(_In_ ID3D11Device1 *device)
 {
+	m_d3dDevice = device;
+	CreateDeviceResources();
 }
 
 // These are the resources that depend on the device.
 void DirectXBase::CreateDeviceResources()
 {
+#ifdef _DEBUG
+	ID3D11InfoQueue *infoQueue;
+	HRESULT result = m_d3dDevice.Get()->QueryInterface(__uuidof(ID3D11InfoQueue), (void**)&infoQueue);
+	
+	if (SUCCEEDED(result)) {
+		D3D11_MESSAGE_ID hideMessages[]  = {
+			D3D11_MESSAGE_ID_DEVICE_DRAW_SAMPLER_NOT_SET,
+		};
+		
+		D3D11_INFO_QUEUE_FILTER filter = {0};
+		filter.DenyList.NumIDs = ARRAYSIZE(hideMessages);
+		filter.DenyList.pIDList = hideMessages;
+		
+		infoQueue->AddStorageFilterEntries(&filter);
+		infoQueue->Release();
+	}
+#endif
 }
 
-void DirectXBase::SetDevice(ID3D11Device1* device)
+void Direct3DBase::UpdateDevice(_In_ ID3D11Device1* device, _In_ ID3D11DeviceContext1* context, _In_ ID3D11RenderTargetView* renderTargetView)
 {
-    if(m_device)
-    {
-        m_device->Release();
-        m_device = nullptr;
-    }
+	m_d3dContext = context;
+	m_renderTargetView = renderTargetView;
 
-    m_device = nullptr;
-}
-
-void DirectXBase::UpdateDevice(ID3D11Device1* device, ID3D11DeviceContext1* context, ID3D11RenderTargetView* renderTargetView)
-{
-    if (m_device != device)
-    {
-        CloseAngle();
-        device->AddRef();
-        m_device = device;
-
-        CreateDeviceResources();
-
-        // Force call to CreateWindowSizeDependentResources
-        m_renderTargetSize.Width  = -1;
-        m_renderTargetSize.Height = -1;
-    }
-
-    m_featureLevel = device->GetFeatureLevel();
-
-
-    ComPtr<ID3D11Resource> renderTargetViewResource;
-    renderTargetView->GetResource(&renderTargetViewResource);
-
-    ComPtr<ID3D11Texture2D> backBuffer;
-    DX::ThrowIfFailed(
-        renderTargetViewResource.As(&backBuffer)
-        );
-
-    // Cache the rendertarget dimensions in our helper class for convenient use.
-    D3D11_TEXTURE2D_DESC backBufferDesc;
-    backBuffer->GetDesc(&backBufferDesc);
-
-    if (m_renderTargetSize.Width  != static_cast<float>(backBufferDesc.Width) ||
-        m_renderTargetSize.Height != static_cast<float>(backBufferDesc.Height))
-    {
-        m_renderTargetSize.Width  = static_cast<float>(backBufferDesc.Width);
-        m_renderTargetSize.Height = static_cast<float>(backBufferDesc.Height);
-        CreateWindowSizeDependentResources();
-    }
-
-    if(!m_bAngleInitialized)
-    {
-        InitializeAngle(device, context, renderTargetView);
-        CreateGLResources();
-    }
-    else
-    {
-        m_eglPhoneWindow->Update(device, context, renderTargetView);
-    }
-
-    OnUpdateDevice();
-}
-
-
-void DirectXBase::UpdateForWindowSizeChange(float width, float height)
-{
-    if (width != m_windowBounds.Width || height != m_windowBounds.Height)
-    {
-        m_windowBounds.Width  = width;
-        m_windowBounds.Height = height;
-    }
-}
-
-// Allocate all memory resources that depend on the window size.
-void DirectXBase::CreateWindowSizeDependentResources()
-{
-
-
-}
-
-void DirectXBase::OnOrientationChanged(DisplayOrientations orientation)
-{
-	switch(orientation)
+	if (m_d3dDevice.Get() != device)
 	{
-		case DisplayOrientations::Portrait:
-			m_orientationMatrix = XMMatrixIdentity();
-            m_aspectRatio = m_renderTargetSize.Width / m_renderTargetSize.Height;
-			break;
+		m_d3dDevice = device;
+		CreateDeviceResources();
 
-		case DisplayOrientations::PortraitFlipped:
-			m_orientationMatrix = XMMatrixRotationZ(XM_PI);
-            m_aspectRatio = m_renderTargetSize.Width / m_renderTargetSize.Height;
-			break;
-
-		case DisplayOrientations::Landscape:
-			m_orientationMatrix = XMMatrixRotationZ(-XM_PIDIV2);
-            m_aspectRatio = m_renderTargetSize.Height / m_renderTargetSize.Width;
-			break;
-			
-		case DisplayOrientations::LandscapeFlipped:
-			m_orientationMatrix = XMMatrixRotationZ(XM_PIDIV2);
-            m_aspectRatio = m_renderTargetSize.Height / m_renderTargetSize.Width;
-			break;
+		m_renderTargetSize.Width = -1;
+		m_renderTargetSize.Height = -1;
 	}
-}
 
-void DirectXBase::Render()
-{
-    if(!OnRender())
-    {
-        eglSwapBuffers(m_eglDisplay, m_eglSurface);
-    }
-}
-
-void DirectXBase::CloseAngle()
-{
-    eglMakeCurrent(NULL, NULL, NULL, NULL);
-
-    if(m_eglPhoneWindow != nullptr)
-    {
-        m_eglPhoneWindow->Update(nullptr, nullptr, nullptr);
-    }  
-
-	if(m_eglDisplay && m_eglContext)
-    {
-        eglDestroyContext(m_eglDisplay, m_eglContext);
-        m_eglContext = nullptr;
-    }    
-
-	if(m_eglDisplay && m_eglSurface)
-    {
-        eglDestroySurface(m_eglDisplay, m_eglSurface);
-        m_eglSurface = nullptr;
-    }
-
-    if(m_eglDisplay)
-    {
-        eglTerminate(m_eglDisplay);
-        m_eglDisplay = nullptr;
-    }  
-
-    if(m_device)
-    {
-        m_device->Release();
-        m_device = nullptr;
-    }
-
-    m_eglPhoneWindow = nullptr;
-    m_eglWindow = nullptr;  
-
-    m_bAngleInitialized = false;
-}
-
-bool DirectXBase::InitializeAngle(ID3D11Device1* d3dDevice, ID3D11DeviceContext1* d3dContext, ID3D11RenderTargetView* d3dRenderTargetView)
-{
-	// setup EGL
-	EGLint configAttribList[] = {
-		EGL_RED_SIZE,       8,
-		EGL_GREEN_SIZE,     8,
-		EGL_BLUE_SIZE,      8,
-		EGL_ALPHA_SIZE,     8,
-		EGL_DEPTH_SIZE,     8,
-		EGL_STENCIL_SIZE,   8,
-		EGL_SAMPLE_BUFFERS, 0,
-		EGL_NONE
-	};
-	EGLint surfaceAttribList[] = {
-		EGL_NONE, EGL_NONE
-	};
-
-	EGLint numConfigs;
-	EGLint majorVersion;
-	EGLint minorVersion;
-	EGLDisplay display;
-	EGLContext context;
-	EGLSurface surface;
-	EGLConfig config;
-	EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE, EGL_NONE };
-
-    // we need to select the correct DirectX feature level depending on the platform
-    // default is D3D_FEATURE_LEVEL_9_3 Windows Phone 8.0
-    ANGLE_D3D_FEATURE_LEVEL featureLevel = ANGLE_D3D_FEATURE_LEVEL::ANGLE_D3D_FEATURE_LEVEL_9_3;
-
-	switch(m_featureLevel)
+	if (m_d3dContext.Get() != context)
 	{
-	case ANGLE_D3D_FEATURE_LEVEL_9_3:
-		featureLevel = ANGLE_D3D_FEATURE_LEVEL::ANGLE_D3D_FEATURE_LEVEL_9_3;
-		break;
-				
-	case ANGLE_D3D_FEATURE_LEVEL_9_2:
-		featureLevel = ANGLE_D3D_FEATURE_LEVEL::ANGLE_D3D_FEATURE_LEVEL_9_2;
-		break;
-					
-	case ANGLE_D3D_FEATURE_LEVEL_9_1:
-		featureLevel = ANGLE_D3D_FEATURE_LEVEL::ANGLE_D3D_FEATURE_LEVEL_9_1;
-		break;
-	}		
-
-    if(m_eglPhoneWindow == nullptr)
-    {
-	    DX::ThrowIfFailed(
-            CreateWinPhone8XamlWindow(&m_eglPhoneWindow)
-            );
-    }
-
-    m_eglPhoneWindow->Update(d3dDevice, d3dContext, d3dRenderTargetView);
-
-    ComPtr<IUnknown> u;
-    HRESULT r = m_eglPhoneWindow.As(&u);
-
-    if(m_eglWindow == nullptr)
-    { 	DX::ThrowIfFailed(
-        CreateWinrtEglWindow(u.Get(), featureLevel, m_eglWindow.GetAddressOf())
-        );
-    }
-
-
-	display = eglGetDisplay(m_eglWindow);
-	if(display == EGL_NO_DISPLAY){
-		//ofLogError("ofAppWinRTWindow") << "couldn't get EGL display";
-		return false;
+		m_renderTargetSize.Width = -1;
+		m_renderTargetSize.Height = -1;
 	}
 
-	if(!eglInitialize(display, &majorVersion, &minorVersion)){
-		//ofLogError("ofAppWinRTWindow") << "failed to initialize EGL";
-		return false;
+	Microsoft::WRL::ComPtr<ID3D11Resource> renderTargetViewResource;
+	m_renderTargetView->GetResource(&renderTargetViewResource);
+
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
+	DX::ThrowIfFailed(
+		renderTargetViewResource.As(&backBuffer)
+		);
+
+	D3D11_TEXTURE2D_DESC backBufferDesc;
+	backBuffer->GetDesc(&backBufferDesc);
+
+	if (m_renderTargetSize.Width != static_cast<float>(backBufferDesc.Width) || m_renderTargetSize.Height != static_cast<float>(backBufferDesc.Height))
+	{
+		m_renderTargetSize.Width = static_cast<float>(backBufferDesc.Width);
+		m_renderTargetSize.Height = static_cast<float>(backBufferDesc.Height);
+		CreateWindowSizeDependentResources();
 	}
 
-	// Get configs
-	if ( !eglGetConfigs(display, NULL, 0, &numConfigs) ){
-		//ofLogError("ofAppWinRTWindow") << "failed to get configurations";
-		return false;
+	// Set the rendering viewport to target the entire window.
+	CD3D11_VIEWPORT viewport(
+		0.0f,
+		0.0f,
+		m_renderTargetSize.Width,
+		m_renderTargetSize.Height
+		);
+
+	m_d3dContext->RSSetViewports(1, &viewport);
+}
+
+void Direct3DBase::CreateWindowSizeDependentResources()
+{
+	CD3D11_TEXTURE2D_DESC depthStencilDescription
+	(
+		DXGI_FORMAT_D24_UNORM_S8_UINT,
+		static_cast<UINT>(m_renderTargetSize.Width),
+		static_cast<UINT>(m_renderTargetSize.Height),
+		1,
+		1,
+		D3D11_BIND_DEPTH_STENCIL
+	);
+
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencil;
+	DX::ThrowIfFailed(m_d3dDevice->CreateTexture2D(
+		&depthStencilDescription,
+		nullptr,
+		&depthStencil));
+
+	CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDescription
+	(
+		D3D11_DSV_DIMENSION_TEXTURE2D
+	);
+
+	DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(
+		depthStencil.Get(),
+		&depthStencilViewDescription,
+		&m_depthStencilView
+		));
+}
+
+void Direct3DBase::UpdateForWindowSizeChange(float width, float height)
+{
+	m_windowBounds.Width = width;
+	m_windowBounds.Height = height;
+}
+
+void Direct3DBase::Clear()
+{
+	if (m_d3dDevice)
+	{
+#ifdef _DEBUG
+		Microsoft::WRL::ComPtr<ID3D11Debug> pDebug;
+		m_d3dDevice.Get()->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void **>(pDebug.GetAddressOf()));
+		if (pDebug)
+		{
+			pDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+		}
+#endif
+
+		cocos2d::DXResourceManager::getInstance().clear();
+		cocos2d::DXStateCache::getInstance().invalidateStateCache();
+
+		m_renderTargetView = nullptr;
+		m_depthStencilView = nullptr;
+
+		// m_d3dContext->ClearState(); // Breaks AdMob 
+		m_d3dContext->Flush();
+		m_d3dContext = nullptr; 
+
+#ifdef _DEBUG
+		if (pDebug)
+		{
+			pDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+			pDebug = nullptr;
+		}
+#endif
+
+		m_d3dDevice = nullptr;
 	}
-
-	// Choose config
-	if(!eglChooseConfig(display, configAttribList, &config, 1, &numConfigs)){
-		//ofLogError("ofAppWinRTWindow") << "failed to choose configuration";
-		return false;
-	}
-
-    // Create a surface
-    surface = eglCreateWindowSurface(display, config, m_eglWindow, surfaceAttribList);
-    if(surface == EGL_NO_SURFACE){
-        //ofLogError("ofAppWinRTWindow") << "failed to create EGL window surface";
-        return false;
-    }  
-
-	// Create a GL context
-	context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs);
-	if(context == EGL_NO_CONTEXT){
-		//ofLogError("ofAppWinRTWindow") << "failed to create EGL context";
-		return false;
-	}   
-
-	// Make the context current
-	if (!eglMakeCurrent(display, surface, surface, context)){
-		//ofLogError("ofAppWinRTWindow") << "failed to make EGL context current";
-		return false;
-	}
-
-	m_eglDisplay = display;
-	m_eglSurface = surface;
-	m_eglContext = context;
-
-    m_bAngleInitialized = true;
-    return true;
 }
