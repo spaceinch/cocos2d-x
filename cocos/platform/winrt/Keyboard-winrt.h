@@ -35,7 +35,6 @@ ref class KeyBoardWinRT sealed
 {
 public:
     KeyBoardWinRT();
-    virtual ~KeyBoardWinRT();
 
     void ShowKeyboard(Platform::String^ text);
     void HideKeyboard(Platform::String^ text);
