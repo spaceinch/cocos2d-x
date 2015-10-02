@@ -191,7 +191,6 @@ static keyCodeItem g_keyCodeStructArray [] = {
     { (int) VirtualKey::LeftMenu, EventKeyboard::KeyCode::KEY_MENU },
     { (int) VirtualKey::RightMenu, EventKeyboard::KeyCode::KEY_MENU }
 };
-
 KeyBoardWinRT::KeyBoardWinRT()
 {
     g_keyCodeMap.clear();
@@ -199,8 +198,6 @@ KeyBoardWinRT::KeyBoardWinRT()
     {
         g_keyCodeMap[item.key] = item.keyCode;
     }
-}
-
 KeyBoardWinRT::~KeyBoardWinRT()
 {
 
