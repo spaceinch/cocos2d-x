@@ -56,6 +56,7 @@ _bounceLeftBoundary(0.0f),
 _bounceRightBoundary(0.0f),
 _autoScroll(false),
 _autoScrollAddUpTime(0.0f),
+_autoScrollMaxSpeed(AUTOSCROLLMAXSPEED),
 _autoScrollOriginalSpeed(0.0f),
 _autoScrollAcceleration(-1000.0f),
 _isAutoScrollSpeedAttenuated(false),
@@ -1463,7 +1464,7 @@ void ScrollView::endRecordSlidAction()
             default:
                 break;
         }
-        float orSpeed = MIN(fabs(totalDis)/(_slidTime), AUTOSCROLLMAXSPEED);
+        float orSpeed = MIN(fabs(totalDis)/(_slidTime), _autoScrollMaxSpeed);
         startAutoScrollChildrenWithOriginalSpeed(dir, orSpeed, true, -1000);
         _slidTime = 0.0f;
     }
