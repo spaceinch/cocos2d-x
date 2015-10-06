@@ -319,6 +319,8 @@ public:
      *@return the next focused widget in a layout
      */
     virtual Widget* findNextFocusedWidget(FocusDirection direction, Widget* current) override;
+  
+    virtual void setAutoScrollMaxSpeed(float maxSpeed) { _autoScrollMaxSpeed = maxSpeed; }
 
 CC_CONSTRUCTOR_ACCESS:
     virtual bool init() override;
@@ -397,7 +399,8 @@ protected:
     
     bool _autoScroll;
     float _autoScrollAddUpTime;
-    
+  
+    float _autoScrollMaxSpeed;
     float _autoScrollOriginalSpeed;
     float _autoScrollAcceleration;
     bool _isAutoScrollSpeedAttenuated;
