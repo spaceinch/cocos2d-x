@@ -38,7 +38,7 @@ PUParticleSystem3DTranslator::~PUParticleSystem3DTranslator()
 
 void PUParticleSystem3DTranslator::translate(PUScriptCompiler* compiler, PUAbstractNode *node)
 {
-    if (typeid(*node) != typeid(PUObjectAbstractNode))
+    if (dynamic_cast<PUObjectAbstractNode*>(node) == nullptr)
         return;
 
         PUObjectAbstractNode* obj = reinterpret_cast<PUObjectAbstractNode*>(node);
