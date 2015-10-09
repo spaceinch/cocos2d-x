@@ -617,15 +617,25 @@ void Director::setProjection(Projection projection)
         case Projection::_2D:
         {
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+			auto final = Mat4::IDENTITY;
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
+			if (getOpenGLView() != nullptr)
+			{
+				final *= getOpenGLView()->getOrientationMatrix();
+			}
+#endif
 #ifdef DIRECTX_ENABLED
 			DirectX::XMMATRIX matrix = DirectX::XMMatrixOrthographicOffCenterLH(0, w, 0, h, -1024, 1024);
 			Mat4 orthoMatrix((float *)matrix.r);
-			orthoMatrix.transpose();
 #else
             Mat4 orthoMatrix;
             Mat4::createOrthographicOffCenter(0, size.width, 0, size.height, -1024, 1024, &orthoMatrix);
 #endif
-            multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, orthoMatrix);
+			final *= orthoMatrix;
+#ifdef DIRECTX_ENABLED
+			final.transpose();
+#endif
+            multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, final);
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
             break;
         }
