@@ -748,6 +748,7 @@ void Director::setClearColor(const Color4F& clearColor)
     _renderer->setClearColor(clearColor);
 }
 
+// Return a row-major formatted matrix in DirectX devices
 static void GLToClipTransform(Mat4 *transformOut)
 {
     if(nullptr == transformOut) return;
@@ -755,11 +756,13 @@ static void GLToClipTransform(Mat4 *transformOut)
     Director* director = Director::getInstance();
     CCASSERT(nullptr != director, "Director is null when seting matrix stack");
 
-    auto projection = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+	auto projection = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
     //if needed, we need to undo the rotation for Landscape orientation in order to get the correct positions
-    //projection = Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * projection;
+	projection.transpose(); // Transform to column-major in order to multiply correctly since orientation matrix was integrated with perspective matrix (the result is projection matrix) being both column-major
+    projection = Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * projection;
+	projection.transpose(); // Transform back to row-major
 #endif
 
     auto modelview = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
@@ -771,7 +774,7 @@ Vec2 Director::convertToGL(const Vec2& uiPoint)
     Mat4 transform;
     GLToClipTransform(&transform);
 #ifdef DIRECTX_ENABLED
-	transform.transpose();
+	transform.transpose(); // Transform to column-major
 #endif
 
     Mat4 transformInv = transform.getInversed();
@@ -784,8 +787,8 @@ Vec2 Director::convertToGL(const Vec2& uiPoint)
 
     Vec4 glCoord;
     //transformInv.transformPoint(clipCoord, &glCoord);
-    transformInv.transformVector(clipCoord, &glCoord);
-    float factor = 1.0/glCoord.w;
+    transformInv.transformVector(clipCoord, &glCoord);    
+	float factor = 1.0/glCoord.w;
     return Vec2(glCoord.x * factor, glCoord.y * factor);
 }
 

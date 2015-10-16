@@ -430,7 +430,7 @@ cocos2d::Vec2 GLViewImpl::TransformToOrientation(Windows::Foundation::Point p)
     cocos2d::Vec2 returnValue;
 
     float x = p.X;
-    float y = p.Y;  
+    float y = p.Y;
 
     switch (m_orientation)
     {
@@ -439,13 +439,13 @@ cocos2d::Vec2 GLViewImpl::TransformToOrientation(Windows::Foundation::Point p)
             returnValue = Vec2(x, y);
             break;
         case DisplayOrientations::Landscape:
-            returnValue = Vec2(y, m_width - x);
+            returnValue = Vec2(y, m_height - x);
             break;
         case DisplayOrientations::PortraitFlipped:
             returnValue = Vec2(m_width - x, m_height - y);
             break;
         case DisplayOrientations::LandscapeFlipped:
-            returnValue = Vec2(m_height - y, x);
+            returnValue = Vec2(m_width - y, x);
             break;
     }
 
