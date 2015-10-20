@@ -401,25 +401,25 @@ const Mat4& GLViewImpl::getOrientationMatrix() const
 
 void GLViewImpl::UpdateOrientationMatrix()
 {
-    kmMat4Identity(&m_orientationMatrix);
-    kmMat4Identity(&m_reverseOrientationMatrix);
+	m_orientationMatrix = Mat4((float*)DirectX::XMMatrixIdentity().r);
+	m_reverseOrientationMatrix = Mat4((float*)DirectX::XMMatrixIdentity().r);
     switch(m_orientation)
 	{
 		case Windows::Graphics::Display::DisplayOrientations::PortraitFlipped:
-			kmMat4RotationZ(&m_orientationMatrix, M_PI);
-			kmMat4RotationZ(&m_reverseOrientationMatrix, -M_PI);
+			m_orientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(DirectX::XM_PI).r);
+			m_reverseOrientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(-DirectX::XM_PI).r);
 			break;
 
 		case Windows::Graphics::Display::DisplayOrientations::Landscape:
-            kmMat4RotationZ(&m_orientationMatrix, -M_PI_2);
-			kmMat4RotationZ(&m_reverseOrientationMatrix, M_PI_2);
+            m_orientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(-DirectX::XM_PIDIV2).r);
+			m_reverseOrientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(DirectX::XM_PIDIV2).r);
 			break;
 			
 		case Windows::Graphics::Display::DisplayOrientations::LandscapeFlipped:
-            kmMat4RotationZ(&m_orientationMatrix, M_PI_2);
-            kmMat4RotationZ(&m_reverseOrientationMatrix, -M_PI_2);
+			m_orientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(DirectX::XM_PIDIV2).r);
+			m_reverseOrientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(-DirectX::XM_PIDIV2).r);
 			break;
-
+			
         default:
             break;
 	}
