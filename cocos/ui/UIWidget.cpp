@@ -1186,8 +1186,15 @@ GLProgramState* Widget::getNormalGLProgramState()const
 
 GLProgramState* Widget::getGrayGLProgramState()const
 {
-    GLProgramState *glState = nullptr;
+	GLProgramState *glState = nullptr;
+#ifndef DIRECTX_ENABLED
     glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE);
+#else
+	auto program = GLProgram::createWithHLSL(ccPositionTextureColor_noMVP_vert,
+											 ccUIGrayScale_frag);
+	glState  = GLProgramState::getOrCreateWithGLProgram(program);
+//	GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE); // FIXME: Works with Direct3D renderer?
+#endif
     return glState;
 }
 

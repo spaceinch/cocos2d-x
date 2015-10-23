@@ -139,7 +139,8 @@ DrawNode::~DrawNode()
     free(_bufferGLLine);
     _bufferGLLine = nullptr;
     
-    glDeleteBuffers(1, &_vbo);
+#ifndef DIRECTX_ENABLED
+	glDeleteBuffers(1, &_vbo);
     glDeleteBuffers(1, &_vboGLLine);
     glDeleteBuffers(1, &_vboGLPoint);
     _vbo = 0;
@@ -154,6 +155,7 @@ DrawNode::~DrawNode()
         glDeleteVertexArrays(1, &_vaoGLPoint);
         _vao = _vaoGLLine = _vaoGLPoint = 0;
     }
+#endif
 }
 
 DrawNode* DrawNode::create()
@@ -214,7 +216,8 @@ bool DrawNode::init()
     ensureCapacityGLPoint(64);
     ensureCapacityGLLine(256);
     
-    if (Configuration::getInstance()->supportsShareableVAO())
+#ifndef DIRECTX_ENABLED
+	if (Configuration::getInstance()->supportsShareableVAO())
     {
         glGenVertexArrays(1, &_vao);
         GL::bindVAO(_vao);
@@ -281,6 +284,7 @@ bool DrawNode::init()
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
+#endif
     
     CHECK_GL_ERROR_DEBUG();
     
@@ -330,8 +334,10 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t flags)
     auto glProgram = getGLProgram();
     glProgram->use();
     glProgram->setUniformsForBuiltins(transform);
+	glProgram->set();
     
-    GL::blendFunc(_blendFunc.src, _blendFunc.dst);
+#ifndef DIRECTX_ENABLED
+	GL::blendFunc(_blendFunc.src, _blendFunc.dst);
 
     if (_dirty)
     {
@@ -364,6 +370,9 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t flags)
     {
         GL::bindVAO(0);
     }
+#else
+	CCASSERT(false, "CCDrawNode is not supported");
+#endif
     
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _bufferCount);
     CHECK_GL_ERROR_DEBUG();
@@ -371,6 +380,9 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t flags)
 
 void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t flags)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "DrawNode::onDrawGLLine is not supported");
+#else
     auto glProgram = GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_LENGTH_TEXTURE_COLOR);
     glProgram->use();
     glProgram->setUniformsForBuiltins(transform);
@@ -410,10 +422,14 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t flags)
     
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,_bufferCountGLLine);
     CHECK_GL_ERROR_DEBUG();
+#endif
 }
 
 void DrawNode::onDrawGLPoint(const Mat4 &transform, uint32_t flags)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "DrawNode::onDrawGLPoint is not supported");
+#else
     auto glProgram = GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_COLOR_TEXASPOINTSIZE);
     glProgram->use();
     glProgram->setUniformsForBuiltins(transform);
@@ -452,6 +468,7 @@ void DrawNode::onDrawGLPoint(const Mat4 &transform, uint32_t flags)
     
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,_bufferCountGLPoint);
     CHECK_GL_ERROR_DEBUG();
+#endif
 }
 
 void DrawNode::drawPoint(const Vec2& position, const float pointSize, const Color4F &color)

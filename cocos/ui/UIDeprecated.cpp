@@ -27,6 +27,10 @@
 NS_CC_BEGIN
 
 namespace ui {
+#ifdef DIRECTX_ENABLED
+const ShaderDescriptor ccUIGrayScale_frag = ShaderDescriptor("UIGrayScale");
+#else
+#endif
     
 const Margin MarginZero =  Margin::ZERO ;
     

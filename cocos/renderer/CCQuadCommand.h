@@ -61,15 +61,16 @@ public:
     void init(float globalOrder, GLuint textureID, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
               const Mat4& mv, uint32_t flags);
 
+#ifndef DIRECTX_ENABLED
     /**Deprecated function, the params is similar as the upper init function, with flags equals 0.*/
-    CC_DEPRECATED_ATTRIBUTE void init(float globalOrder, GLuint textureID, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
+    CC_DEPRECATED_ATTRIBUTE void init(float globalOrder, Texture2D *texture, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
               const Mat4& mv);
+#endif
     /**Apply the texture, shaders, programs, blend functions to GPU pipeline.*/
     void useMaterial() const;
     /**Get the material id of command.*/
     inline uint32_t getMaterialID() const { return _materialID; }
     /**Get the openGL texture handle.*/
-    inline GLuint getTextureID() const { return _textureID; }
     /**Get the pointer of the rendered quads.*/
     inline V3F_C4B_T2F_Quad* getQuads() const { return _quads; }
     /**Get the number of quads for rendering.*/
@@ -88,6 +89,7 @@ protected:
     /**Generated material id.*/
     uint32_t _materialID;
     /**OpenGL handle for texture.*/
+    Texture2D* _texture;
     GLuint _textureID;
     /**GLprogramstate for the commmand. encapsulate shaders and uniforms.*/
     GLProgramState* _glProgramState;

@@ -74,6 +74,10 @@ CCPrecompiledShaders::~CCPrecompiledShaders(void)
 
 static std::string computeHash(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray) 
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "computeHash is not supported");
+	return "not supported";
+#else
     SHA1Context sha;
     int err;
     err = SHA1Reset(&sha);
@@ -105,6 +109,7 @@ static std::string computeHash(const GLchar* vShaderByteArray, const GLchar* fSh
     }
 
     return result;
+#endif
 }
 
 std::string CCPrecompiledShaders::addShaders(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray)
@@ -149,6 +154,10 @@ void CCPrecompiledShaders::addPrecompiledProgram(const char* key, const unsigned
 
 bool CCPrecompiledShaders::loadProgram(GLuint program, const GLchar* vShaderByteArray, const GLchar* fShaderByteArray)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "CCPrecompiledShaders::loadProgram is not supported");
+	return false;
+#else
     std::string id = computeHash(vShaderByteArray, fShaderByteArray);
 
     auto it = m_precompiledPrograms.find(id);
@@ -158,10 +167,15 @@ bool CCPrecompiledShaders::loadProgram(GLuint program, const GLchar* vShaderByte
     glProgramBinaryOES(program, GL_PROGRAM_BINARY_ANGLE, (const GLvoid*) it->second->program, it->second->length);
 
     return true;
+#endif
 }
 
 bool CCPrecompiledShaders::addProgram(GLuint program, const std::string& id)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "CCPrecompiledShaders::addProgram is not supported");
+	return false;
+#else
     int length;
 
     auto it = m_programs.find(id);
@@ -183,6 +197,7 @@ bool CCPrecompiledShaders::addProgram(GLuint program, const std::string& id)
     m_programs[id] = p;
 
     return true;
+#endif
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)

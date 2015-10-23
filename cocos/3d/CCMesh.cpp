@@ -129,7 +129,9 @@ Mesh::Mesh()
 , _blendDirty(true)
 , _force2DQueue(false)
 {
-    
+#ifdef DIRECTX_ENABLED
+    CCASSERT(false, "Mesh is not supported");
+#endif
 }
 Mesh::~Mesh()
 {

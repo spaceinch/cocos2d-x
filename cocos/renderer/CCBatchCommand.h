@@ -36,6 +36,7 @@ NS_CC_BEGIN
 
 class TextureAtlas;
 class GLProgram;
+class Texture2D;
 /**
 Command used to draw batches in one TextureAtlas.
 */
@@ -64,6 +65,7 @@ public:
 protected:
     //TODO: This member variable is not used. It should be removed.
     int32_t _materialID;
+    Texture2D* _texture;
     /**Texture ID used for texture atlas rendering.*/
     GLuint _textureID;
     /**Shaders used for rendering.*/

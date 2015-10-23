@@ -166,6 +166,7 @@ protected:
     void onAfterDrawStencil();
     void onAfterVisit();
 
+#ifndef DIRECTX_ENABLED
     GLboolean _currentStencilEnabled;
     GLuint _currentStencilWriteMask;
     GLenum _currentStencilFunc;
@@ -179,6 +180,12 @@ protected:
     GLboolean _currentAlphaTestEnabled;
     GLenum _currentAlphaTestFunc;
     GLclampf _currentAlphaTestRef;
+#else
+	D3D11_DEPTH_STENCIL_DESC _originalDepthStencilStateDescription;
+	UINT _originalStencilReferenceValue;
+	D3D11_DEPTH_STENCIL_DESC _currentDepthStencilStateDescription;
+	UINT _currentStencilReferenceValue;
+#endif
 
     GLint _mask_layer_le;
     

@@ -33,6 +33,14 @@ THE SOFTWARE.
 #include "platform/CCGL.h"
 #include "platform/CCPlatformMacros.h"
 
+#ifdef DIRECTX_ENABLED
+	#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
+		#include "wp8/CCGLViewImpl-wp8.h"
+	#elif (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+		#include "winrt/CCGLViewImpl-winrt.h"
+	#endif
+#endif
+
 NS_CC_BEGIN
 
 /**
@@ -42,6 +50,7 @@ NS_CC_BEGIN
 
 class GLProgram;
 
+#ifndef DIRECTX_ENABLED
 namespace GL {
 
 /** Vertex attrib flags. */
@@ -176,6 +185,174 @@ void CC_DLL bindVAO(GLuint vaoId);
 /// @}
 
 } // Namespace GL
+
+#else
+
+class GLView;
+
+class CC_DLL DXStateCache
+{
+public:
+	static DXStateCache& getInstance()
+	{
+		static auto ptr = std::unique_ptr<DXStateCache>(new DXStateCache);
+		return *ptr.get();
+	}
+
+	D3D11_BLEND GetDXBlend(GLint glBlend) const;
+
+	void invalidateStateCache();
+
+	void setShaders(ID3D11VertexShader* vs, ID3D11PixelShader* ps);
+
+	void setVertexBuffer(ID3D11Buffer* buffer, UINT stride, UINT offset);
+	void setIndexBuffer(ID3D11Buffer* buffer);
+
+	void setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
+	void setInputLayout(ID3D11InputLayout* layout);
+
+	void setVSConstantBuffer(int index, ID3D11Buffer*const* buffer);
+	void setPSConstantBuffer(int index, ID3D11Buffer*const* buffer);
+
+	void setVSTexture(int index, ID3D11ShaderResourceView*const* view);
+	void setPSTexture(int index, ID3D11ShaderResourceView*const* view);
+
+	void setBlend(GLint src, GLint dst);
+
+	void setViewport(float x, float y, float w, float h);
+
+	void setScissor(float x, float y, float w, float h);
+	void getScissor(Rect& rect) const;
+	void enableScissor(bool enable);
+	bool isScissorEnabled() const;
+	void setScissorScaling(float scaling);
+
+	void setRasterizer();
+
+	void setDepthStencilState(const D3D11_DEPTH_STENCIL_DESC& depthStencilDesc, UINT depthStencilRef);
+	const D3D11_DEPTH_STENCIL_DESC& getDepthStencilState() const;
+	UINT getStencilRef() const;
+
+	void clear();
+	void clearColor(float r, float g, float b, float a);
+	void clearDepth(float z);
+	void setClearColor(float r, float g, float b, float a);
+	const FLOAT* getClearColor() const;
+	void setClearDepth(float z);
+	void setClearStencil(uint8_t s);
+
+	void setDepthTest(bool enabled);
+	bool isDepthTestEnabled();
+	void setDepthMask(bool enabled);
+	bool isDepthMaskEnabled();
+	void setCullTest(bool enabled);
+	bool isCullTestEnabled();
+
+private:
+	DXStateCache();
+
+	static const int MAX_UNITS = 8;
+
+	GLViewImpl* _view;
+
+	DXStateCache(const DXStateCache&);
+	DXStateCache& operator=(const DXStateCache&);
+
+	// Cached values
+	ID3D11Buffer* _vertexBuffer;
+	ID3D11Buffer* _indexBuffer;
+	ID3D11VertexShader* _vertexShader;
+	ID3D11PixelShader* _pixelShader;
+	ID3D11Buffer*const* _constantBufferPS[MAX_UNITS];
+	ID3D11Buffer*const* _constantBufferVS[MAX_UNITS];
+	D3D11_PRIMITIVE_TOPOLOGY _primitiveTopology;
+	ID3D11InputLayout* _inputLayout;
+	ID3D11ShaderResourceView*const* _textureViewsPS[MAX_UNITS];
+	ID3D11ShaderResourceView*const* _textureViewsVS[MAX_UNITS];
+
+	bool _rasterizerDirty;
+	CD3D11_RASTERIZER_DESC _rasterizerDesc;
+	ID3D11RasterizerState* _rasterizerState;
+
+	float _scissorScaling;
+	CD3D11_RECT _scissorRect;
+
+	D3D11_VIEWPORT _viewportRect;
+
+	CD3D11_BLEND_DESC _blendDesc;
+	ID3D11BlendState* _blendState;
+
+	CD3D11_DEPTH_STENCIL_DESC _depthStencilDesc;
+	UINT _depthStencilRef;
+	ID3D11DepthStencilState *_depthStencilState;
+
+	FLOAT _clearColor[4];
+	FLOAT _clearDepth;
+	UINT8 _clearStencil;
+};
+
+class CC_DLL DXResourceManager
+{
+public:
+	static DXResourceManager & getInstance()
+	{
+		static auto ptr = std::unique_ptr<DXResourceManager>(new DXResourceManager);
+		return *ptr.get();
+	}
+
+#define DX_MANAGER_PROPERTY_DEF(type, name) \
+public: \
+	void add(type *##name) \
+	{ \
+	if (*##name) \
+	_##name.insert(##name); \
+	} \
+	\
+	void remove(type * ##name) \
+	{ \
+	if (*##name) \
+	{ \
+	auto it = _##name.find(##name); \
+	if (it != _##name.end()) \
+	{ \
+	(*##name)->Release(); \
+	_##name.erase(it); \
+	*##name = nullptr; \
+	} \
+	} \
+	} \
+private: \
+	::std::set<type *> _##name; \
+	\
+	void clear##name() \
+	{ \
+	for (auto a : _##name) \
+	{ \
+	(*a)->Release(); \
+	*a = nullptr; \
+	} \
+	_##name.clear(); \
+	}
+
+public:
+	DX_MANAGER_PROPERTY_DEF(ID3D11Buffer *, Buffer);
+	DX_MANAGER_PROPERTY_DEF(ID3D11Texture2D *, Texture);
+	DX_MANAGER_PROPERTY_DEF(ID3D11InputLayout *, InputLayout);
+	DX_MANAGER_PROPERTY_DEF(ID3D11ShaderResourceView *, ShaderResourceView);
+	DX_MANAGER_PROPERTY_DEF(ID3D11VertexShader *, VS);
+	DX_MANAGER_PROPERTY_DEF(ID3D11RasterizerState *, RasterizerState);
+	DX_MANAGER_PROPERTY_DEF(ID3D11PixelShader *, PS);
+	DX_MANAGER_PROPERTY_DEF(ID3D11BlendState *, BlendState);
+	DX_MANAGER_PROPERTY_DEF(ID3D11DepthStencilView *, DepthStencilView);
+	DX_MANAGER_PROPERTY_DEF(ID3D11RenderTargetView *, RenderTargetView);
+	DX_MANAGER_PROPERTY_DEF(ID3D11DepthStencilState *, DepthStencilState);
+
+public:
+	void clear();
+};
+
+#endif
+
 NS_CC_END
     
 

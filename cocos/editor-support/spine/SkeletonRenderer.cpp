@@ -152,6 +152,8 @@ void SkeletonRenderer::draw (Renderer* renderer, const Mat4& transform, uint32_t
 void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFlags) {
 	getGLProgramState()->apply(transform);
 
+	_batch->SetZ(getPositionZ());
+
 	Color3B nodeColor = getColor();
 	_skeleton->r = nodeColor.r / (float)255;
 	_skeleton->g = nodeColor.g / (float)255;
@@ -218,19 +220,26 @@ void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFl
 			if (slot->data->blendMode != blendMode) {
 				_batch->flush();
 				blendMode = slot->data->blendMode;
+				#ifdef DIRECTX_ENABLED
+				#define SET_BLEND 	DXStateCache::getInstance().setBlend
+				#else
+				#define SET_BLEND 	GL::blendFunc
+				#endif
 				switch (slot->data->blendMode) {
 				case SP_BLEND_MODE_ADDITIVE:
-					GL::blendFunc(_premultipliedAlpha ? GL_ONE : GL_SRC_ALPHA, GL_ONE);
+					SET_BLEND(_premultipliedAlpha ? GL_ONE : GL_SRC_ALPHA, GL_ONE);
 					break;
 				case SP_BLEND_MODE_MULTIPLY:
-					GL::blendFunc(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
+					SET_BLEND(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
 					break;
 				case SP_BLEND_MODE_SCREEN:
-					GL::blendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+					SET_BLEND(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 					break;
 				default:
-					GL::blendFunc(_blendFunc.src, _blendFunc.dst);
+					SET_BLEND(_blendFunc.src, _blendFunc.dst);
 				}
+				
+				#undef SET_BLEND
 			}
 			color.a = _skeleton->a * slot->a * a * 255;
 			float multiplier = _premultipliedAlpha ? color.a : 255;
@@ -250,7 +259,7 @@ void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFl
 		if (_debugSlots) {
 			// Slots.
 			DrawPrimitives::setDrawColor4B(0, 0, 255, 255);
-			glLineWidth(1);
+			//glLineWidth(1);
 			Vec2 points[4];
 			V3F_C4B_T2F_Quad quad;
 			for (int i = 0, n = _skeleton->slotsCount; i < n; i++) {
@@ -267,7 +276,7 @@ void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFl
 		}
 		if (_debugBones) {
 			// Bone lengths.
-			glLineWidth(2);
+			//glLineWidth(2);
 			DrawPrimitives::setDrawColor4B(255, 0, 0, 255);
 			for (int i = 0, n = _skeleton->bonesCount; i < n; i++) {
 				spBone *bone = _skeleton->bones[i];

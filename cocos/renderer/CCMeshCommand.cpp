@@ -161,13 +161,17 @@ MeshCommand::~MeshCommand()
 
 void MeshCommand::applyRenderState()
 {
+#ifndef DIRECTX_ENABLED
     CCASSERT(!_material, "Must not be called when using materials");
     CCASSERT(_stateBlock, "StateBlock must be non null");
+#endif
+#ifndef DIRECTX_ENABLED
 
     // blend and texture
     GL::bindTexture2D(_textureID);
 
     _stateBlock->bind();
+#endif
 }
 
 void MeshCommand::genMaterialID(GLuint texID, void* glProgramState, GLuint vertexBuffer, GLuint indexBuffer, BlendFunc blend)
@@ -189,6 +193,9 @@ uint32_t MeshCommand::getMaterialID() const
 
 void MeshCommand::preBatchDraw()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::preBatchDraw is not supported");
+#else
     // Do nothing if using material since each pass needs to bind its own VAO
     if (!_material)
     {
@@ -209,11 +216,15 @@ void MeshCommand::preBatchDraw()
             programState->applyAttributes();
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
         }
+#endif
     }
 }
 
 void MeshCommand::batchDraw()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::batchDraw is not supported");
+#else
     if (_material)
     {
         for(const auto& pass: _material->_currentTechnique->_passes)
@@ -236,10 +247,14 @@ void MeshCommand::batchDraw()
         // Draw
         glDrawElements(_primitive, (GLsizei)_indexCount, _indexFormat, 0);
         CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _indexCount);
+#endif
     }
 }
 void MeshCommand::postBatchDraw()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::postBatchDraw is not supported");
+#else
     // when using material, unbind is after draw
     if (!_material)
     {
@@ -257,10 +272,14 @@ void MeshCommand::postBatchDraw()
         // if the next command will need the default state or not
         RenderState::StateBlock::restore(0);
     }
+#endif
 }
 
 void MeshCommand::execute()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::execute is not supported");
+#else
     // Draw without VAO
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
@@ -292,10 +311,14 @@ void MeshCommand::execute()
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif
 }
 
 void MeshCommand::buildVAO()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::buildVAO is not supported");
+#else
     // FIXME: Assumes that all the passes in the Material share the same Vertex Attribs
     GLProgramState* programState = (_material != nullptr)
                                     ? _material->_currentTechnique->_passes.at(0)->getGLProgramState()
@@ -319,18 +342,31 @@ void MeshCommand::buildVAO()
     GL::bindVAO(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+#endif
 }
 void MeshCommand::releaseVAO()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::releaseVAO is not supported");
+#else
     if (_vao)
     {
         glDeleteVertexArrays(1, &_vao);
         _vao = 0;
         GL::bindVAO(0);
     }
+#endif
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::setLightUniforms is not supported");
+#else
+#endif
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "MeshCommand::resetLightUniformValues is not supported");
+#else
+#endif
 void MeshCommand::listenRendererRecreated(EventCustom* event)
 {
     _vao = 0;
