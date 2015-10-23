@@ -211,8 +211,6 @@ public:
     virtual void* getEAGLView() const { return nullptr; }
 #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_IOS) */
 
-<<<<<<< HEAD
-=======
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
 #ifndef DIRECTX_ENABLED
 	virtual Size getRenderTargetSize() const = 0;
@@ -220,7 +218,6 @@ public:
 	virtual const Mat4& getOrientationMatrix() const = 0;
 	virtual const Mat4& getReverseOrientationMatrix() const = 0;
 #endif
->>>>>>> Merge cocos2d-x 3.4 with parcial direct3d support.
     /**
      * Get the visible area size of opengl viewport.
      *
