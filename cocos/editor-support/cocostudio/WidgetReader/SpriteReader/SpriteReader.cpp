@@ -130,107 +130,71 @@ namespace cocostudio
         
         return *(Offset<Table>*)(&options);
     }
-    
+
     void SpriteReader::setPropsWithFlatBuffers(cocos2d::Node *node,
-                                                   const flatbuffers::Table* spriteOptions)
+      const flatbuffers::Table* spriteOptions)
     {
-        Sprite *sprite = static_cast<Sprite*>(node);
-        auto options = (SpriteOptions*)spriteOptions;
-        
-        
-        auto fileNameData = options->fileNameData();
-        
-        int resourceType = fileNameData->resourceType();
+      Sprite *sprite = static_cast<Sprite*>(node);
+      auto options = (SpriteOptions*)spriteOptions;
+
+
+      auto fileNameData = options->fileNameData();
+
+      int resourceType = fileNameData->resourceType();
+      switch (resourceType)
+      {
+      case 0:
+      {
         std::string path = fileNameData->path()->c_str();
-        
-        bool fileExist = false;
-        std::string errorFilePath = "";
-        
-        switch (resourceType)
+        if (path != "")
         {
-            case 0:
-            {
-                if (FileUtils::getInstance()->isFileExist(path))
-                {
-                    sprite->setTexture(path);
-                    fileExist = true;
-                }
-                else
-                {
-                    errorFilePath = path;
-                    fileExist = false;
-                }
-                break;
-            }
-                
-            case 1:
-            {
-                std::string plist = fileNameData->plistFile()->c_str();
-                SpriteFrame* spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(path);
-                if (spriteFrame)
-                {
-                    sprite->setSpriteFrame(spriteFrame);
-                    fileExist = true;
-                }
-                else
-                {
-                    if (FileUtils::getInstance()->isFileExist(plist))
-                    {
-                        ValueMap value = FileUtils::getInstance()->getValueMapFromFile(plist);
-                        ValueMap metadata = value["metadata"].asValueMap();
-                        std::string textureFileName = metadata["textureFileName"].asString();
-                        if (!FileUtils::getInstance()->isFileExist(textureFileName))
-                        {
-                            errorFilePath = textureFileName;
-                        }
-                    }
-                    else
-                    {
-                        errorFilePath = plist;
-                    }
-                    fileExist = false;
-                }
-                break;
-            }
-                
-            default:
-                break;
+          sprite->setTexture(path);
         }
-        if (!fileExist)
+        break;
+      }
+
+      case 1:
+      {
+        std::string path = fileNameData->path()->c_str();
+        if (path != "")
         {
-            auto label = Label::create();
-            label->setString(__String::createWithFormat("%s missed", errorFilePath.c_str())->getCString());
-            sprite->addChild(label);
+          sprite->setSpriteFrame(path);
         }
-        
-        
-        auto nodeReader = NodeReader::getInstance();
-        nodeReader->setPropsWithFlatBuffers(node, (Table*)(options->nodeOptions()));
-        
-        
-        auto nodeOptions = options->nodeOptions();
-        
-        GLubyte alpha       = (GLubyte)nodeOptions->color()->a();
-        GLubyte red         = (GLubyte)nodeOptions->color()->r();
-        GLubyte green       = (GLubyte)nodeOptions->color()->g();
-        GLubyte blue        = (GLubyte)nodeOptions->color()->b();
-        
-        if (alpha != 255)
-        {
-            sprite->setOpacity(alpha);
-        }
-        if (red != 255 || green != 255 || blue != 255)
-        {
-            sprite->setColor(Color3B(red, green, blue));
-        }
-        
-        bool flipX   = nodeOptions->flipX() != 0;
-        bool flipY   = nodeOptions->flipY() != 0;
-        
-        if(flipX != false)
-            sprite->setFlippedX(flipX);
-        if(flipY != false)
-            sprite->setFlippedY(flipY);
+        break;
+      }
+
+      default:
+        break;
+      }
+
+
+      auto nodeReader = NodeReader::getInstance();
+      nodeReader->setPropsWithFlatBuffers(node, (Table*)(options->nodeOptions()));
+
+
+      auto nodeOptions = options->nodeOptions();
+
+      GLubyte alpha = (GLubyte)nodeOptions->color()->a();
+      GLubyte red = (GLubyte)nodeOptions->color()->r();
+      GLubyte green = (GLubyte)nodeOptions->color()->g();
+      GLubyte blue = (GLubyte)nodeOptions->color()->b();
+
+      if (alpha != 255)
+      {
+        sprite->setOpacity(alpha);
+      }
+      if (red != 255 || green != 255 || blue != 255)
+      {
+        sprite->setColor(Color3B(red, green, blue));
+      }
+
+      bool flipX = nodeOptions->flipX() != 0;
+      bool flipY = nodeOptions->flipY() != 0;
+
+      if (flipX != false)
+        sprite->setFlippedX(flipX);
+      if (flipY != false)
+        sprite->setFlippedY(flipY);
     }
     
     Node* SpriteReader::createNodeWithFlatBuffers(const flatbuffers::Table *spriteOptions)
