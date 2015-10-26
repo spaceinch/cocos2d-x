@@ -645,7 +645,7 @@ void Director::setProjection(Projection projection)
             float zeye = this->getZEye();
 
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-
+            
 #ifdef DIRECTX_ENABLED
 			const DirectX::XMVECTORF32 eye = { w * 0.5f, h * 0.5f, std::max(zeye, 1.0f) };
 			const DirectX::XMVECTORF32 center = { w * 0.5f, h * 0.5f, 0.0f };

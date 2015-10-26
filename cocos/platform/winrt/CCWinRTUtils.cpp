@@ -33,8 +33,10 @@ THE SOFTWARE.
 #include <ppltasks.h>
 #include <sstream>
 
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WP8
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
+#endif
 
 NS_CC_BEGIN
 
@@ -120,6 +122,7 @@ Platform::String^ PlatformStringFromString(const std::string& s)
 }
 
 #if 0
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
 // Method to convert a length in device-independent pixels (DIPs) to a length in physical pixels.
 float ConvertDipsToPixels(float dips)
 {
@@ -131,6 +134,7 @@ float getScaledDPIValue(float v) {
 	auto dipFactor = DisplayProperties::LogicalDpi / 96.0f;
 	return v * dipFactor;
 }
+#endif
 #endif
 
 void CC_DLL CCLogIPAddresses()
@@ -168,6 +172,7 @@ std::string CC_DLL getDeviceIPAddresses()
     return result.str();
 }
 
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WP8
 Platform::Object^ findXamlElement(Platform::Object^ parent, Platform::String^ name)
 {
     if (parent == nullptr || name == nullptr || name->Length() == 0)
@@ -262,6 +267,43 @@ bool replaceXamlElement(Platform::Object^ parent, Platform::Object^ add, Platfor
 
     return true;
 }
+#endif
+
+
+
+
+
+
+
+
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
+
+// Function that reads from a binary file asynchronously.
+Concurrency::task<Platform::Array<byte>^> ReadDataAsync(Platform::String^ filename)
+{
+	using namespace Windows::Storage;
+	using namespace Concurrency;
+		
+	auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
+		
+	return create_task(folder->GetFileAsync(filename)).then([] (StorageFile^ file) 
+	{
+		return file->OpenReadAsync();
+	}).then([] (Streams::IRandomAccessStreamWithContentType^ stream)
+	{
+		unsigned int bufferSize = static_cast<unsigned int>(stream->Size);
+		auto fileBuffer = ref new Streams::Buffer(bufferSize);
+		return stream->ReadAsync(fileBuffer, bufferSize, Streams::InputStreamOptions::None);
+	}).then([] (Streams::IBuffer^ fileBuffer) -> Platform::Array<byte>^ 
+	{
+		auto fileData = ref new Platform::Array<byte>(fileBuffer->Length);
+		Streams::DataReader::FromBuffer(fileBuffer)->ReadBytes(fileData);
+		return fileData;
+	});
+}
+#else
+
+
 
 // Function that reads from a binary file asynchronously.
 Concurrency::task<Platform::Array<byte>^> ReadDataAsync(Platform::String^ path)
@@ -280,6 +322,10 @@ Concurrency::task<Platform::Array<byte>^> ReadDataAsync(Platform::String^ path)
 		return fileData;
 	});
 }
+
+
+
+#endif
 
 std::string computeHashForFile(const std::string& filePath)
 {

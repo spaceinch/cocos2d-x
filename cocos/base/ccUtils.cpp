@@ -104,6 +104,7 @@ void onCaptureScreen(const std::function<void(bool, const std::string&)>& afterC
 		CCASSERT(false, "Capture screen is not supported");
 #else
         glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer.get());
+#endif
 
 #endif
         
@@ -134,10 +135,10 @@ void onCaptureScreen(const std::function<void(bool, const std::string&)>& afterC
         //    }     
         //}
 #else
-        for (int row = 0; row < height; ++row)
-        {
-            memcpy(flippedBuffer.get() + (height - row - 1) * width * 4, buffer.get() + row * width * 4, width * 4);
-        }
+            for (int row = 0; row < height; ++row)
+            {
+                memcpy(flippedBuffer.get() + (height - row - 1) * width * 4, buffer.get() + row * width * 4, width * 4);
+            }
 #endif
 
         Image* image = new (std::nothrow) Image;

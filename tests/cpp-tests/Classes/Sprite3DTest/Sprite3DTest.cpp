@@ -39,14 +39,18 @@ Sprite3DTests::Sprite3DTests()
     ADD_TEST_CASE(Sprite3DBasicTest);
     ADD_TEST_CASE(Sprite3DHitTest);
     ADD_TEST_CASE(AsyncLoadSprite3DTest);
+#if (CC_TARGET_PLATFORM != CC_PLATFORM_WP8)
     // 3DEffect use custom shader which is not supported on WP8/WinRT yet. 
     ADD_TEST_CASE(Sprite3DEffectTest);
     ADD_TEST_CASE(Sprite3DUVAnimationTest);
     ADD_TEST_CASE(Sprite3DFakeShadowTest);
     ADD_TEST_CASE(Sprite3DBasicToonShaderTest);
     ADD_TEST_CASE(Sprite3DLightMapTest);
+#endif
     ADD_TEST_CASE(Sprite3DWithSkinTest);
+#if (CC_TARGET_PLATFORM != CC_PLATFORM_WP8)
     ADD_TEST_CASE(Sprite3DWithSkinOutlineTest);
+#endif
     ADD_TEST_CASE(Animate3DTest);
     ADD_TEST_CASE(AttachmentTest);
     ADD_TEST_CASE(Sprite3DReskinTest);
@@ -278,7 +282,7 @@ Sprite3DUVAnimationTest::Sprite3DUVAnimationTest()
     //the callback function update cylinder's texcoord
     schedule(schedule_selector(Sprite3DUVAnimationTest::cylinderUpdate));
     
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     _backToForegroundListener = EventListenerCustom::create(EVENT_COME_TO_FOREGROUND,
                                                             [this](EventCustom*)
                                                             {
@@ -306,7 +310,7 @@ Sprite3DUVAnimationTest::Sprite3DUVAnimationTest()
 
 Sprite3DUVAnimationTest::~Sprite3DUVAnimationTest()
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     Director::getInstance()->getEventDispatcher()->removeEventListener(_backToForegroundListener);
 #endif
 }
@@ -414,7 +418,7 @@ Sprite3DFakeShadowTest::Sprite3DFakeShadowTest()
 
     schedule(CC_SCHEDULE_SELECTOR(Sprite3DFakeShadowTest::updateCamera), 0.0f);
     
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     _backToForegroundListener = EventListenerCustom::create(EVENT_COME_TO_FOREGROUND,
                                                             [this](EventCustom*)
                                                             {
@@ -443,7 +447,7 @@ Sprite3DFakeShadowTest::Sprite3DFakeShadowTest()
 
 Sprite3DFakeShadowTest::~Sprite3DFakeShadowTest()
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     Director::getInstance()->getEventDispatcher()->removeEventListener(_backToForegroundListener);
 #endif
 }
@@ -643,7 +647,7 @@ Sprite3DBasicToonShaderTest::Sprite3DBasicToonShaderTest()
     addChild(_camera);
     setCameraMask(2);
     
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     _backToForegroundListener = EventListenerCustom::create(EVENT_COME_TO_FOREGROUND,
                                                             [this](EventCustom*)
                                                             {
@@ -660,7 +664,7 @@ Sprite3DBasicToonShaderTest::Sprite3DBasicToonShaderTest()
 
 Sprite3DBasicToonShaderTest::~Sprite3DBasicToonShaderTest()
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     Director::getInstance()->getEventDispatcher()->removeEventListener(_backToForegroundListener);
 #endif
 }
@@ -946,7 +950,7 @@ Effect3DOutline::Effect3DOutline()
 , _outlineWidth(1.0f)
 , _sprite(nullptr)
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     _backToForegroundListener = EventListenerCustom::create(EVENT_COME_TO_FOREGROUND,
                                                           [this](EventCustom*)
                                                           {
@@ -966,7 +970,7 @@ Effect3DOutline::Effect3DOutline()
 
 Effect3DOutline::~Effect3DOutline()
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     Director::getInstance()->getEventDispatcher()->removeEventListener(_backToForegroundListener);
 #endif
 }
@@ -2401,7 +2405,7 @@ Sprite3DCubeMapTest::Sprite3DCubeMapTest() :
 
 Sprite3DCubeMapTest::~Sprite3DCubeMapTest()
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     Director::getInstance()->getEventDispatcher()->removeEventListener(_backToForegroundListener);
 #endif
 
@@ -2493,7 +2497,7 @@ void Sprite3DCubeMapTest::addNewSpriteWithCoords(Vec2 p)
     addChild(_camera);
     setCameraMask(2);
 
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     _backToForegroundListener = EventListenerCustom::create(EVENT_COME_TO_FOREGROUND,
                                 [this](EventCustom*)
     {

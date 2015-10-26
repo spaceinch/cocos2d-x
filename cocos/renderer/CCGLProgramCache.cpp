@@ -64,6 +64,9 @@ enum {
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || defined(WP8_SHADER_COMPILER)
     kShaderType_PositionColor_noMVP_GrayScale,
 #endif
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || defined(WP8_SHADER_COMPILER)
+    kShaderType_PositionColor_noMVP_GrayScale,
+#endif
     kShaderType_MAX,
 };
 
@@ -476,6 +479,10 @@ void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || defined(WP8_SHADER_COMPILER)
         case kShaderType_PositionColor_noMVP_GrayScale:
 			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccUIGrayScale_frag);
+            break;
+#endif
+        case kShaderType_PositionColor_noMVP_GrayScale:
+            p->initWithByteArrays(ccPositionTextureColor_noMVP_vert, ccUIGrayScale_frag);
             break;
 #endif
         default:

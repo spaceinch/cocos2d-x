@@ -1025,6 +1025,7 @@ bool FileUtils::isAbsolutePath(const std::string& path) const
     return (path[0] == '/');
 }
 
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) ||  (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
 bool FileUtils::isDirectoryExist(const std::string& dirPath) const
 {
     CCASSERT(!dirPath.empty(), "Invalid path");
@@ -1151,6 +1152,7 @@ bool FileUtils::createDirectory(const std::string& path)
         }
     }
 
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     DIR *dir = NULL;
 
     // Create path recursively
@@ -1189,6 +1191,7 @@ bool FileUtils::removeDirectory(const std::string& path)
         return false;
     }
 
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     std::string command = "rm -r ";
     // Path may include space.
     command += "\"" + path + "\"";
@@ -1200,6 +1203,7 @@ bool FileUtils::removeDirectory(const std::string& path)
 
 bool FileUtils::removeFile(const std::string &path)
 {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
     if (remove(path.c_str())) {
         return false;
     } else {
@@ -1213,6 +1217,7 @@ bool FileUtils::renameFile(const std::string &oldfullpath, const std::string &ne
     CCASSERT(!newfullpath.empty(), "Invalid path");
 
     int errorCode = rename(oldfullpath.c_str(), newfullpath.c_str());
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT || CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
 
     if (0 != errorCode)
     {
