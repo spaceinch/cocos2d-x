@@ -182,7 +182,7 @@ float SimpleAudioEngine::getBackgroundMusicVolume()
 
 void SimpleAudioEngine::setBackgroundMusicVolume(float volume)
 {
-	sharedAudioController()->SetBackgroundVolume((volume<=0.0f)? 0.0f : volume);
+	//sharedAudioController()->SetBackgroundVolume((volume<=0.0f)? 0.0f : volume);
 }
 
 float SimpleAudioEngine::getEffectsVolume()
