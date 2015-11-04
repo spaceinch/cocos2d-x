@@ -50,6 +50,9 @@ VertexAttribBinding::VertexAttribBinding() :
 
 VertexAttribBinding::~VertexAttribBinding()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "VertexAttribBinding::Dtor is not supported.");
+#else
     // Delete from the vertex attribute binding cache.
     std::vector<VertexAttribBinding*>::iterator itr = std::find(__vertexAttribBindingCache.begin(), __vertexAttribBindingCache.end(), this);
     if (itr != __vertexAttribBindingCache.end())
@@ -66,6 +69,7 @@ VertexAttribBinding::~VertexAttribBinding()
         glDeleteVertexArrays(1, &_handle);
         _handle = 0;
     }
+#endif
 }
 
 VertexAttribBinding* VertexAttribBinding::create(MeshIndexData* meshIndexData, GLProgramState* glProgramState)
@@ -97,6 +101,10 @@ VertexAttribBinding* VertexAttribBinding::create(MeshIndexData* meshIndexData, G
 
 bool VertexAttribBinding::init(MeshIndexData* meshIndexData, GLProgramState* glProgramState)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "VertexAttribBinding::init is not supported.");
+	return false;
+#else
     CCASSERT(meshIndexData && glProgramState, "Invalid arguments");
 
     // One-time initialization.
@@ -167,11 +175,14 @@ bool VertexAttribBinding::init(MeshIndexData* meshIndexData, GLProgramState* glP
     }
 
     return true;
+#endif
 }
 
 void VertexAttribBinding::bind()
 {
-
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "VertexAttribBinding::bind is not supported.");
+#else
     if (_handle)
     {
         // hardware
@@ -193,10 +204,14 @@ void VertexAttribBinding::bind()
         }
         
     }
+#endif
 }
 
 void VertexAttribBinding::unbind()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "VertexAttribBinding::unbind is not supported.");
+#else
     if (_handle)
     {
         // Hardware
@@ -208,6 +223,7 @@ void VertexAttribBinding::unbind()
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
+#endif
 }
 
 uint32_t VertexAttribBinding::getVertexAttribsFlags() const

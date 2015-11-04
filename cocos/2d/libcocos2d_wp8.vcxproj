@@ -72,18 +72,18 @@
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <TargetName>libcocos2d_v3.4_WindowsPhone_8.0</TargetName>
+    <TargetName>libcocos2d_v3.8_WindowsPhone_8.0</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <TargetName>libcocos2d_v3.4_WindowsPhone_8.0</TargetName>
+    <TargetName>libcocos2d_v3.8_WindowsPhone_8.0</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <TargetName>libcocos2d_v3.4_WindowsPhone_8.0</TargetName>
+    <TargetName>libcocos2d_v3.8_WindowsPhone_8.0</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <TargetName>libcocos2d_v3.4_WindowsPhone_8.0</TargetName>
+    <TargetName>libcocos2d_v3.8_WindowsPhone_8.0</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -95,6 +95,7 @@
       <AdditionalIncludeDirectories>$(EngineRoot)external\jpeg\include\$(COCOS2D_PLATFORM);$(EngineRoot)external\tiff\include\$(COCOS2D_PLATFORM);$(EngineRoot)external\png\include\$(COCOS2D_PLATFORM);$(EngineRoot)external\protobuf-lite\src;$(EngineRoot)external\protobuf-lite\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zm384 /bigobj %(AdditionalOptions)</AdditionalOptions>
       <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -174,7 +175,6 @@
     <ClInclude Include="..\..\extensions\assets-manager\AssetsManagerEx.h" />
     <ClInclude Include="..\..\extensions\assets-manager\CCEventAssetsManagerEx.h" />
     <ClInclude Include="..\..\extensions\assets-manager\CCEventListenerAssetsManagerEx.h" />
-    <ClInclude Include="..\..\extensions\assets-manager\Downloader.h" />
     <ClInclude Include="..\..\extensions\assets-manager\Manifest.h" />
     <ClInclude Include="..\..\extensions\cocos-ext.h" />
     <ClInclude Include="..\..\extensions\ExtensionMacros.h" />
@@ -470,7 +470,6 @@
     <ClInclude Include="..\platform\winrt\pch.h" />
     <ClInclude Include="..\platform\winrt\sha1.h" />
     <ClInclude Include="..\platform\wp8\CCGLViewImpl-wp8.h" />
-    <ClInclude Include="..\platform\wp8\DirectXBase.h" />
     <ClInclude Include="..\renderer\CCBatchCommand.h" />
     <ClInclude Include="..\renderer\CCCustomCommand.h" />
     <ClInclude Include="..\renderer\CCGLProgram.h" />
@@ -495,7 +494,6 @@
     <ClInclude Include="..\renderer\CCVertexIndexData.h" />
     <ClInclude Include="..\storage\local-storage\LocalStorage.h" />
     <ClInclude Include="..\ui\CocosGUI.h" />
-    <ClInclude Include="..\ui\shaders\UIShaders.h" />
     <ClInclude Include="..\ui\UIButton.h" />
     <ClInclude Include="..\ui\UIDeprecated.h" />
     <ClInclude Include="..\ui\UIEditBox\UIEditBox.h" />
@@ -597,7 +595,6 @@
     <ClCompile Include="..\..\extensions\assets-manager\AssetsManagerEx.cpp" />
     <ClCompile Include="..\..\extensions\assets-manager\CCEventAssetsManagerEx.cpp" />
     <ClCompile Include="..\..\extensions\assets-manager\CCEventListenerAssetsManagerEx.cpp" />
-    <ClCompile Include="..\..\extensions\assets-manager\Downloader.cpp" />
     <ClCompile Include="..\..\extensions\assets-manager\Manifest.cpp" />
     <ClCompile Include="..\..\extensions\GUI\CCControlExtension\CCControl.cpp" />
     <ClCompile Include="..\..\extensions\GUI\CCControlExtension\CCControlButton.cpp" />
@@ -613,8 +610,159 @@
     <ClCompile Include="..\..\extensions\GUI\CCScrollView\CCScrollView.cpp" />
     <ClCompile Include="..\..\extensions\GUI\CCScrollView\CCTableView.cpp" />
     <ClCompile Include="..\..\extensions\GUI\CCScrollView\CCTableViewCell.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\CCParticle3DAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\CCParticle3DEmitter.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\CCParticle3DRender.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\CCParticleSystem3D.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUAffectorManager.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUAlignAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUAlignAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBaseCollider.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBaseColliderTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBaseForceAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBaseForceAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBeamRender.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBehaviour.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBehaviourManager.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBehaviourTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBillboardChain.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBoxCollider.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBoxColliderTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBoxEmitter.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUBoxEmitterTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUCircleEmitter.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUCircleEmitterTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUCollisionAvoidanceAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUCollisionAvoidanceAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUColorAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUColorAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoAffectorEventHandler.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoAffectorEventHandlerTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoEnableComponentEventHandler.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoEnableComponentEventHandlerTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoExpireEventHandler.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoExpireEventHandlerTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoFreezeEventHandler.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoFreezeEventHandlerTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoPlacementParticleEventHandler.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoPlacementParticleEventHandlerTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoScaleEventHandler.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoScaleEventHandlerTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoStopSystemEventHandler.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDoStopSystemEventHandlerTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDynamicAttribute.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUDynamicAttributeTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUEmitter.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUEmitterManager.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUEmitterTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUEventHandler.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUEventHandlerManager.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUEventHandlerTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUFlockCenteringAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUFlockCenteringAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUForceField.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUForceFieldAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUForceFieldAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUGeometryRotator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUGeometryRotatorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUGravityAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUGravityAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUInterParticleCollider.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUInterParticleColliderTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUJetAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUJetAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPULineAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPULineAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPULinearForceAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPULinearForceAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPULineEmitter.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPULineEmitterTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUListener.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUMaterialManager.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUMaterialTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUMeshSurfaceEmitter.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUMeshSurfaceEmitterTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUNoise.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUObserverManager.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnClearObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnClearObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnCollisionObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnCollisionObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnCountObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnCountObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnEmissionObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnEmissionObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnEventFlagObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnEventFlagObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnExpireObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnExpireObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnPositionObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnPositionObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnQuotaObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnQuotaObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnRandomObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnRandomObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnTimeObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnTimeObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnVelocityObserver.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUOnVelocityObserverTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUParticleFollower.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUParticleFollowerTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUParticleSystem3D.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUParticleSystem3DTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUPathFollower.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUPathFollowerTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUPlane.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUPlaneCollider.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUPlaneColliderTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUPointEmitter.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUPointEmitterTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUPositionEmitter.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUPositionEmitterTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPURandomiser.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPURandomiserTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPURender.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPURendererTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPURibbonTrail.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPURibbonTrailRender.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUScaleAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUScaleAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUScaleVelocityAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUScaleVelocityAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUScriptCompiler.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUScriptLexer.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUScriptParser.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUScriptTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSimpleSpline.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSineForceAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSineForceAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSlaveBehaviour.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSlaveBehaviourTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSlaveEmitter.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSlaveEmitterTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSphere.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSphereCollider.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSphereColliderTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSphereSurfaceEmitter.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUSphereSurfaceEmitterTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUTechniqueTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUTextureAnimator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUTextureAnimatorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUTextureRotator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUTextureRotatorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUTranslateManager.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUUtil.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUVelocityMatchingAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUVelocityMatchingAffectorTranslator.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUVortexAffector.cpp" />
+    <ClCompile Include="..\..\extensions\Particle3D\PU\CCPUVortexAffectorTranslator.cpp" />
     <ClCompile Include="..\..\extensions\physics-nodes\CCPhysicsDebugNode.cpp" />
     <ClCompile Include="..\..\extensions\physics-nodes\CCPhysicsSprite.cpp" />
+    <ClCompile Include="..\..\external\clipper\clipper.cpp" />
     <ClCompile Include="..\..\external\ConvertUTF\ConvertUTF.c">
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</CompileAsWinRT>
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</CompileAsWinRT>
@@ -637,6 +785,61 @@
     <ClCompile Include="..\..\external\flatbuffers\idl_gen_go.cpp" />
     <ClCompile Include="..\..\external\flatbuffers\idl_gen_text.cpp" />
     <ClCompile Include="..\..\external\flatbuffers\idl_parser.cpp" />
+    <ClCompile Include="..\..\external\poly2tri\common\shapes.cc" />
+    <ClCompile Include="..\..\external\poly2tri\sweep\advancing_front.cc" />
+    <ClCompile Include="..\..\external\poly2tri\sweep\cdt.cc" />
+    <ClCompile Include="..\..\external\poly2tri\sweep\sweep.cc" />
+    <ClCompile Include="..\..\external\poly2tri\sweep\sweep_context.cc" />
+    <ClCompile Include="..\..\external\recast\DebugUtils\DebugDraw.cpp" />
+    <ClCompile Include="..\..\external\recast\DebugUtils\DetourDebugDraw.cpp" />
+    <ClCompile Include="..\..\external\recast\DebugUtils\RecastDebugDraw.cpp" />
+    <ClCompile Include="..\..\external\recast\DebugUtils\RecastDump.cpp" />
+    <ClCompile Include="..\..\external\recast\DetourCrowd\DetourCrowd.cpp" />
+    <ClCompile Include="..\..\external\recast\DetourCrowd\DetourLocalBoundary.cpp" />
+    <ClCompile Include="..\..\external\recast\DetourCrowd\DetourObstacleAvoidance.cpp" />
+    <ClCompile Include="..\..\external\recast\DetourCrowd\DetourPathCorridor.cpp" />
+    <ClCompile Include="..\..\external\recast\DetourCrowd\DetourPathQueue.cpp" />
+    <ClCompile Include="..\..\external\recast\DetourCrowd\DetourProximityGrid.cpp" />
+    <ClCompile Include="..\..\external\recast\DetourTileCache\DetourTileCache.cpp" />
+    <ClCompile Include="..\..\external\recast\DetourTileCache\DetourTileCacheBuilder.cpp" />
+    <ClCompile Include="..\..\external\recast\Detour\DetourAlloc.cpp" />
+    <ClCompile Include="..\..\external\recast\Detour\DetourCommon.cpp" />
+    <ClCompile Include="..\..\external\recast\Detour\DetourNavMesh.cpp" />
+    <ClCompile Include="..\..\external\recast\Detour\DetourNavMeshBuilder.cpp" />
+    <ClCompile Include="..\..\external\recast\Detour\DetourNavMeshQuery.cpp" />
+    <ClCompile Include="..\..\external\recast\Detour\DetourNode.cpp" />
+    <ClCompile Include="..\..\external\recast\fastlz\fastlz.c">
+      <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">false</CompileAsWinRT>
+      <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">false</CompileAsWinRT>
+      <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsWinRT>
+      <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsWinRT>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">CompileAsCpp</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">CompileAsCpp</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ForcedIncludeFiles>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ForcedIncludeFiles>
+    </ClCompile>
+    <ClCompile Include="..\..\external\recast\Recast\Recast.cpp" />
+    <ClCompile Include="..\..\external\recast\Recast\RecastAlloc.cpp" />
+    <ClCompile Include="..\..\external\recast\Recast\RecastArea.cpp" />
+    <ClCompile Include="..\..\external\recast\Recast\RecastContour.cpp" />
+    <ClCompile Include="..\..\external\recast\Recast\RecastFilter.cpp" />
+    <ClCompile Include="..\..\external\recast\Recast\RecastLayers.cpp" />
+    <ClCompile Include="..\..\external\recast\Recast\RecastMesh.cpp" />
+    <ClCompile Include="..\..\external\recast\Recast\RecastMeshDetail.cpp" />
+    <ClCompile Include="..\..\external\recast\Recast\RecastRasterization.cpp" />
+    <ClCompile Include="..\..\external\recast\Recast\RecastRegion.cpp" />
     <ClCompile Include="..\..\external\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="..\..\external\unzip\ioapi.cpp" />
     <ClCompile Include="..\..\external\unzip\ioapi_mem.cpp" />
@@ -679,6 +882,7 @@
     <ClCompile Include="..\3d\CCPlane.cpp" />
     <ClCompile Include="..\3d\CCRay.cpp" />
     <ClCompile Include="..\3d\CCSkeleton3D.cpp" />
+    <ClCompile Include="..\3d\CCSkybox.cpp" />
     <ClCompile Include="..\3d\CCSprite3D.cpp" />
     <ClCompile Include="..\3d\CCSprite3DMaterial.cpp" />
     <ClCompile Include="..\audio\wp8\Audio.cpp">
@@ -778,8 +982,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\base\CCIMEDispatcher.cpp" />
+    <ClCompile Include="..\base\CCNinePatchImageParser.cpp" />
     <ClCompile Include="..\base\CCNS.cpp" />
     <ClCompile Include="..\base\CCProfiling.cpp" />
+    <ClCompile Include="..\base\CCProperties.cpp" />
     <ClCompile Include="..\base\ccRandom.cpp" />
     <ClCompile Include="..\base\CCRef.cpp" />
     <ClCompile Include="..\base\CCScheduler.cpp" />
@@ -828,8 +1034,9 @@
     <ClCompile Include="..\editor-support\cocostudio\ActionTimeline\CCActionTimeline.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\ActionTimeline\CCActionTimelineCache.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\ActionTimeline\CCActionTimelineNode.cpp" />
+    <ClCompile Include="..\editor-support\cocostudio\ActionTimeline\CCBoneNode.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\ActionTimeline\CCFrame.cpp" />
-    <ClCompile Include="..\editor-support\cocostudio\ActionTimeline\CCNodeReader.cpp" />
+    <ClCompile Include="..\editor-support\cocostudio\ActionTimeline\CCSkeletonNode.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\ActionTimeline\CCTimeLine.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\ActionTimeline\CSLoader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\CCActionFrame.cpp" />
@@ -847,6 +1054,7 @@
     <ClCompile Include="..\editor-support\cocostudio\CCComAttribute.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\CCComAudio.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\CCComController.cpp" />
+    <ClCompile Include="..\editor-support\cocostudio\CCComExtensionData.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\CCComRender.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\CCDataReaderHelper.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\CCDatas.cpp" />
@@ -874,24 +1082,31 @@
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\CheckBoxReader\CheckBoxReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\ComAudioReader\ComAudioReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\GameMapReader\GameMapReader.cpp" />
+    <ClCompile Include="..\editor-support\cocostudio\WidgetReader\GameNode3DReader\GameNode3DReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\ImageViewReader\ImageViewReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\LayoutReader\LayoutReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\ListViewReader\ListViewReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\LoadingBarReader\LoadingBarReader.cpp" />
+    <ClCompile Include="..\editor-support\cocostudio\WidgetReader\Node3DReader\Node3DReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\NodeReaderDefine.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\NodeReaderProtocol.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\NodeReader\NodeReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\PageViewReader\PageViewReader.cpp" />
+    <ClCompile Include="..\editor-support\cocostudio\WidgetReader\Particle3DReader\Particle3DReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\ParticleReader\ParticleReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\ProjectNodeReader\ProjectNodeReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\ScrollViewReader\ScrollViewReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\SingleNodeReader\SingleNodeReader.cpp" />
+    <ClCompile Include="..\editor-support\cocostudio\WidgetReader\SkeletonReader\BoneNodeReader.cpp" />
+    <ClCompile Include="..\editor-support\cocostudio\WidgetReader\SkeletonReader\SkeletonNodeReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\SliderReader\SliderReader.cpp" />
+    <ClCompile Include="..\editor-support\cocostudio\WidgetReader\Sprite3DReader\Sprite3DReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\SpriteReader\SpriteReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\TextAtlasReader\TextAtlasReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\TextBMFontReader\TextBMFontReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\TextFieldReader\TextFieldReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\TextReader\TextReader.cpp" />
+    <ClCompile Include="..\editor-support\cocostudio\WidgetReader\UserCameraReader\UserCameraReader.cpp" />
     <ClCompile Include="..\editor-support\cocostudio\WidgetReader\WidgetReader.cpp" />
     <ClCompile Include="..\math\CCAffineTransform.cpp" />
     <ClCompile Include="..\math\CCGeometry.cpp" />
@@ -903,6 +1118,13 @@
     <ClCompile Include="..\math\Vec2.cpp" />
     <ClCompile Include="..\math\Vec3.cpp" />
     <ClCompile Include="..\math\Vec4.cpp" />
+    <ClCompile Include="..\navmesh\CCNavMesh.cpp" />
+    <ClCompile Include="..\navmesh\CCNavMeshAgent.cpp" />
+    <ClCompile Include="..\navmesh\CCNavMeshDebugDraw.cpp" />
+    <ClCompile Include="..\navmesh\CCNavMeshObstacle.cpp" />
+    <ClCompile Include="..\navmesh\CCNavMeshUtils.cpp" />
+    <ClCompile Include="..\network\CCDownloader.cpp" />
+    <ClCompile Include="..\network\CCDownloaderImpl.cpp" />
     <ClCompile Include="..\network\HttpClient.cpp" />
     <ClCompile Include="..\network\SocketIO.cpp" />
     <ClCompile Include="..\network\WebSocket.cpp" />
@@ -936,31 +1158,37 @@
     </ClCompile>
     <ClCompile Include="..\platform\winrt\sha1.cpp" />
     <ClCompile Include="..\platform\wp8\CCGLViewImpl-wp8.cpp" />
-    <ClCompile Include="..\platform\wp8\DirectXBase.cpp" />
     <ClCompile Include="..\renderer\CCBatchCommand.cpp" />
     <ClCompile Include="..\renderer\CCCustomCommand.cpp" />
+    <ClCompile Include="..\renderer\CCFrameBuffer.cpp" />
     <ClCompile Include="..\renderer\CCGLProgram.cpp" />
     <ClCompile Include="..\renderer\CCGLProgramCache.cpp" />
     <ClCompile Include="..\renderer\CCGLProgramState.cpp" />
     <ClCompile Include="..\renderer\CCGLProgramStateCache.cpp" />
     <ClCompile Include="..\renderer\ccGLStateCache.cpp" />
     <ClCompile Include="..\renderer\CCGroupCommand.cpp" />
+    <ClCompile Include="..\renderer\CCMaterial.cpp" />
     <ClCompile Include="..\renderer\CCMeshCommand.cpp" />
+    <ClCompile Include="..\renderer\CCPass.cpp" />
     <ClCompile Include="..\renderer\CCPrimitive.cpp" />
     <ClCompile Include="..\renderer\CCPrimitiveCommand.cpp" />
     <ClCompile Include="..\renderer\CCQuadCommand.cpp" />
     <ClCompile Include="..\renderer\CCRenderCommand.cpp" />
     <ClCompile Include="..\renderer\CCRenderer.cpp" />
+    <ClCompile Include="..\renderer\CCRenderState.cpp" />
     <ClCompile Include="..\renderer\ccShaders.cpp" />
+    <ClCompile Include="..\renderer\CCTechnique.cpp" />
     <ClCompile Include="..\renderer\CCTexture2D.cpp" />
     <ClCompile Include="..\renderer\CCTextureAtlas.cpp" />
     <ClCompile Include="..\renderer\CCTextureCache.cpp" />
+    <ClCompile Include="..\renderer\CCTextureCube.cpp" />
     <ClCompile Include="..\renderer\CCTrianglesCommand.cpp" />
+    <ClCompile Include="..\renderer\CCVertexAttribBinding.cpp" />
     <ClCompile Include="..\renderer\CCVertexIndexBuffer.cpp" />
     <ClCompile Include="..\renderer\CCVertexIndexData.cpp" />
     <ClCompile Include="..\storage\local-storage\LocalStorage.cpp" />
     <ClCompile Include="..\ui\CocosGUI.cpp" />
-    <ClCompile Include="..\ui\shaders\UIShaders.cpp" />
+    <ClCompile Include="..\ui\UIAbstractCheckButton.cpp" />
     <ClCompile Include="..\ui\UIButton.cpp" />
     <ClCompile Include="..\ui\UICheckBox.cpp" />
     <ClCompile Include="..\ui\UIDeprecated.cpp" />
@@ -980,6 +1208,7 @@
     <ClCompile Include="..\ui\UIRichText.cpp" />
     <ClCompile Include="..\ui\UIScale9Sprite.cpp" />
     <ClCompile Include="..\ui\UIScrollView.cpp" />
+    <ClCompile Include="..\ui\UIScrollViewBar.cpp" />
     <ClCompile Include="..\ui\UISlider.cpp" />
     <ClCompile Include="..\ui\UIText.cpp" />
     <ClCompile Include="..\ui\UITextAtlas.cpp" />
@@ -1003,7 +1232,9 @@
     <ClCompile Include="CCAnimation.cpp" />
     <ClCompile Include="CCAnimationCache.cpp" />
     <ClCompile Include="CCAtlasNode.cpp" />
+    <ClCompile Include="CCAutoPolygon.cpp" />
     <ClCompile Include="CCCamera.cpp" />
+    <ClCompile Include="CCCameraBackgroundBrush.cpp" />
     <ClCompile Include="CCClippingNode.cpp" />
     <ClCompile Include="CCClippingRectangleNode.cpp" />
     <ClCompile Include="CCComponent.cpp" />

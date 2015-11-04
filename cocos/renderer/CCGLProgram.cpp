@@ -152,7 +152,7 @@ static const std::string EMPTY_DEFINE;
 
 GLProgram* GLProgram::createWithByteArrays(const std::string &vShaderByteArray, const std::string &fShaderByteArray)
 {
-    return createWithByteArrays(vShaderByteArray, fShaderByteArray, EMPTY_DEFINE);
+    return createWithByteArrays(vShaderByteArray.c_str(), fShaderByteArray.c_str(), EMPTY_DEFINE);
 }
 
 GLProgram* GLProgram::createWithByteArrays(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray, const std::string& compileTimeDefines)
@@ -345,7 +345,7 @@ bool GLProgram::initWithHLSL(const ShaderDescriptor &vertexShader, const ShaderD
 #endif
 bool GLProgram::initWithByteArrays(const std::string &vShaderByteArray, const std::string &fShaderByteArray)
 {
-	return initWithByteArrays(vShaderByteArray, fShaderByteArray, EMPTY_DEFINE);
+	return initWithByteArrays(vShaderByteArray.c_str(), fShaderByteArray.c_str(), EMPTY_DEFINE);
 }
 
 bool GLProgram::initWithByteArrays(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray, const std::string& compileTimeDefines)
@@ -416,6 +416,7 @@ bool GLProgram::initWithByteArrays(const GLchar* vShaderByteArray, const GLchar*
     return true;
 }
 
+#ifndef DIRECTX_ENABLED
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
 GLProgram* GLProgram::createWithPrecompiledProgramByteArray(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray)
 {
@@ -449,6 +450,7 @@ bool GLProgram::initWithPrecompiledProgramByteArray(const GLchar* vShaderByteArr
 
     return haveProgram;
 }
+#endif
 #endif
 
 bool GLProgram::initWithFilenames(const std::string& vShaderFilename, const std::string& fShaderFilename)
@@ -623,19 +625,6 @@ Uniform* GLProgram::getUniform(const std::string &name)
 		return &itr->second;
 #endif
 	return nullptr;
-}
-
-VertexAttrib* GLProgram::getVertexAttrib(const std::string &name)
-{
-#ifdef DIRECTX_ENABLED
-	CCASSERT(false, "GLProgram::getVertexAttrib is not supported");
-#else
-	auto itr = _vertexAttribs.find(name);
-	if (itr != _vertexAttribs.end())
-		return &itr->second;
-
-#endif
-    return nullptr;
 }
 
 const VertexAttrib* GLProgram::getVertexAttrib(const std::string &name) const
@@ -1230,6 +1219,11 @@ void GLProgram::updateUniform(int location, unsigned char *input, int size)
 			_uniformDirtyVS = true;
 		}
 	}
+}
+
+void GLProgram::setUniformLocationWith1fv(GLint location, const GLfloat* floats, unsigned int numberOfArrays)
+{
+	CCASSERT(false, "GLProgram::setUniformLocationWith1fv is not supported.");
 }
 
 void GLProgram::setUniformLocationWith1i(GLint location, GLint i1)

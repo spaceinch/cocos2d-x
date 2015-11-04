@@ -173,6 +173,10 @@ bool TextureCube::init(const std::string& positive_x, const std::string& negativ
                        const std::string& positive_y, const std::string& negative_y,
                        const std::string& positive_z, const std::string& negative_z)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "TextureCube::init is not supported.");
+	return false;
+#else
     _imgPath[0] = positive_x;
     _imgPath[1] = negative_x;
     _imgPath[2] = positive_y;
@@ -244,10 +248,14 @@ bool TextureCube::init(const std::string& positive_x, const std::string& negativ
     }
 
     return true;
+#endif
 }
 
 void TextureCube::setTexParameters(const TexParams& texParams)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "TextureCube::setTexParameters is not supported.");
+#else
     CCASSERT(_name != 0, __FUNCTION__);
 
     GL::bindTextureN(0, _name, GL_TEXTURE_CUBE_MAP);
@@ -258,6 +266,7 @@ void TextureCube::setTexParameters(const TexParams& texParams)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, texParams.wrapT);
 
     GL::bindTextureN(0, 0, GL_TEXTURE_CUBE_MAP);
+#endif
 }
 
 bool TextureCube::reloadTexture()

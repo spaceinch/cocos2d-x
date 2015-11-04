@@ -1279,8 +1279,13 @@ void Label::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
                 it.second->updateTransform();
             }
             auto textureAtlas = _batchNodes.at(0)->getTextureAtlas();
-            _quadCommand.init(_globalZOrder, textureAtlas->getTexture()->getName(), getGLProgramState(), 
+#ifndef DIRECTX_ENABLED
+			_quadCommand.init(_globalZOrder, textureAtlas->getTexture()->getName(), getGLProgramState(), 
                 _blendFunc, textureAtlas->getQuads(), textureAtlas->getTotalQuads(), transform, flags);
+#else 
+			_quadCommand.init(_globalZOrder, textureAtlas->getTexture(), getGLProgramState(),
+				_blendFunc, textureAtlas->getQuads(), textureAtlas->getTotalQuads(), transform, flags);
+#endif
             renderer->addCommand(&_quadCommand);
         }
         else

@@ -105,8 +105,6 @@ void onCaptureScreen(const std::function<void(bool, const std::string&)>& afterC
 #else
         glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer.get());
 #endif
-
-#endif
         
         std::shared_ptr<GLubyte> flippedBuffer(new GLubyte[width * height * 4], [](GLubyte* p) { CC_SAFE_DELETE_ARRAY(p); });
         if (!flippedBuffer)

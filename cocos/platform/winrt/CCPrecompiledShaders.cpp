@@ -27,11 +27,12 @@ THE SOFTWARE.
 #include "renderer/CCGLProgram.h"
 #include "sha1.h"
 
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
-#include "platform/winrt/shaders/precompiledshaders.h"
-#elif (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
-#include "platform/wp8/shaders/precompiledshaders.h"
-#endif
+// ******** Unused in DirectX platforms since is unsupported ************
+//#if (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
+//#include "platform/winrt/shaders/precompiledshaders.h"
+//#elif (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
+//#include "platform/wp8/shaders/precompiledshaders.h"
+//#endif
 
 
 using namespace Windows::Graphics::Display;

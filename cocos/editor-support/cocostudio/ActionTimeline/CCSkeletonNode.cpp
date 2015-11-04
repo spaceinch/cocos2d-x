@@ -30,7 +30,9 @@ THE SOFTWARE.
 #include "renderer/CCGLProgramState.h"
 #include <stack>
 
+#ifndef DIRECTX_ENABLED
 using namespace cocos2d::GL;
+#endif
 
 NS_TIMELINE_BEGIN
 
@@ -222,6 +224,9 @@ void SkeletonNode::draw(cocos2d::Renderer *renderer, const cocos2d::Mat4 &transf
 
 void SkeletonNode::batchDrawAllSubBones(const cocos2d::Mat4 &transform)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "SkeletonNode::batchDrawAllSubBones is not supported.");
+#else
     checkSubBonesDirty();
 
     _batchedVeticesCount = 0;
@@ -260,11 +265,15 @@ void SkeletonNode::batchDrawAllSubBones(const cocos2d::Mat4 &transform)
     }
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _batchedVeticesCount);
 #endif //CC_STUDIO_ENABLED_VIEW
+#endif // DIRECTX_ENABLED
 }
 
 
 void SkeletonNode::onDraw(const cocos2d::Mat4 &transform, uint32_t flags)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "SkeletonNode::onDraw is not supported.");
+#else
     getGLProgram()->use();
     getGLProgram()->setUniformsForBuiltins(transform);
 
@@ -280,6 +289,7 @@ void SkeletonNode::onDraw(const cocos2d::Mat4 &transform, uint32_t flags)
     glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
 
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, 8);
+#endif
 }
 
 void SkeletonNode::changeSkins(const std::map<std::string, std::string>& boneSkinNameMap)

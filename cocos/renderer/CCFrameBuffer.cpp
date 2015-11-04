@@ -140,7 +140,11 @@ RenderTarget::~RenderTarget()
 
 RenderTargetRenderBuffer::RenderTargetRenderBuffer()
 : _colorBuffer(0)
+#ifndef DIRECTX_ENABLED
 , _format(GL_RGBA4)
+#else
+, _format(DXGI_FORMAT_B4G4R4A4_UNORM)
+#endif
 #if CC_ENABLE_CACHE_TEXTURE_DATA
 , _reBuildRenderBufferListener(nullptr)
 #endif
@@ -150,6 +154,9 @@ RenderTargetRenderBuffer::RenderTargetRenderBuffer()
 
 RenderTargetRenderBuffer::~RenderTargetRenderBuffer()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "RenderTargetRenderBuffer::Dtor is not supported.");
+#else
     if(glIsRenderbuffer(_colorBuffer))
     {
         glDeleteRenderbuffers(1, &_colorBuffer);
@@ -158,10 +165,15 @@ RenderTargetRenderBuffer::~RenderTargetRenderBuffer()
 #if CC_ENABLE_CACHE_TEXTURE_DATA
     Director::getInstance()->getEventDispatcher()->removeEventListener(_reBuildRenderBufferListener);
 #endif
+#endif // DIRECTX_ENABLED
 }
 
 bool RenderTargetRenderBuffer::init(unsigned int width, unsigned int height)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "RenderTargetRenderBuffer::init is not supported.");
+	return false;
+#else
     if(!RenderTargetBase::init(width, height)) return false;
     GLint oldRenderBuffer(0);
     glGetIntegerv(GL_RENDERBUFFER_BINDING, &oldRenderBuffer);
@@ -191,6 +203,7 @@ bool RenderTargetRenderBuffer::init(unsigned int width, unsigned int height)
 #endif
     
     return true;
+#endif // DIRECTX_ENABLED
 }
 
 
@@ -221,6 +234,9 @@ RenderTargetDepthStencil::RenderTargetDepthStencil()
 
 RenderTargetDepthStencil::~RenderTargetDepthStencil()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "RenderTargetDepthStencil::Dtor is not supported.");
+#else
     if(glIsRenderbuffer(_depthStencilBuffer))
     {
         glDeleteRenderbuffers(1, &_depthStencilBuffer);
@@ -229,10 +245,15 @@ RenderTargetDepthStencil::~RenderTargetDepthStencil()
 #if CC_ENABLE_CACHE_TEXTURE_DATA
     Director::getInstance()->getEventDispatcher()->removeEventListener(_reBuildDepthStencilListener);
 #endif
+#endif // DIRECTX_ENABLED
 }
 
 bool RenderTargetDepthStencil::init(unsigned int width, unsigned int height)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "RenderTargetDepthStencil::init is not supported.");
+	return false;
+#else
     if(!RenderTargetBase::init(width, height)) return false;
     GLint oldRenderBuffer(0);
     glGetIntegerv(GL_RENDERBUFFER_BINDING, &oldRenderBuffer);
@@ -261,6 +282,7 @@ bool RenderTargetDepthStencil::init(unsigned int width, unsigned int height)
 #endif
     
     return true;
+#endif // DIRECTX_ENABLED
 }
 
 
@@ -282,6 +304,10 @@ RenderTargetDepthStencil* RenderTargetDepthStencil::create(unsigned int width, u
 
 bool FrameBuffer::initWithGLView(GLView* view)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "FrameBuffer::initWithGLView is not supported.");
+	return false;
+#else
     if(view == nullptr)
     {
         return false;
@@ -290,6 +316,7 @@ bool FrameBuffer::initWithGLView(GLView* view)
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
     _fbo = fbo;
     return true;
+#endif
 }
 
 FrameBuffer* FrameBuffer::getOrCreateDefaultFBO(GLView* view)
@@ -347,6 +374,10 @@ FrameBuffer* FrameBuffer::create(uint8_t fid, unsigned int width, unsigned int h
 
 bool FrameBuffer::init(uint8_t fid, unsigned int width, unsigned int height)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "FrameBuffer::intit is not supported.");
+	return false;
+#else
     _fid = fid;
     _width = width;
     _height = height;
@@ -377,6 +408,7 @@ bool FrameBuffer::init(uint8_t fid, unsigned int width, unsigned int height)
     Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(_dirtyFBOListener, -1);
 #endif
     return true;
+#endif // DIRECTX_ENABLED
 }
 
 FrameBuffer::FrameBuffer()
@@ -397,6 +429,9 @@ FrameBuffer::FrameBuffer()
 
 FrameBuffer::~FrameBuffer()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "FrameBuffer::Dtor is not supported.");
+#else
     if(!isDefaultFBO())
     {
         CC_SAFE_RELEASE_NULL(_rt);
@@ -408,16 +443,21 @@ FrameBuffer::~FrameBuffer()
         Director::getInstance()->getEventDispatcher()->removeEventListener(_dirtyFBOListener);
 #endif
     }
+#endif // DIRECTX_ENABLED
 }
 
 void FrameBuffer::clearFBO()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "FrameBuffer::clearFBO is not supported.");
+#else
     applyFBO();
     glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
     glClearDepth(_clearDepth);
     glClearStencil(_clearStencil);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
     applyDefaultFBO();
+#endif
 }
 
 void FrameBuffer::attachRenderTarget(RenderTargetBase* rt)
@@ -441,6 +481,9 @@ void FrameBuffer::attachRenderTarget(RenderTargetBase* rt)
 
 void FrameBuffer::applyFBO()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "FrameBuffer::applyFBO is not supported.");
+#else
     CHECK_GL_ERROR_DEBUG();
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
     CHECK_GL_ERROR_DEBUG();
@@ -464,6 +507,7 @@ void FrameBuffer::applyFBO()
         CCLOG("FrameBuffer Status Error %d", (int)glCheckFramebufferStatus(GL_FRAMEBUFFER));
     }
     CHECK_GL_ERROR_DEBUG();
+#endif
 }
 
 void FrameBuffer::attachDepthStencilTarget(RenderTargetDepthStencil* rt)

@@ -129,20 +129,20 @@ public:
                             const std::string& cross,
                             TextureResType texType = TextureResType::LOCAL);
 
-    /**
-     * Change Checkbox state to selected.
-     *
-     * @deprecated use `isSelected()` instead
-     * @param selected   True means the Checkbox will be selected, false means unselected.
-     */
+	/**
+	* Query whether the CheckBox is selected or not.
+	*
+	* @deprecated use `setSelected(bool)` instead.
+	* @return selected    true that checkbox is selected, false otherwise.
+	*/
     CC_DEPRECATED_ATTRIBUTE void setSelectedState(bool selected){this->setSelected(selected);}
 
-    /**
-     * Query whether the CheckBox is selected or not.
-     *
-     * @deprecated use `setSelected(bool)` instead.
-     * @return selected    true that checkbox is selected, false otherwise.
-     */
+	/**
+	* Change Checkbox state to selected.
+	*
+	* @deprecated use `isSelected()` instead
+	* @param selected   True means the Checkbox will be selected, false means unselected.
+	*/
     CC_DEPRECATED_ATTRIBUTE bool getSelectedState()const{return this->isSelected();}
     
     /**Add a callback function which would be called when checkbox is selected or unselected.

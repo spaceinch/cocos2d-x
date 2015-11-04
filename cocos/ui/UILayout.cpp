@@ -519,8 +519,8 @@ void Layout::onAfterVisitScissor()
     {
         // revert scissor test
         glDisable(GL_SCISSOR_TEST);
+	}
 #endif
-    }
 }
     
 void Layout::scissorClippingVisit(Renderer *renderer, const Mat4& parentTransform, uint32_t parentFlags)

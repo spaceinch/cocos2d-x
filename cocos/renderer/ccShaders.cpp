@@ -72,6 +72,9 @@ const ShaderDescriptor ccPositionTextureColor_noMVP_vert = ShaderDescriptor("Pos
 .Input("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 16)
 .Const(GLProgram::UNIFORM_NAME_P_MATRIX, sizeof(Mat4), GL_FLOAT_MAT4);
 
+const ShaderDescriptor ccUIGrayScale_frag = ShaderDescriptor("UIGrayScale")
+.Const("u_textColor", sizeof(float) * 4, GL_FLOAT_VEC4);
+
 const ShaderDescriptor ccPositionTextureColorAlphaTest_frag = ShaderDescriptor("PositionTextureColorAlphaTest")
 .Const(GLProgram::UNIFORM_NAME_ALPHA_TEST_VALUE, sizeof(float), GL_FLOAT);
 

@@ -126,7 +126,9 @@ WinRTKeyboardEvent::WinRTKeyboardEvent(WinRTKeyboardEventType type, Windows::UI:
 
 void WinRTKeyboardEvent::execute()
 {
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WINRT
 	GLViewImpl::sharedOpenGLView()->OnWinRTKeyboardEvent(m_type, m_key.Get());
+#endif
 }
 
 BackButtonEvent::BackButtonEvent()

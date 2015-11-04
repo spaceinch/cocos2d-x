@@ -97,8 +97,12 @@ Camera::Camera()
 , _fbo(nullptr)
 {
     _frustum.setClipZ(true);
+#ifndef DIRECTX_ENABLED
     _clearBrush = CameraBackgroundBrush::createDepthBrush(1.f);
     _clearBrush->retain();
+#else
+	_clearBrush = nullptr;
+#endif
 }
 
 Camera::~Camera()
@@ -457,6 +461,9 @@ void Camera::apply()
 
 void Camera::applyViewport()
 {
+#ifdef DIRECTX_ENABLED
+//	CCASSERT(false, "Camera::applyViewport is not supported.");
+#else
     if(nullptr == _fbo)
     {
         glViewport(getDefaultViewport()._left, getDefaultViewport()._bottom, getDefaultViewport()._width, getDefaultViewport()._height);
@@ -466,7 +473,7 @@ void Camera::applyViewport()
         glViewport(_viewport._left * _fbo->getWidth(), _viewport._bottom * _fbo->getHeight(),
                    _viewport._width * _fbo->getWidth(), _viewport._height * _fbo->getHeight());
     }
-    
+#endif
 }
 
 int Camera::getRenderOrder() const

@@ -741,6 +741,7 @@ void Renderer::visitRenderQueue(RenderQueue& queue)
     {
         if(_isDepthTestFor2D)
         {
+#ifndef DIRECTX_ENABLED
             glEnable(GL_DEPTH_TEST);
             glDepthMask(true);
             glEnable(GL_BLEND);
@@ -748,10 +749,15 @@ void Renderer::visitRenderQueue(RenderQueue& queue)
             RenderState::StateBlock::_defaultState->setDepthTest(true);
             RenderState::StateBlock::_defaultState->setDepthWrite(true);
             RenderState::StateBlock::_defaultState->setBlend(true);
+#else
+			dx.setDepthTest(true);
+			dx.setDepthMask(true);
+#endif
             
         }
         else
         {
+#ifndef DIRECTX_ENABLED
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
             glEnable(GL_BLEND);
@@ -759,7 +765,10 @@ void Renderer::visitRenderQueue(RenderQueue& queue)
             RenderState::StateBlock::_defaultState->setDepthTest(false);
             RenderState::StateBlock::_defaultState->setDepthWrite(false);
             RenderState::StateBlock::_defaultState->setBlend(true);
-            
+#else
+			dx.setDepthTest(false);
+			dx.setDepthMask(false);
+#endif
         }
         
         for (auto it = zPosQueue.cbegin(); it != zPosQueue.cend(); ++it)

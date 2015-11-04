@@ -481,6 +481,9 @@ void BoneNode::disableCascadeColor()
 
 void BoneNode::onDraw(const cocos2d::Mat4 &transform, uint32_t flags)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "BoneNode::onDraw is not supported.");
+#else
     getGLProgram()->use();
     getGLProgram()->setUniformsForBuiltins(transform);
 
@@ -505,7 +508,7 @@ void BoneNode::onDraw(const cocos2d::Mat4 &transform, uint32_t flags)
 #else
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, 4);
 #endif //CC_STUDIO_ENABLED_VIEW
-
+#endif // DIRECTX_ENABLED
 }
 
 cocos2d::Vector<BoneNode*> BoneNode::getAllSubBones() const

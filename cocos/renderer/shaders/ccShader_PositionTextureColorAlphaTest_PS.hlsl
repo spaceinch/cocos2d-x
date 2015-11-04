@@ -26,8 +26,9 @@ float4 main(PixelShaderInput input) : SV_TARGET
 {
 	float4 texColor = g_Texture0.Sample(TextureSampler, input.texUV);
 
-	if (texColor.a <= CC_alpha_value)
-		clip(-1);
+	//if (texColor.a <= CC_alpha_value)
+		//clip(-1);
+    clip(texColor.a - CC_alpha_value);
 
 	return input.color * texColor;
 }

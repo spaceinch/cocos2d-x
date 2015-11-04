@@ -33,7 +33,7 @@ THE SOFTWARE.
 #include "2d/CCDrawNode.h"
 #include "base/CCProtocols.h"
 #include "renderer/CCTextureAtlas.h"
-#include "renderer/CCTrianglesCommand.h"
+#include "renderer/CCQuadCommand.h"
 #include "renderer/CCCustomCommand.h"
 #include "2d/CCAutoPolygon.h"
 
@@ -608,8 +608,10 @@ protected:
     BlendFunc        _blendFunc;            /// It's required for TextureProtocol inheritance
     Texture2D*       _texture;              /// Texture2D object that is used to render the sprite
     SpriteFrame*     _spriteFrame;
-    TrianglesCommand _trianglesCommand;     ///
-
+	QuadCommand      _quadCommand;          /// quad command
+#if CC_SPRITE_DEBUG_DRAW
+	DrawNode *_debugDrawNode;
+#endif //CC_SPRITE_DEBUG_DRAW
 
     //
     // Shared data

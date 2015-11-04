@@ -100,6 +100,9 @@ Texture2D* RenderState::getTexture() const
 
 void RenderState::bind(Pass* pass)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "RenderState::bind is not supported.");
+#else
     CC_ASSERT(pass);
 
     if (_texture)
@@ -129,6 +132,7 @@ void RenderState::bind(Pass* pass)
             rs->_state->bindNoRestore();
         }
     }
+#endif
 }
 
 RenderState* RenderState::getTopmost(RenderState* below)
@@ -224,6 +228,9 @@ void RenderState::StateBlock::bind()
 
 void RenderState::StateBlock::bindNoRestore()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "RenderState::StateBlock::bindNoRestore.");
+#else
     CC_ASSERT(_defaultState);
 
     // Update any state that differs from _defaultState and flip _defaultState bits
@@ -310,10 +317,14 @@ void RenderState::StateBlock::bindNoRestore()
 //    }
 
     _defaultState->_bits |= _bits;
+#endif
 }
 
 void RenderState::StateBlock::restore(long stateOverrideBits)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "RenderState::StateBlock::restore is not supported.");
+#else
     CC_ASSERT(_defaultState);
 
     // If there is no state to restore (i.e. no non-default state), do nothing.
@@ -401,10 +412,14 @@ void RenderState::StateBlock::restore(long stateOverrideBits)
 //        _defaultState->_stencilOpDpfail = RenderState::STENCIL_OP_KEEP;
 //        _defaultState->_stencilOpDppass = RenderState::STENCIL_OP_KEEP;
 //    }
+#endif
 }
 
 void RenderState::StateBlock::enableDepthWrite()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "RenderState::StateBlock::enableDepthWrite is not supported.");
+#else
     CC_ASSERT(_defaultState);
 
     // Internal method used to restore depth writing before a
@@ -416,6 +431,7 @@ void RenderState::StateBlock::enableDepthWrite()
         _defaultState->_bits &= ~RS_DEPTH_WRITE;
         _defaultState->_depthWriteEnabled = true;
     }
+#endif
 }
 
 void RenderState::StateBlock::cloneInto(StateBlock* state) const

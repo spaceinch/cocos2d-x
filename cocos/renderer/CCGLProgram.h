@@ -202,7 +202,7 @@ public:
     static const char* SHADER_NAME_POSITION_COLOR_NO_MVP;
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || defined(WP8_SHADER_COMPILER)
     /**Built in shader for 2d. Support Position, Color vertex attribute, without multiply vertex by MVP matrix and have a grey scale fragment shader.*/
-    static const char* SHADER_NAME_POSITION_COLOR_NO_MVP_GRAYåSCALE;
+    static const char* SHADER_NAME_POSITION_COLOR_NO_MVP_GRAYSCALE;
 #endif
     /**Built in shader for 2d. Support Position, Texture vertex attribute.*/
     static const char* SHADER_NAME_POSITION_TEXTURE;
@@ -349,12 +349,12 @@ public:
 	static GLProgram* createWithHLSL(const ShaderDescriptor &vertexShader, const ShaderDescriptor &pixelShader);
 	bool initWithHLSL(const ShaderDescriptor &vertexShader, const ShaderDescriptor &pixelShader);
 #endif
-//#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
-//    /** @{Initializes the CCGLProgram with precompiled shader program. */
-//    static GLProgram* createWithPrecompiledProgramByteArray(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray);
-//    bool initWithPrecompiledProgramByteArray(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray);
-//    /**@}*/
-//#endif
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8)
+    /** @{Initializes the CCGLProgram with precompiled shader program. */
+    static GLProgram* createWithPrecompiledProgramByteArray(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray);
+    bool initWithPrecompiledProgramByteArray(const GLchar* vShaderByteArray, const GLchar* fShaderByteArray);
+    /**@}*/
+#endif
 
     /** @{
     Create or Initializes the GLProgram with a vertex and fragment with bytes array.
@@ -387,7 +387,7 @@ public:
 
     /**@{ Get the uniform or vertex attribute by string name in shader, return null if it does not exist.*/
 	Uniform* getUniform(const std::string& name);
-    VertexAttrib* getVertexAttrib(const std::string& name);
+    const VertexAttrib* getVertexAttrib(const std::string& name) const;
     /**@}*/
 
     /**  It will add a new attribute to the shader by calling glBindAttribLocation. */
@@ -576,11 +576,6 @@ protected:
     GLint             _builtInUniforms[UNIFORM_MAX];
     /**Indicate whether it has a offline shader compiler or not.*/
     bool              _hasShaderCompiler;
-
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || defined(WP8_SHADER_COMPILER)
-    /**Shader ID in precompiled shaders on Windows phone.*/
-    std::string       _shaderId;
-#endif
 
 #ifndef DIRECTX_ENABLED
 #endif

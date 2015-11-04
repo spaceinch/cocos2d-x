@@ -39,6 +39,9 @@ NavMeshDebugDraw::NavMeshDebugDraw()
 , _currentPrimitive(nullptr)
 , _currentDepthMask(true)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "NavMeshDebugDraw::Ctor is not supported");
+#else
     _stateBlock = RenderState::StateBlock::create();
     _stateBlock->setCullFace(true);
     _stateBlock->setCullFaceSide(RenderState::CullFaceSide::CULL_FACE_SIDE_BACK);
@@ -51,6 +54,7 @@ NavMeshDebugDraw::NavMeshDebugDraw()
     _customCmd.setTransparent(true);
     _program = GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_COLOR);
     glGenBuffers(1, &_vbo);
+#endif
 }
 
 void NavMeshDebugDraw::vertex(const float x, const float y, const float z, unsigned int color, const float u, const float v)
@@ -78,11 +82,15 @@ void NavMeshDebugDraw::vertex(const float* pos, unsigned int color)
 
 NavMeshDebugDraw::~NavMeshDebugDraw()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "NavMeshDebugDraw::Dtor is not supported");
+#else
     CC_SAFE_RELEASE(_stateBlock);
     for (auto iter : _primitiveList){
         delete iter;
     }
     glDeleteBuffers(1, &_vbo);
+#endif
 }
 
 void NavMeshDebugDraw::depthMask(bool state)
@@ -136,6 +144,9 @@ GLenum NavMeshDebugDraw::getPrimitiveType(duDebugDrawPrimitives prim)
 
 void NavMeshDebugDraw::drawImplement(const cocos2d::Mat4& transform, uint32_t flags)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "NavMeshDebugDraw::drawImplement is not supported.");
+#else
     _program->use();
     _program->setUniformsForBuiltins(transform);
 
@@ -160,6 +171,7 @@ void NavMeshDebugDraw::drawImplement(const cocos2d::Mat4& transform, uint32_t fl
         CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, iter->end - iter->start);
     }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif
 }
 
 void NavMeshDebugDraw::draw(Renderer* renderer)

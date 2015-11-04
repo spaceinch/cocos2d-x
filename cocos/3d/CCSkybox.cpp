@@ -47,6 +47,9 @@ Skybox::Skybox()
 
 Skybox::~Skybox()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Skybox::Ctor is not supported.");
+#else
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteBuffers(1, &_indexBuffer);
 
@@ -61,6 +64,7 @@ Skybox::~Skybox()
     }
 
     _texture->release();
+#endif
 }
 
 Skybox* Skybox::create(const std::string& positive_x, const std::string& negative_x,
@@ -104,6 +108,9 @@ bool Skybox::init(const std::string& positive_x, const std::string& negative_x,
 
 void Skybox::initBuffers()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Skybox::initBuffers is not supported.");
+#else
     if (Configuration::getInstance()->supportsShareableVAO())
     {
         glGenVertexArrays(1, &_vao);
@@ -141,6 +148,7 @@ void Skybox::initBuffers()
 
         GL::bindVAO(0);
     }
+#endif
 }
 
 void Skybox::draw(Renderer* renderer, const Mat4& transform, uint32_t flags)
@@ -154,6 +162,9 @@ void Skybox::draw(Renderer* renderer, const Mat4& transform, uint32_t flags)
 
 void Skybox::onDraw(const Mat4& transform, uint32_t flags)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "Skybox::onDraw is not supported.");
+#else
     auto camera = Camera::getVisitingCamera();
     
     Mat4 cameraModelMat = camera->getNodeToWorldTransform();
@@ -210,6 +221,7 @@ void Skybox::onDraw(const Mat4& transform, uint32_t flags)
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, 8);
 
     CHECK_GL_ERROR_DEBUG();
+#endif
 }
 
 void Skybox::setTexture(TextureCube* texture)

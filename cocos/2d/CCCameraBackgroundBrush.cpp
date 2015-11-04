@@ -123,6 +123,9 @@ bool CameraBackgroundDepthBrush::init()
 
 void CameraBackgroundDepthBrush::drawBackground(Camera* camera)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "CameraBackgroundDepthBrush::drawBackground is not supported.");
+#else
     GLboolean oldDepthTest;
     GLint oldDepthFunc;
     GLboolean oldDepthMask;
@@ -188,6 +191,7 @@ void CameraBackgroundDepthBrush::drawBackground(Camera* camera)
         /* BUG: RenderState does not support glColorMask yet. */
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     }
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -246,6 +250,9 @@ CameraBackgroundSkyBoxBrush::CameraBackgroundSkyBoxBrush()
 
 CameraBackgroundSkyBoxBrush::~CameraBackgroundSkyBoxBrush()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "CameraBackgroundSkyBoxBrush::Dtor is not supported.");
+#else
     CC_SAFE_RELEASE(_texture);
     
     glDeleteBuffers(1, &_vertexBuffer);
@@ -260,6 +267,7 @@ CameraBackgroundSkyBoxBrush::~CameraBackgroundSkyBoxBrush()
         GL::bindVAO(0);
         _vao = 0;
     }
+#endif
 }
 
 CameraBackgroundSkyBoxBrush* CameraBackgroundSkyBoxBrush::create(const std::string& positive_x, const std::string& negative_x, const std::string& positive_y, const std::string& negative_y, const std::string& positive_z, const std::string& negative_z)
@@ -296,6 +304,9 @@ CameraBackgroundSkyBoxBrush* CameraBackgroundSkyBoxBrush::create()
 
 void CameraBackgroundSkyBoxBrush::drawBackground(Camera* camera)
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "CameraBackgroundSkyBoxBrush::drawBackground is not supported.");
+#else
     Mat4 cameraModelMat = camera->getNodeToWorldTransform();
     
     _glProgramState->apply(Mat4::IDENTITY);
@@ -352,6 +363,7 @@ void CameraBackgroundSkyBoxBrush::drawBackground(Camera* camera)
     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, 8);
     
     CHECK_GL_ERROR_DEBUG();
+#endif
 }
 
 bool CameraBackgroundSkyBoxBrush::init()
@@ -368,6 +380,9 @@ bool CameraBackgroundSkyBoxBrush::init()
 
 void CameraBackgroundSkyBoxBrush::initBuffer()
 {
+#ifdef DIRECTX_ENABLED
+	CCASSERT(false, "CameraBackgroundSkyBoxBrush::initBuffer is not supported.");
+#else
     if (_vertexBuffer)
         glDeleteBuffers(1, &_vertexBuffer);
     if (_indexBuffer)
@@ -417,6 +432,7 @@ void CameraBackgroundSkyBoxBrush::initBuffer()
         
         GL::bindVAO(0);
     }
+#endif
 }
 
 void CameraBackgroundSkyBoxBrush::setTexture(TextureCube*  texture)

@@ -215,8 +215,8 @@ void MeshCommand::preBatchDraw()
             programState->applyAttributes();
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
         }
-#endif
     }
+#endif
 }
 
 void MeshCommand::batchDraw()
@@ -246,8 +246,8 @@ void MeshCommand::batchDraw()
         // Draw
         glDrawElements(_primitive, (GLsizei)_indexCount, _indexFormat, 0);
         CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _indexCount);
-#endif
     }
+#endif
 }
 void MeshCommand::postBatchDraw()
 {
@@ -358,14 +358,14 @@ void MeshCommand::releaseVAO()
 }
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
-#ifdef DIRECTX_ENABLED
-	CCASSERT(false, "MeshCommand::setLightUniforms is not supported");
-#else
-#endif
-#ifdef DIRECTX_ENABLED
-	CCASSERT(false, "MeshCommand::resetLightUniformValues is not supported");
-#else
-#endif
+//#ifdef DIRECTX_ENABLED
+//	CCASSERT(false, "MeshCommand::setLightUniforms is not supported");
+//#else
+//#endif
+//#ifdef DIRECTX_ENABLED
+//	CCASSERT(false, "MeshCommand::resetLightUniformValues is not supported");
+//#else
+//#endif
 void MeshCommand::listenRendererRecreated(EventCustom* event)
 {
     _vao = 0;

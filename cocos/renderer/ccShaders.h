@@ -58,6 +58,8 @@ extern CC_DLL const ShaderDescriptor ccPositionTextureColor_vert;
 extern CC_DLL const ShaderDescriptor ccPositionTextureColor_noMVP_frag;
 extern CC_DLL const ShaderDescriptor ccPositionTextureColor_noMVP_vert;
 
+extern CC_DLL const ShaderDescriptor ccUIGrayScale_frag;
+
 extern CC_DLL const ShaderDescriptor ccPositionTextureColorAlphaTest_frag;
 
 extern CC_DLL const ShaderDescriptor ccPositionTexture_uColor_frag;

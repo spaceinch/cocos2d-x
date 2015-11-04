@@ -32,9 +32,6 @@ THE SOFTWARE.
 #include "base/ccMacros.h"
 #include "base/CCConfiguration.h"
 
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8  || defined(WP8_SHADER_COMPILER)
-#include "ui/shaders/UIShaders.h"
-#endif
 
 NS_CC_BEGIN
 
@@ -61,10 +58,7 @@ enum {
     kShaderType_3DPositionNormal,
     kShaderType_3DPositionNormalTex,
     kShaderType_3DSkinPositionNormalTex,
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || defined(WP8_SHADER_COMPILER)
-    kShaderType_PositionColor_noMVP_GrayScale,
-#endif
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || defined(WP8_SHADER_COMPILER)
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
     kShaderType_PositionColor_noMVP_GrayScale,
 #endif
     kShaderType_MAX,
@@ -398,11 +392,11 @@ void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
 			break;
 #endif
 		case kShaderType_PositionColor_noMVP:
-        #ifdef DIRECTX_ENABLED
+#ifdef DIRECTX_ENABLED
 			p->INIT_SHADERS(ccPositionColor_noMVP_vert, ccPositionColor_frag);
-        #else
+#else
             p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionColor_frag);
-        #endif
+#endif
             break;
         case kShaderType_PositionTexture:
 			p->INIT_SHADERS(ccPositionTexture_vert, ccPositionTexture_frag);
@@ -446,45 +440,34 @@ void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
         case kShaderType_3DPositionNormal:
 #ifdef DIRECTX_ENABLED
 			p->INIT_SHADERS(cc3D_PositionTex_vert, cc3D_Color_frag);
-			break;
 #else
-			{
-                std::string def = getShaderMacrosForLight();
-				p->INIT_SHADERS((def + std::string(cc3D_PositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormal_frag)).c_str());
-            }
-			break;
+            std::string def = getShaderMacrosForLight();
+			p->INIT_SHADERS((def + std::string(cc3D_PositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormal_frag)).c_str());
 #endif
+			break;
         case kShaderType_3DPositionNormalTex:
 #ifdef DIRECTX_ENABLED
 			p->INIT_SHADERS(cc3D_PositionTex_vert, cc3D_Color_frag);
-			break;
 #else
-			{
-                std::string def = getShaderMacrosForLight();
-				p->INIT_SHADERS((def + std::string(cc3D_PositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormalTex_frag)).c_str());
-            }
-			break;
+			std::string def = getShaderMacrosForLight();
+			p->INIT_SHADERS((def + std::string(cc3D_PositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormalTex_frag)).c_str());
 #endif
+			break;
         case kShaderType_3DSkinPositionNormalTex:
 #ifdef DIRECTX_ENABLED
 			p->INIT_SHADERS(cc3D_PositionTex_vert, cc3D_Color_frag);
-			break;
 #else
-            {
-                std::string def = getShaderMacrosForLight();
-				p->INIT_SHADERS((def + std::string(cc3D_SkinPositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormalTex_frag)).c_str());
-            }
+            std::string def = getShaderMacrosForLight();
+			p->INIT_SHADERS((def + std::string(cc3D_SkinPositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormalTex_frag)).c_str());
+#endif
 			break;
-#endif
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || defined(WP8_SHADER_COMPILER)
         case kShaderType_PositionColor_noMVP_GrayScale:
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
 			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccUIGrayScale_frag);
-            break;
+#else
+			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTexture_GrayScale_frag);
 #endif
-        case kShaderType_PositionColor_noMVP_GrayScale:
-            p->initWithByteArrays(ccPositionTextureColor_noMVP_vert, ccUIGrayScale_frag);
-            break;
-#endif
+			break;
         default:
             CCLOG("cocos2d: %s:%d, error shader type", __FUNCTION__, __LINE__);
             return;

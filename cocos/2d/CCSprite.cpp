@@ -207,6 +207,19 @@ bool Sprite::initWithSpriteFrame(SpriteFrame *spriteFrame)
     return bRet;
 }
 
+bool Sprite::initWithPolygon(const cocos2d::PolygonInfo &info)
+{
+	Texture2D *texture = Director::getInstance()->getTextureCache()->addImage(info.filename);
+	bool res = false;
+	if (initWithTexture(texture))
+	{
+		_polyInfo = info;
+		setContentSize(_polyInfo.rect.size / Director::getInstance()->getContentScaleFactor());
+		res = true;
+	}
+	return res;
+}
+
 // designated initializer
 bool Sprite::initWithTexture(Texture2D *texture, const Rect& rect, bool rotated)
 {
