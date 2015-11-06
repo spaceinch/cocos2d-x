@@ -148,6 +148,7 @@ void QuadCommand::useMaterial() const
 
     _glProgramState->applyGLProgram(_mv);
     _glProgramState->applyUniforms();
+	_glProgramState->getGLProgram()->set();
 }
 
 NS_CC_END
