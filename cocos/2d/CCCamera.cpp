@@ -239,15 +239,22 @@ bool Camera::initOrthographic(float zoomX, float zoomY, float nearPlane, float f
     _zoom[1] = zoomY;
     _nearPlane = nearPlane;
     _farPlane = farPlane;
-    Mat4::createOrthographicOffCenter(0, _zoom[0], 0, _zoom[1], _nearPlane, _farPlane, &_projection);
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
-    //if needed, we need to add a rotation for Landscape orientations on Windows Phone 8 since it is always in Portrait Mode
-    GLView* view = Director::getInstance()->getOpenGLView();
-    if(view != nullptr)
-    {
-        setAdditionalProjection(view->getOrientationMatrix());
-    }
+
+#ifdef DIRECTX_ENABLED
+	DirectX::XMMATRIX matrix = DirectX::XMMatrixOrthographicOffCenterLH(0, _zoom[0], 0, _zoom[1], _nearPlane, _farPlane);
+	_projection.set(Mat4((float*) matrix.r));
+#else
+	Mat4::createOrthographicOffCenter(0, _zoom[0], 0, _zoom[1], _nearPlane, _farPlane, &_projection);
 #endif
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
+	//if needed, we need to add a rotation for Landscape orientations on Windows Phone 8 since it is always in Portrait Mode
+	GLView* view = Director::getInstance()->getOpenGLView();
+	if (view != nullptr)
+	{
+		setAdditionalProjection(view->getOrientationMatrix());
+	}
+#endif
+
     _viewProjectionDirty = true;
     _frustumDirty = true;
     
@@ -260,7 +267,11 @@ Vec2 Camera::project(const Vec3& src) const
     
     auto viewport = Director::getInstance()->getWinSize();
     Vec4 clipPos;
-    getViewProjectionMatrix().transformVector(Vec4(src.x, src.y, src.z, 1.0f), &clipPos);
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WP8
+	getViewProjectionMatrix().transformVector(Vec4(src.x, src.y, src.z, 1.0f), &clipPos);
+#else // Remove orientation matrix in VP matrix
+	((Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * _projection) * _view).transformVector(Vec4(src.x, src.y, src.z, 1.0f), &clipPos);
+#endif
     
     CCASSERT(clipPos.w != 0.0f, "clipPos.w can't be 0.0f!");
     float ndcX = clipPos.x / clipPos.w;
@@ -277,7 +288,11 @@ Vec2 Camera::projectGL(const Vec3& src) const
     
     auto viewport = Director::getInstance()->getWinSize();
     Vec4 clipPos;
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WP8
     getViewProjectionMatrix().transformVector(Vec4(src.x, src.y, src.z, 1.0f), &clipPos);
+#else // Remove orientation matrix in VP matrix
+	((Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * _projection) * _view).transformVector(Vec4(src.x, src.y, src.z, 1.0f), &clipPos);
+#endif
     
     CCASSERT(clipPos.w != 0.0f, "clipPos.w can't be 0.0f!");
     float ndcX = clipPos.x / clipPos.w;
@@ -311,7 +326,11 @@ void Camera::unproject(const Size& viewport, const Vec3* src, Vec3* dst) const
     screen.y = screen.y * 2.0f - 1.0f;
     screen.z = screen.z * 2.0f - 1.0f;
     
-    getViewProjectionMatrix().getInversed().transformVector(screen, &screen);
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WP8
+	getViewProjectionMatrix().getInversed().transformVector(screen, &screen);
+#else // Remove orientation matrix in VP matrix
+	((Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * _projection) * _view).getInversed().transformVector(screen, &screen);
+#endif
     if (screen.w != 0.0f)
     {
         screen.x /= screen.w;
@@ -331,7 +350,11 @@ void Camera::unprojectGL(const Size& viewport, const Vec3* src, Vec3* dst) const
     screen.y = screen.y * 2.0f - 1.0f;
     screen.z = screen.z * 2.0f - 1.0f;
     
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WP8
     getViewProjectionMatrix().getInversed().transformVector(screen, &screen);
+#else // Remove orientation matrix in VP matrix
+	((Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * _projection) * _view).getInversed().transformVector(screen, &screen);
+#endif
     if (screen.w != 0.0f)
     {
         screen.x /= screen.w;
