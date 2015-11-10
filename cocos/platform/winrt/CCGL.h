@@ -168,6 +168,10 @@ typedef int32_t	GLfixed;
 #define GL_INCR_WRAP 0x8507
 #define GL_DECR_WRAP 0x8508
 
+/* FrontFaceDirection */
+#define GL_CW                             0x0900
+#define GL_CCW                            0x0901
+
 /* CullFaceMode */
 #define GL_FRONT 0x0404
 #define GL_BACK 0x0405

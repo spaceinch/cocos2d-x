@@ -65,6 +65,11 @@ namespace cocostudio
         CC_SAFE_DELETE(_instanceSpriteReader);
     }
     
+    void SpriteReader::destroyInstance()
+    {
+        CC_SAFE_DELETE(_instanceSpriteReader);
+    }
+    
     Offset<Table> SpriteReader::createOptionsWithFlatBuffers(const tinyxml2::XMLElement *objectData,
                                                              flatbuffers::FlatBufferBuilder *builder)
     {
@@ -74,6 +79,8 @@ namespace cocostudio
         std::string path = "";
         std::string plistFile = "";
         int resourceType = 0;
+        
+        cocos2d::BlendFunc blendFunc = cocos2d::BlendFunc::ALPHA_PREMULTIPLIED;
         
         // FileData
         const tinyxml2::XMLElement* child = objectData->FirstChildElement();
@@ -116,85 +123,150 @@ namespace cocostudio
                     fbs->_textures.push_back(builder->CreateString(texture));                    
                 }
             }
+            else if (name == "BlendFunc")
+            {
+                const tinyxml2::XMLAttribute* attribute = child->FirstAttribute();
+                
+                while (attribute)
+                {
+                    name = attribute->Name();
+                    std::string value = attribute->Value();
+                    
+                    if (name == "Src")
+                    {
+                        blendFunc.src = atoi(value.c_str());
+                    }
+                    else if (name == "Dst")
+                    {
+                        blendFunc.dst = atoi(value.c_str());
+                    }
+                    
+                    attribute = attribute->Next();
+                }
+            }
             
             child = child->NextSiblingElement();
         }
+        
+        flatbuffers::BlendFunc f_blendFunc(blendFunc.src, blendFunc.dst);
 
         auto options = CreateSpriteOptions(*builder,
                                            nodeOptions,
                                            CreateResourceData(*builder,
                                                               builder->CreateString(path),
                                                               builder->CreateString(plistFile),
-                                                              resourceType)
-                                           );
+                                                              resourceType),
+                                           &f_blendFunc);
         
         return *(Offset<Table>*)(&options);
     }
-
+    
     void SpriteReader::setPropsWithFlatBuffers(cocos2d::Node *node,
-      const flatbuffers::Table* spriteOptions)
+                                                   const flatbuffers::Table* spriteOptions)
     {
-      Sprite *sprite = static_cast<Sprite*>(node);
-      auto options = (SpriteOptions*)spriteOptions;
-
-
-      auto fileNameData = options->fileNameData();
-
-      int resourceType = fileNameData->resourceType();
-      switch (resourceType)
-      {
-      case 0:
-      {
+        Sprite *sprite = static_cast<Sprite*>(node);
+        auto options = (SpriteOptions*)spriteOptions;
+        
+        auto nodeReader = NodeReader::getInstance();
+        nodeReader->setPropsWithFlatBuffers(node, (Table*)(options->nodeOptions()));
+        
+        auto fileNameData = options->fileNameData();
+        
+        int resourceType = fileNameData->resourceType();
         std::string path = fileNameData->path()->c_str();
-        if (path != "")
+        
+        bool fileExist = false;
+        std::string errorFilePath = "";
+        
+        switch (resourceType)
         {
-          sprite->setTexture(path);
+            case 0:
+            {
+                if (FileUtils::getInstance()->isFileExist(path))
+                {
+                    sprite->setTexture(path);
+                    fileExist = true;
+                }
+                else
+                {
+                    errorFilePath = path;
+                    fileExist = false;
+                }
+                break;
+            }
+                
+            case 1:
+            {
+                std::string plist = fileNameData->plistFile()->c_str();
+                SpriteFrame* spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(path);
+                if (spriteFrame)
+                {
+                    sprite->setSpriteFrame(spriteFrame);
+                    fileExist = true;
+                }
+                else
+                {
+                    if (FileUtils::getInstance()->isFileExist(plist))
+                    {
+                        ValueMap value = FileUtils::getInstance()->getValueMapFromFile(plist);
+                        ValueMap metadata = value["metadata"].asValueMap();
+                        std::string textureFileName = metadata["textureFileName"].asString();
+                        if (!FileUtils::getInstance()->isFileExist(textureFileName))
+                        {
+                            errorFilePath = textureFileName;
+                        }
+                    }
+                    else
+                    {
+                        errorFilePath = plist;
+                    }
+                    fileExist = false;
+                }
+                break;
+            }
+                
+            default:
+                break;
         }
-        break;
-      }
-
-      case 1:
-      {
-        std::string path = fileNameData->path()->c_str();
-        if (path != "")
+        //if (!fileExist)
+        //{
+        //    auto label = Label::create();
+        //    label->setString(__String::createWithFormat("%s missed", errorFilePath.c_str())->getCString());
+        //    sprite->addChild(label);
+        //}
+        
+        auto f_blendFunc = options->blendFunc();
+        if (f_blendFunc)
         {
-          sprite->setSpriteFrame(path);
+            cocos2d::BlendFunc blendFunc = cocos2d::BlendFunc::ALPHA_PREMULTIPLIED;
+            blendFunc.src = f_blendFunc->src();
+            blendFunc.dst = f_blendFunc->dst();
+            sprite->setBlendFunc(blendFunc);
         }
-        break;
-      }
-
-      default:
-        break;
-      }
-
-
-      auto nodeReader = NodeReader::getInstance();
-      nodeReader->setPropsWithFlatBuffers(node, (Table*)(options->nodeOptions()));
-
-
-      auto nodeOptions = options->nodeOptions();
-
-      GLubyte alpha = (GLubyte)nodeOptions->color()->a();
-      GLubyte red = (GLubyte)nodeOptions->color()->r();
-      GLubyte green = (GLubyte)nodeOptions->color()->g();
-      GLubyte blue = (GLubyte)nodeOptions->color()->b();
-
-      if (alpha != 255)
-      {
-        sprite->setOpacity(alpha);
-      }
-      if (red != 255 || green != 255 || blue != 255)
-      {
-        sprite->setColor(Color3B(red, green, blue));
-      }
-
-      bool flipX = nodeOptions->flipX() != 0;
-      bool flipY = nodeOptions->flipY() != 0;
-
-      if (flipX != false)
-        sprite->setFlippedX(flipX);
-      if (flipY != false)
-        sprite->setFlippedY(flipY);
+        
+        auto nodeOptions = options->nodeOptions();
+        
+        GLubyte alpha       = (GLubyte)nodeOptions->color()->a();
+        GLubyte red         = (GLubyte)nodeOptions->color()->r();
+        GLubyte green       = (GLubyte)nodeOptions->color()->g();
+        GLubyte blue        = (GLubyte)nodeOptions->color()->b();
+        
+        if (alpha != 255)
+        {
+            sprite->setOpacity(alpha);
+        }
+        if (red != 255 || green != 255 || blue != 255)
+        {
+            sprite->setColor(Color3B(red, green, blue));
+        }
+        
+        bool flipX   = nodeOptions->flipX() != 0;
+        bool flipY   = nodeOptions->flipY() != 0;
+        
+        if(flipX != false)
+            sprite->setFlippedX(flipX);
+        if(flipY != false)
+            sprite->setFlippedY(flipY);
     }
     
     Node* SpriteReader::createNodeWithFlatBuffers(const flatbuffers::Table *spriteOptions)

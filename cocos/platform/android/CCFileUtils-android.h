@@ -60,7 +60,7 @@ public:
     virtual ~FileUtilsAndroid();
 
     static void setassetmanager(AAssetManager* a);
-	static AAssetManager* getAssetManager() { return assetmanager; }
+    static AAssetManager* getAssetManager() { return assetmanager; }
 
     /* override funtions */
     bool init();
@@ -90,7 +90,8 @@ public:
     void addExpansionFile(const std::string& expansionPath);
   
 private:
-    virtual bool isFileExistInternal(const std::string& strFilePath) const;
+    virtual bool isFileExistInternal(const std::string& strFilePath) const override;
+    virtual bool isDirectoryExistInternal(const std::string& dirPath) const override;
     Data getData(const std::string& filename, bool forString);
 
     static AAssetManager* assetmanager;

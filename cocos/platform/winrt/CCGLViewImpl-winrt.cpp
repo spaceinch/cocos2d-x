@@ -31,10 +31,12 @@ THE SOFTWARE.
 #include "CCApplication.h"
 #include "CCWinRTUtils.h"
 #include "deprecated/CCNotificationCenter.h"
+#include <map>
 #include "ID3D11Provider.h"
 
 using namespace Platform;
 using namespace Concurrency;
+using namespace Windows::System;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::Graphics::Display;
@@ -69,7 +71,6 @@ GLViewImpl* GLViewImpl::create(const std::string& viewName)
     return nullptr;
 }
 
-
 GLViewImpl::GLViewImpl()
 	: _frameZoomFactor(1.0f)
 	, _supportTouch(true)
@@ -83,9 +84,16 @@ GLViewImpl::GLViewImpl()
     , m_height(0)
 	, m_d3d11Provider(nullptr)
     , m_orientation(DisplayOrientations::Landscape)
+    , m_appShouldExit(false)
 {
 	s_pEglView = this;
     _viewName =  "cocos2dx";
+
+    m_keyboard = ref new KeyBoardWinRT();
+
+    m_backButtonListener = EventListenerKeyboard::create();
+    m_backButtonListener->onKeyReleased = CC_CALLBACK_2(GLViewImpl::BackButtonListener, this);
+    Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(m_backButtonListener, INT_MAX);
 }
 
 GLViewImpl::~GLViewImpl()
@@ -109,7 +117,6 @@ bool GLViewImpl::initWithFullScreen(const std::string& viewName)
     return initWithRect(viewName, Rect(0, 0, m_width, m_height), 1.0f);
 }
 
-
 bool GLViewImpl::Create(ID3D11Provider *d3d11Provider, float width, float height, float dpi, DisplayOrientations orientation)
 {
     m_orientation = orientation;
@@ -129,8 +136,6 @@ void GLViewImpl::setPanel(Windows::UI::Xaml::Controls::Panel^ panel)
 {
     m_panel = panel;
 }
-
-
 
 void GLViewImpl::setIMEKeyboardState(bool bOpen)
 {
@@ -160,19 +165,11 @@ void GLViewImpl::setIMEKeyboardState(bool bOpen, std::string str)
 {
     if(bOpen)
     {
-        if (m_keyboard == nullptr)
-        {
-            m_keyboard = ref new KeyBoardWinRT(m_dispatcher.Get(), m_panel.Get());
-        }
         m_keyboard->ShowKeyboard(PlatformStringFromString(str));
     }
     else
     {
-        if (m_keyboard != nullptr)
-        {
-            m_keyboard->HideKeyboard(PlatformStringFromString(str));
-        }
-        m_keyboard = nullptr;
+        m_keyboard->HideKeyboard(PlatformStringFromString(str));
     }
 }
 
@@ -188,6 +185,7 @@ bool GLViewImpl::isOpenGLReady()
 void GLViewImpl::end()
 {
 	m_windowClosed = true;
+    m_appShouldExit = true;
 }
 
 void GLViewImpl::OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args)
@@ -201,11 +199,49 @@ void GLViewImpl::OnResuming(Platform::Object^ sender, Platform::Object^ args)
 // user pressed the Back Key on the phone
 void GLViewImpl::OnBackKeyPress()
 {
-    std::string str;
-    if(m_delegate)
-    {
-        //m_delegate->Invoke(Cocos2dEvent::TerminateApp, stringToPlatformString(str));
+    cocos2d::EventKeyboard::KeyCode cocos2dKey = EventKeyboard::KeyCode::KEY_ESCAPE;
+    cocos2d::EventKeyboard event(cocos2dKey, false);
+    cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
+}
+
+void GLViewImpl::BackButtonListener(EventKeyboard::KeyCode keyCode, Event* event)
+{
+	if (keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
+	{
+		CCLOG("*********************************************************************");
+		CCLOG("GLViewImpl::BackButtonListener: Exiting application!");
+		CCLOG("");
+		CCLOG("If you want to listen for Windows Phone back button events,");
+		CCLOG("add a listener for EventKeyboard::KeyCode::KEY_ESCAPE");
+		CCLOG("Make sure you call stopPropagation() on the Event if you don't");
+		CCLOG("want your app to exit when the back button is pressed.");
+		CCLOG("");
+		CCLOG("For example, add the following to your scene...");
+		CCLOG("auto listener = EventListenerKeyboard::create();");
+		CCLOG("listener->onKeyReleased = CC_CALLBACK_2(HelloWorld::onKeyReleased, this);");
+		CCLOG("getEventDispatcher()->addEventListenerWithFixedPriority(listener, 1);");
+		CCLOG("");
+		CCLOG("void HelloWorld::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event)");
+		CCLOG("{");
+		CCLOG("     if (keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)");
+		CCLOG("     {");
+		CCLOG("         if (myAppShouldNotQuit) // or whatever logic you want...");
+		CCLOG("         {");
+		CCLOG("             event->stopPropagation();");
+		CCLOG("         }");
+		CCLOG("     }");
+		CCLOG("}");
+		CCLOG("");
+		CCLOG("You MUST call event->stopPropagation() if you don't want your app to quit!");
+		CCLOG("*********************************************************************");
+
+		Director::getInstance()->end();
     }
+}
+
+bool GLViewImpl::AppShouldExit()
+{
+    return m_appShouldExit;
 }
 
 void GLViewImpl::OnPointerPressed(CoreWindow^ sender, PointerEventArgs^ args)
@@ -219,7 +255,6 @@ void GLViewImpl::OnPointerPressed(PointerEventArgs^ args)
     Vec2 pt = GetPoint(args);
     handleTouchesBegin(1, &id, &pt.x, &pt.y);
 }
-
 
 void GLViewImpl::OnPointerWheelChanged(CoreWindow^ sender, PointerEventArgs^ args)
 {
@@ -385,8 +420,9 @@ void GLViewImpl::UpdateWindowSize()
 		ResolutionPolicy resPolicy=view->getResolutionPolicy();
 		view->setFrameSize(width, height);
  		view->setDesignResolutionSize(resSize.width, resSize.height, resPolicy);
-		Director::getInstance()->setViewport();
-        Director::sharedDirector()->setProjection(Director::sharedDirector()->getProjection());
+        auto director = Director::getInstance();
+        director->setViewport();
+        director->setProjection(director->getProjection());
 	}
 }
 
@@ -433,7 +469,6 @@ Vec2 GLViewImpl::GetPoint(PointerEventArgs^ args) {
 	return TransformToOrientation(args->CurrentPoint->Position);
 }
 
-
 void GLViewImpl::setViewPortInPoints(float x , float y , float w , float h)
 {
 #ifdef DIRECTX_ENABLED
@@ -474,6 +509,18 @@ void GLViewImpl::QueuePointerEvent(PointerEventType type, PointerEventArgs^ args
 {
     std::shared_ptr<PointerEvent> e(new PointerEvent(type, args));
     mInputEvents.push(e);
+#endif
+}
+
+void GLViewImpl::QueueWinRTKeyboardEvent(WinRTKeyboardEventType type, KeyEventArgs^ args)
+{
+	std::shared_ptr<WinRTKeyboardEvent> e(new WinRTKeyboardEvent(type, args));
+	mInputEvents.push(e);
+}
+
+void GLViewImpl::OnWinRTKeyboardEvent(WinRTKeyboardEventType type, KeyEventArgs^ args)
+{
+    m_keyboard->OnWinRTKeyboardEvent(type, args);
 }
 
 void GLViewImpl::QueueEvent(std::shared_ptr<InputEvent>& event)

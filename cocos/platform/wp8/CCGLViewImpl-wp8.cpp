@@ -401,25 +401,25 @@ const Mat4& GLViewImpl::getOrientationMatrix() const
 
 void GLViewImpl::UpdateOrientationMatrix()
 {
-    kmMat4Identity(&m_orientationMatrix);
-    kmMat4Identity(&m_reverseOrientationMatrix);
+	m_orientationMatrix = Mat4((float*)DirectX::XMMatrixIdentity().r);
+	m_reverseOrientationMatrix = Mat4((float*)DirectX::XMMatrixIdentity().r);
     switch(m_orientation)
 	{
 		case Windows::Graphics::Display::DisplayOrientations::PortraitFlipped:
-			kmMat4RotationZ(&m_orientationMatrix, M_PI);
-			kmMat4RotationZ(&m_reverseOrientationMatrix, -M_PI);
+			m_orientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(DirectX::XM_PI).r);
+			m_reverseOrientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(-DirectX::XM_PI).r);
 			break;
 
 		case Windows::Graphics::Display::DisplayOrientations::Landscape:
-            kmMat4RotationZ(&m_orientationMatrix, -M_PI_2);
-			kmMat4RotationZ(&m_reverseOrientationMatrix, M_PI_2);
+            m_orientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(-DirectX::XM_PIDIV2).r);
+			m_reverseOrientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(DirectX::XM_PIDIV2).r);
 			break;
 			
 		case Windows::Graphics::Display::DisplayOrientations::LandscapeFlipped:
-            kmMat4RotationZ(&m_orientationMatrix, M_PI_2);
-            kmMat4RotationZ(&m_reverseOrientationMatrix, -M_PI_2);
+			m_orientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(DirectX::XM_PIDIV2).r);
+			m_reverseOrientationMatrix = Mat4((float*)DirectX::XMMatrixRotationZ(-DirectX::XM_PIDIV2).r);
 			break;
-
+			
         default:
             break;
 	}
@@ -430,7 +430,7 @@ cocos2d::Vec2 GLViewImpl::TransformToOrientation(Windows::Foundation::Point p)
     cocos2d::Vec2 returnValue;
 
     float x = p.X;
-    float y = p.Y;  
+    float y = p.Y;
 
     switch (m_orientation)
     {
@@ -439,13 +439,13 @@ cocos2d::Vec2 GLViewImpl::TransformToOrientation(Windows::Foundation::Point p)
             returnValue = Vec2(x, y);
             break;
         case DisplayOrientations::Landscape:
-            returnValue = Vec2(y, m_width - x);
+            returnValue = Vec2(y, m_height - x);
             break;
         case DisplayOrientations::PortraitFlipped:
             returnValue = Vec2(m_width - x, m_height - y);
             break;
         case DisplayOrientations::LandscapeFlipped:
-            returnValue = Vec2(m_height - y, x);
+            returnValue = Vec2(m_width - y, x);
             break;
     }
 

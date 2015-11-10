@@ -72,6 +72,9 @@ const ShaderDescriptor ccPositionTextureColor_noMVP_vert = ShaderDescriptor("Pos
 .Input("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 16)
 .Const(GLProgram::UNIFORM_NAME_P_MATRIX, sizeof(Mat4), GL_FLOAT_MAT4);
 
+const ShaderDescriptor ccUIGrayScale_frag = ShaderDescriptor("UIGrayScale")
+.Const("u_textColor", sizeof(float) * 4, GL_FLOAT_VEC4);
+
 const ShaderDescriptor ccPositionTextureColorAlphaTest_frag = ShaderDescriptor("PositionTextureColorAlphaTest")
 .Const(GLProgram::UNIFORM_NAME_ALPHA_TEST_VALUE, sizeof(float), GL_FLOAT);
 
@@ -116,10 +119,11 @@ const ShaderDescriptor cc3D_Color_frag = ShaderDescriptor("3D_Color");
 #else
 
 //
+
 #include "ccShader_Position_uColor.frag"
 
-#ifdef CC_NO_GL_POINTSIZE
-#include "ccShader_Position_uColor-no-gl_PointSize.vert"
+#ifdef CC_WINDOWS_PHONE_8_1
+#include "ccShader_Position_uColor_wp81.vert"
 #else
 #include "ccShader_Position_uColor.vert"
 #endif
@@ -129,9 +133,8 @@ const ShaderDescriptor cc3D_Color_frag = ShaderDescriptor("3D_Color");
 #include "ccShader_PositionColor.vert"
 
 //
-
-#ifdef CC_NO_GL_POINTSIZE
-#include "ccShader_PositionColorPointsize-no-gl_PointSize.vert"
+#ifdef CC_WINDOWS_PHONE_8_1
+#include "ccShader_PositionColorTextureAsPointsize_wp81.vert"
 #else
 #include "ccShader_PositionColorTextureAsPointsize.vert"
 #endif
@@ -162,6 +165,7 @@ const ShaderDescriptor cc3D_Color_frag = ShaderDescriptor("3D_Color");
 #include "ccShader_PositionColorLengthTexture.frag"
 #include "ccShader_PositionColorLengthTexture.vert"
 
+#include "ccShader_UI_Gray.frag"
 //
 #include "ccShader_Label.vert"
 #include "ccShader_Label_df.frag"
@@ -176,6 +180,14 @@ const ShaderDescriptor cc3D_Color_frag = ShaderDescriptor("3D_Color");
 #include "ccShader_3D_PositionNormalTex.vert"
 #include "ccShader_3D_ColorNormal.frag"
 #include "ccShader_3D_ColorNormalTex.frag"
+#include "ccShader_3D_Particle.vert"
+#include "ccShader_3D_Particle.frag"
+#include "ccShader_3D_Skybox.vert"
+#include "ccShader_3D_Skybox.frag"
+#include "ccShader_3D_Terrain.vert"
+#include "ccShader_3D_Terrain.frag"
+#include "ccShader_CameraClear.vert"
+#include "ccShader_CameraClear.frag"
 
 #endif
 

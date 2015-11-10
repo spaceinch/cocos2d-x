@@ -617,15 +617,25 @@ void Director::setProjection(Projection projection)
         case Projection::_2D:
         {
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+			auto final = Mat4::IDENTITY;
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
+			if (getOpenGLView() != nullptr)
+			{
+				final *= getOpenGLView()->getOrientationMatrix();
+			}
+#endif
 #ifdef DIRECTX_ENABLED
 			DirectX::XMMATRIX matrix = DirectX::XMMatrixOrthographicOffCenterLH(0, w, 0, h, -1024, 1024);
 			Mat4 orthoMatrix((float *)matrix.r);
-			orthoMatrix.transpose();
 #else
             Mat4 orthoMatrix;
             Mat4::createOrthographicOffCenter(0, size.width, 0, size.height, -1024, 1024, &orthoMatrix);
 #endif
-            multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, orthoMatrix);
+			final *= orthoMatrix;
+#ifdef DIRECTX_ENABLED
+			final.transpose();
+#endif
+            multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, final);
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
             break;
         }
@@ -635,7 +645,7 @@ void Director::setProjection(Projection projection)
             float zeye = this->getZEye();
 
             loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-
+            
 #ifdef DIRECTX_ENABLED
 			const DirectX::XMVECTORF32 eye = { w * 0.5f, h * 0.5f, std::max(zeye, 1.0f) };
 			const DirectX::XMVECTORF32 center = { w * 0.5f, h * 0.5f, 0.0f };
@@ -738,6 +748,7 @@ void Director::setClearColor(const Color4F& clearColor)
     _renderer->setClearColor(clearColor);
 }
 
+// Return a row-major formatted matrix in DirectX devices
 static void GLToClipTransform(Mat4 *transformOut)
 {
     if(nullptr == transformOut) return;
@@ -745,11 +756,13 @@ static void GLToClipTransform(Mat4 *transformOut)
     Director* director = Director::getInstance();
     CCASSERT(nullptr != director, "Director is null when seting matrix stack");
 
-    auto projection = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+	auto projection = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
     //if needed, we need to undo the rotation for Landscape orientation in order to get the correct positions
-    //projection = Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * projection;
+	projection.transpose(); // Transform to column-major in order to multiply correctly since orientation matrix was integrated with perspective matrix (the result is projection matrix) being both column-major
+    projection = Director::getInstance()->getOpenGLView()->getReverseOrientationMatrix() * projection;
+	projection.transpose(); // Transform back to row-major
 #endif
 
     auto modelview = director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
@@ -761,7 +774,7 @@ Vec2 Director::convertToGL(const Vec2& uiPoint)
     Mat4 transform;
     GLToClipTransform(&transform);
 #ifdef DIRECTX_ENABLED
-	transform.transpose();
+	transform.transpose(); // Transform to column-major
 #endif
 
     Mat4 transformInv = transform.getInversed();
@@ -774,8 +787,8 @@ Vec2 Director::convertToGL(const Vec2& uiPoint)
 
     Vec4 glCoord;
     //transformInv.transformPoint(clipCoord, &glCoord);
-    transformInv.transformVector(clipCoord, &glCoord);
-    float factor = 1.0/glCoord.w;
+    transformInv.transformVector(clipCoord, &glCoord);    
+	float factor = 1.0/glCoord.w;
     return Vec2(glCoord.x * factor, glCoord.y * factor);
 }
 
@@ -1384,7 +1397,7 @@ void DisplayLinkDirector::stopAnimation()
     _invalid = true;
 }
 
-void DisplayLinkDirector::setAnimationInterval(double interval)
+void DisplayLinkDirector::setAnimationInterval(float interval)
 {
     _animationInterval = interval;
     if (! _invalid)

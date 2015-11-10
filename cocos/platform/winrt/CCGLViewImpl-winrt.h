@@ -75,6 +75,9 @@ public:
 	void OnPointerPressed(Windows::UI::Core::PointerEventArgs^ args);
 	void OnPointerMoved(Windows::UI::Core::PointerEventArgs^ args);
 	void OnPointerReleased(Windows::UI::Core::PointerEventArgs^ args);
+	void OnWinRTKeyboardEvent(WinRTKeyboardEventType type, Windows::UI::Core::KeyEventArgs^ args);
+
+
 	void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
 	void OnPointerWheelChanged(Windows::UI::Core::CoreWindow^, Windows::UI::Core::PointerEventArgs^ args);
 	void OnPointerMoved(Windows::UI::Core::CoreWindow^, Windows::UI::Core::PointerEventArgs^ args);
@@ -84,10 +87,13 @@ public:
 	void OnResuming(Platform::Object^ sender, Platform::Object^ args);
 	void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ args);
     void OnBackKeyPress();
+    bool AppShouldExit();
+    void BackButtonListener(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
 
     void QueueBackKeyPress();
-    void QueuePointerEvent(PointerEventType type, Windows::UI::Core::PointerEventArgs^ args);
-    void QueueEvent(std::shared_ptr<InputEvent>& event);
+	void QueuePointerEvent(PointerEventType type, Windows::UI::Core::PointerEventArgs^ args);
+	void QueueWinRTKeyboardEvent(WinRTKeyboardEventType type, Windows::UI::Core::KeyEventArgs^ args);
+	void QueueEvent(std::shared_ptr<InputEvent>& event);
 	void QueueEvent(std::shared_ptr<Event>& event);
 
     bool ShowMessageBox(Platform::String^ title, Platform::String^ message);
@@ -164,6 +170,7 @@ private:
 
     bool m_running;
 	bool m_initialized;
+    bool m_appShouldExit;
 
     Cocos2dEventDelegate^ m_delegate;
     Cocos2dMessageBoxDelegate^ m_messageBoxDelegate;
@@ -176,7 +183,9 @@ private:
     Platform::Agile<Windows::UI::Xaml::Controls::Panel> m_panel;
     KeyBoardWinRT^ m_keyboard;
 
+    cocos2d::EventListenerKeyboard* m_backButtonListener;
 	ID3D11Provider *m_d3d11Provider;
+
 };
 
 NS_CC_END

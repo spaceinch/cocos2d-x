@@ -27,15 +27,23 @@
 
 #include "renderer/ccGLStateCache.h"
 #include "renderer/CCGLProgram.h"
+#include "renderer/CCMaterial.h"
+#include "renderer/CCTechnique.h"
+#include "renderer/CCRenderer.h"
+#include "renderer/CCPass.h"
+
 #include "xxhash.h"
-#include "CCRenderer.h"
 #include "renderer/CCTexture2D.h"
 NS_CC_BEGIN
 
 
 QuadCommand::QuadCommand()
 :_materialID(0)
+#ifndef DIRECTX_ENABLED
+,_textureID(0)
+#else
 ,_texture(nullptr)
+#endif
 ,_glProgramState(nullptr)
 ,_blendType(BlendFunc::DISABLE)
 ,_quads(nullptr)
@@ -44,7 +52,8 @@ QuadCommand::QuadCommand()
     _type = RenderCommand::Type::QUAD_COMMAND;
 }
 
-void QuadCommand::init(float globalOrder, Texture2D *texture, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
+#ifndef DIRECTX_ENABLED
+void QuadCommand::init(float globalOrder, GLuint textureID, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
                        const Mat4& mv, uint32_t flags)
 {
     CCASSERT(shader, "Invalid GLProgramState");
@@ -57,9 +66,9 @@ void QuadCommand::init(float globalOrder, Texture2D *texture, GLProgramState* sh
     
     _mv = mv;
     
-    if( _texture != texture || _blendType.src != blendType.src || _blendType.dst != blendType.dst || _glProgramState != shader) {
+    if( _textureID != textureID || _blendType.src != blendType.src || _blendType.dst != blendType.dst || _glProgramState != shader) {
         
-        _texture = texture;
+        _textureID = textureID;
         _blendType = blendType;
         _glProgramState = shader;
         
@@ -67,10 +76,32 @@ void QuadCommand::init(float globalOrder, Texture2D *texture, GLProgramState* sh
     }
 }
 
-#ifndef DIRECTX_ENABLED
-void QuadCommand::init(float globalOrder, Texture2D *texture, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount, const Mat4 &mv)
+void QuadCommand::init(float globalOrder, GLuint textureID, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount, const Mat4 &mv)
 {
-    init(globalOrder, texture, shader, blendType, quads, quadCount, mv, 0);
+    init(globalOrder, textureID, shader, blendType, quads, quadCount, mv, 0);
+}
+#else
+void QuadCommand::init(float globalOrder, Texture2D* texture, GLProgramState* shader, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
+	const Mat4& mv, uint32_t flags)
+{
+	CCASSERT(shader, "Invalid GLProgramState");
+	CCASSERT(shader->getVertexAttribsFlags() == 0, "No custom attributes are supported in QuadCommand");
+
+	RenderCommand::init(globalOrder, mv, flags);
+
+	_quadsCount = quadCount;
+	_quads = quads;
+
+	_mv = mv;
+
+	if (_texture != texture || _blendType.src != blendType.src || _blendType.dst != blendType.dst || _glProgramState != shader) {
+
+		_texture = texture;
+		_blendType = blendType;
+		_glProgramState = shader;
+
+		generateMaterialID();
+	}
 }
 #endif
 
@@ -80,17 +111,25 @@ QuadCommand::~QuadCommand()
 
 void QuadCommand::generateMaterialID()
 {
-    
-    if(_glProgramState->getUniformCount() > 0)
+    _skipBatching = false;
+
+    if(_glProgramState->getUniformCount() == 0)
     {
-        _materialID = Renderer::MATERIAL_ID_DO_NOT_BATCH;
+		int textureID = 0;
+#ifndef DIRECTX_ENABLED
+		textureID = (int)_textureID;
+#else
+		textureID = (int)_texture->getName();
+#endif
+        int glProgram = (int)_glProgramState->getGLProgram()->getProgram();
+        int intArray[4] = { glProgram, textureID, (int)_blendType.src, (int)_blendType.dst};
+
+        _materialID = XXH32((const void*)intArray, sizeof(intArray), 0);
     }
     else
     {
-        int glProgram = (int)_glProgramState->getGLProgram()->getProgram();
-        int intArray[4] = { glProgram, (int)_texture->getName(), (int)_blendType.src, (int)_blendType.dst};
-        
-        _materialID = XXH32((const void*)intArray, sizeof(intArray), 0);
+        _materialID = Renderer::MATERIAL_ID_DO_NOT_BATCH;
+        _skipBatching = true;
     }
 }
 
@@ -98,7 +137,7 @@ void QuadCommand::useMaterial() const
 {
 #ifndef DIRECTX_ENABLED
     //Set texture
-    GL::bindTexture2D(_texture->getName());
+    GL::bindTexture2D(_textureID);
     
     //set blend mode
     GL::blendFunc(_blendType.src, _blendType.dst);
@@ -107,7 +146,9 @@ void QuadCommand::useMaterial() const
 	DXStateCache::getInstance().setBlend(_blendType.src, _blendType.dst);
 #endif
 
-	_glProgramState->apply(_mv);
+    _glProgramState->applyGLProgram(_mv);
+    _glProgramState->applyUniforms();
+	_glProgramState->getGLProgram()->set();
 }
 
 NS_CC_END

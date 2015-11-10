@@ -207,6 +207,19 @@ bool Sprite::initWithSpriteFrame(SpriteFrame *spriteFrame)
     return bRet;
 }
 
+bool Sprite::initWithPolygon(const cocos2d::PolygonInfo &info)
+{
+	Texture2D *texture = Director::getInstance()->getTextureCache()->addImage(info.filename);
+	bool res = false;
+	if (initWithTexture(texture))
+	{
+		_polyInfo = info;
+		setContentSize(_polyInfo.rect.size / Director::getInstance()->getContentScaleFactor());
+		res = true;
+	}
+	return res;
+}
+
 // designated initializer
 bool Sprite::initWithTexture(Texture2D *texture, const Rect& rect, bool rotated)
 {
@@ -589,11 +602,23 @@ void Sprite::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 {
 #if CC_USE_CULLING
     // Don't do calculate the culling if the transform was not updated
-    _insideBounds = (flags & FLAGS_TRANSFORM_DIRTY) ? renderer->checkVisibility(transform, _contentSize) : _insideBounds;
+	auto visitingCamera = Camera::getVisitingCamera();
+	auto defaultCamera = Camera::getDefaultCamera();
+	if (visitingCamera == defaultCamera) {
+		_insideBounds = ((flags & FLAGS_TRANSFORM_DIRTY) || visitingCamera->isViewProjectionUpdated()) ? renderer->checkVisibility(transform, _contentSize) : _insideBounds;
+	}
+	else
+	{
+		_insideBounds = renderer->checkVisibility(transform, _contentSize);
+	}
 
     if(_insideBounds)
 #endif
     {
+#ifndef DIRECTX_ENABLED
+		_trianglesCommand.init(_globalZOrder, _texture->getName(), getGLProgramState(), _blendFunc, _polyInfo.triangles, transform, flags);
+		renderer->addCommand(&_trianglesCommand);
+#else
         _quadCommand.init(_globalZOrder, _texture, getGLProgramState(), _blendFunc, &_quad, 1, transform, flags);
         renderer->addCommand(&_quadCommand);
         
@@ -607,6 +632,7 @@ void Sprite::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
         };
         _debugDrawNode->drawPoly(vertices, 4, true, Color4F(1.0, 1.0, 1.0, 1.0));
 #endif //CC_SPRITE_DEBUG_DRAW
+#endif //DIRECTX_ENABLED
     }
 }
 

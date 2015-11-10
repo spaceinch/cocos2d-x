@@ -28,6 +28,7 @@ THE SOFTWARE.
 #endif
 #include <Windows.h>
 #include <wrl/client.h>
+#include <wrl/wrappers/corewrappers.h>
 #include <ppl.h>
 #include <ppltasks.h>
 #include <sstream>
@@ -47,6 +48,20 @@ using namespace Windows::Storage;
 using namespace Windows::Storage::Pickers;
 using namespace Windows::Storage::Streams;
 using namespace Windows::Networking::Connectivity;
+
+bool isWindowsPhone()
+{
+#if _MSC_VER >= 1900
+    if (Windows::Foundation::Metadata::ApiInformation::IsTypePresent("Windows.Phone.UI.Input.HardwareButtons"))
+    {
+        return true;
+    }
+#elif (WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP)
+    return true;
+#else
+    return false;
+#endif
+}
 
 std::wstring CCUtf8ToUnicode(const char * pszUtf8Str, unsigned len/* = -1*/)
 {
@@ -106,6 +121,7 @@ Platform::String^ PlatformStringFromString(const std::string& s)
     return ref new Platform::String(ws.data(), ws.length());
 }
 
+#if 0
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
 // Method to convert a length in device-independent pixels (DIPs) to a length in physical pixels.
 float ConvertDipsToPixels(float dips)
@@ -119,11 +135,10 @@ float getScaledDPIValue(float v) {
 	return v * dipFactor;
 }
 #endif
-
+#endif
 
 void CC_DLL CCLogIPAddresses()
 {
-#ifndef WP8_SHADER_COMPILER
     auto hostnames = NetworkInformation::GetHostNames();
     int length = hostnames->Size;
 
@@ -133,10 +148,9 @@ void CC_DLL CCLogIPAddresses()
         if (hn->IPInformation != nullptr)
         {
             std::string s = PlatformStringToString(hn->DisplayName);
-            CCLog("IP Address: %s:", s.c_str());
+            log("IP Address: %s:", s.c_str());
         }
     }
-#endif
 }
 
 std::string CC_DLL getDeviceIPAddresses()
@@ -313,5 +327,73 @@ Concurrency::task<Platform::Array<byte>^> ReadDataAsync(Platform::String^ path)
 
 #endif
 
+std::string computeHashForFile(const std::string& filePath)
+{
+    std::string ret = filePath;
+    int pos = std::string::npos;
+    pos = ret.find_last_of('/');
+
+    if (pos != std::string::npos) {
+        ret = ret.substr(pos);
+    }
+
+    pos = ret.find_last_of('.');
+
+    if (pos != std::string::npos) {
+        ret = ret.substr(0, pos);
+    }
+
+    CREATEFILE2_EXTENDED_PARAMETERS extParams = { 0 };
+    extParams.dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
+    extParams.dwFileFlags = FILE_FLAG_RANDOM_ACCESS;
+    extParams.dwSecurityQosFlags = SECURITY_ANONYMOUS;
+    extParams.dwSize = sizeof(extParams);
+    extParams.hTemplateFile = nullptr;
+    extParams.lpSecurityAttributes = nullptr;
+
+    Microsoft::WRL::Wrappers::FileHandle file(CreateFile2(std::wstring(filePath.begin(), filePath.end()).c_str(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, &extParams));
+
+    if (file.Get() != INVALID_HANDLE_VALUE) {
+        FILE_BASIC_INFO  fInfo = { 0 };
+        if (GetFileInformationByHandleEx(file.Get(), FileBasicInfo, &fInfo, sizeof(FILE_BASIC_INFO))) {
+            std::stringstream ss;
+            ss << ret << "_";
+            ss << fInfo.CreationTime.QuadPart;
+            ss << fInfo.ChangeTime.QuadPart;
+            ret = ss.str();
+        }
+    }
+
+    return ret;
+}
+
+bool createMappedCacheFile(const std::string& srcFilePath, std::string& cacheFilePath, std::string ext)
+{
+    bool ret = false;
+    auto folderPath = FileUtils::getInstance()->getWritablePath();
+    cacheFilePath = folderPath + computeHashForFile(srcFilePath) + ext;
+    std::string prevFile = UserDefault::getInstance()->getStringForKey(srcFilePath.c_str());
+
+    if (prevFile == cacheFilePath) {
+        ret = FileUtils::getInstance()->isFileExist(cacheFilePath);
+    }
+    else {
+        FileUtils::getInstance()->removeFile(prevFile);
+    }
+
+    UserDefault::getInstance()->setStringForKey(srcFilePath.c_str(), cacheFilePath);
+    return ret;
+}
+
+void destroyMappedCacheFile(const std::string& key)
+{
+    std::string value = UserDefault::getInstance()->getStringForKey(key.c_str());
+    
+    if (!value.empty()) {
+        FileUtils::getInstance()->removeFile(value);
+    }
+
+    UserDefault::getInstance()->setStringForKey(key.c_str(), "");
+}
 
 NS_CC_END
