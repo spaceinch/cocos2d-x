@@ -164,8 +164,13 @@ bool FileUtilsAndroid::isFileExistInternal(const std::string& strFilePath) const
 
         // Found "assets/" at the beginning of the path and we don't want it
         if (strFilePath.find(_defaultResRootPath) == 0) s += strlen("assets/");
+      
+        for (auto it = _fileSystems.rbegin(); it != _fileSystems.rend() && !bFound; ++it)
+        {
+            bFound = (*it)->isFileExist(std::string(s));
+        }
 
-        if (FileUtilsAndroid::assetmanager) {
+        if (!bFound && FileUtilsAndroid::assetmanager) {
             AAsset* aa = AAssetManager_open(FileUtilsAndroid::assetmanager, s, AASSET_MODE_UNKNOWN);
             if (aa)
             {
@@ -254,6 +259,11 @@ bool FileUtilsAndroid::isAbsolutePath(const std::string& strPath) const
     return false;
 }
 
+void FileUtilsAndroid::addFileSystem(std::shared_ptr<FileSystemProtocol> fileSystem)
+{
+  _fileSystems.push_back(fileSystem);
+}
+
 Data FileUtilsAndroid::getData(const std::string& filename, bool forString)
 {
     if (filename.empty())
@@ -278,38 +288,52 @@ Data FileUtilsAndroid::getData(const std::string& filename, bool forString)
             relativePath += fullPath;
         }
         CCLOGINFO("relative path = %s", relativePath.c_str());
-
-        if (nullptr == FileUtilsAndroid::assetmanager) {
-            LOGD("... FileUtilsAndroid::assetmanager is nullptr");
-            return Data::Null;
-        }
-
-        // read asset data
-        AAsset* asset =
-            AAssetManager_open(FileUtilsAndroid::assetmanager,
-                               relativePath.c_str(),
-                               AASSET_MODE_UNKNOWN);
-        if (nullptr == asset) {
-            LOGD("asset is nullptr");
-            return Data::Null;
-        }
-
-        off_t fileSize = AAsset_getLength(asset);
-
-        if (forString)
+      
+        // FileSystems take priority
+        for (auto it = _fileSystems.rbegin(); data == nullptr && it != _fileSystems.rend(); ++it)
         {
-            data = (unsigned char*) malloc(fileSize + 1);
-            data[fileSize] = '\0';
+            int64_t localSize = 0;
+            data = (unsigned char*) (*it)->getData(relativePath, localSize);
+            if ( data )
+            {
+                size = static_cast<int>(localSize);
+            }
         }
-        else
+
+        if ( data == nullptr )
         {
-            data = (unsigned char*) malloc(fileSize);
+            if (nullptr == FileUtilsAndroid::assetmanager) {
+                LOGD("... FileUtilsAndroid::assetmanager is nullptr");
+                return Data::Null;
+            }
+
+            // read asset data
+            AAsset* asset =
+                AAssetManager_open(FileUtilsAndroid::assetmanager,
+                                   relativePath.c_str(),
+                                   AASSET_MODE_UNKNOWN);
+            if (nullptr == asset) {
+                LOGD("asset is nullptr");
+                return Data::Null;
+            }
+
+            off_t fileSize = AAsset_getLength(asset);
+
+            if (forString)
+            {
+                data = (unsigned char*) malloc(fileSize + 1);
+                data[fileSize] = '\0';
+            }
+            else
+            {
+                data = (unsigned char*) malloc(fileSize);
+            }
+
+            int bytesread = AAsset_read(asset, (void*)data, fileSize);
+            size = bytesread;
+
+            AAsset_close(asset);
         }
-
-        int bytesread = AAsset_read(asset, (void*)data, fileSize);
-        size = bytesread;
-
-        AAsset_close(asset);
     }
     else
     {
@@ -402,32 +426,46 @@ unsigned char* FileUtilsAndroid::getFileData(const std::string& filename, const 
         }
         LOGD("relative path = %s", relativePath.c_str());
 
-        if (nullptr == FileUtilsAndroid::assetmanager) {
-            LOGD("... FileUtilsAndroid::assetmanager is nullptr");
-            return nullptr;
-        }
-
-        // read asset data
-        AAsset* asset =
-            AAssetManager_open(FileUtilsAndroid::assetmanager,
-                               relativePath.c_str(),
-                               AASSET_MODE_UNKNOWN);
-        if (nullptr == asset) {
-            LOGD("asset is nullptr");
-            return nullptr;
-        }
-
-        off_t fileSize = AAsset_getLength(asset);
-
-        data = (unsigned char*) malloc(fileSize);
-
-        int bytesread = AAsset_read(asset, (void*)data, fileSize);
-        if (size)
+        // FileSystems take priority
+        for (auto it = _fileSystems.rbegin(); data == nullptr && it != _fileSystems.rend(); ++it)
         {
-            *size = bytesread;
+          int64_t localSize = 0;
+          data = (unsigned char*) (*it)->getData(relativePath, localSize);
+          if ( data )
+          {
+            *size = static_cast<int>(localSize);
+          }
         }
+      
+        if ( data == nullptr )
+        {
+            if (nullptr == FileUtilsAndroid::assetmanager) {
+                LOGD("... FileUtilsAndroid::assetmanager is nullptr");
+                return nullptr;
+            }
 
-        AAsset_close(asset);
+            // read asset data
+            AAsset* asset =
+                AAssetManager_open(FileUtilsAndroid::assetmanager,
+                                   relativePath.c_str(),
+                                   AASSET_MODE_UNKNOWN);
+            if (nullptr == asset) {
+                LOGD("asset is nullptr");
+                return nullptr;
+            }
+
+            off_t fileSize = AAsset_getLength(asset);
+
+            data = (unsigned char*) malloc(fileSize);
+
+            int bytesread = AAsset_read(asset, (void*)data, fileSize);
+            if (size)
+            {
+                *size = bytesread;
+            }
+
+            AAsset_close(asset);
+        }
     }
     else
     {

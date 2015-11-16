@@ -36,7 +36,7 @@ LOCAL_EXPORT_LDLIBS := -lGLESv1_CM \
                        -llog \
                        -landroid
 
-LOCAL_CPPFLAGS := -Wno-extern-c-compat
+LOCAL_CPPFLAGS := -Wno-extern-c-compat -frtti
 
 LOCAL_EXPORT_CPPFLAGS := -Wno-extern-c-compat
 

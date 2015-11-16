@@ -27,6 +27,7 @@
 #include "cocostudio/CSParseBinary_generated.h"
 #include "cocostudio/FlatBuffersSerialize.h"
 #include "cocostudio/WidgetReader/NodeReader/NodeReader.h"
+#include "cocostudio/CCComExtensionData.h"
 
 #include "tinyxml2.h"
 #include "flatbuffers/flatbuffers.h"
@@ -199,7 +200,14 @@ namespace cocostudio
             {
                 std::string plist = fileNameData->plistFile()->c_str();
                 SpriteFrame* spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(path);
-                if (spriteFrame)
+                ComExtensionData* csUserData = reinterpret_cast<ComExtensionData*>(sprite->getComponent("ComExtensionData"));
+              
+                if (csUserData != nullptr && csUserData->getCustomProperty() == "async")
+                {
+                  sprite->setSpriteFrame(path);
+                  fileExist = true;
+                }
+                else if (spriteFrame)
                 {
                     sprite->setSpriteFrame(spriteFrame);
                     fileExist = true;

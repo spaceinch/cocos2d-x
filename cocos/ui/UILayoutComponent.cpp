@@ -667,7 +667,7 @@ namespace ui {
         _owner->setPosition(ownerPosition);
         _owner->setContentSize(ownerSize);
 
-        if (typeid(*_owner) == typeid(PageView))
+        if ( dynamic_cast<PageView*>(_owner) != nullptr )
         {
             PageView* page = static_cast<PageView*>(_owner);
             page->forceDoLayout();

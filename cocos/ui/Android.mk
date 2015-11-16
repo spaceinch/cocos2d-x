@@ -45,6 +45,8 @@ UIEditBox/UIEditBoxImpl-android.cpp \
 UIEditBox/UIEditBoxImpl-common.cpp \
 UILayoutComponent.cpp \
 
+LOCAL_CPPFLAGS += -frtti
+
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../editor-support
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../editor-support

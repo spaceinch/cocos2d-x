@@ -31,10 +31,8 @@ Copyright (c) 2013-2014 Chukong Technologies Inc.
 #include "platform/CCFileUtils.h"
 #include "platform/CCPlatformMacros.h"
 #include "base/ccTypes.h"
-#include "base/ZipUtils.h"
 #include <string>
 #include <vector>
-#include <memory>
 #include "jni.h"
 #include "android/asset_manager.h"
 
@@ -45,7 +43,15 @@ NS_CC_BEGIN
  * @{
  */
 
-class ZipFile;
+/// SpaceInch modification for expansion files
+class FileSystemProtocol
+{
+public:
+    virtual ~FileSystemProtocol() {}
+    virtual bool isFileExist(const std::string& file) = 0;
+    virtual std::int64_t getSize(const std::string& file) const = 0;
+    virtual char* getData(const std::string& file, std::int64_t& fileSize) const = 0;
+};
 
 //! @brief  Helper class to handle file operations
 class CC_DLL FileUtilsAndroid : public FileUtils
@@ -83,21 +89,21 @@ public:
 
     virtual std::string getWritablePath() const;
     virtual bool isAbsolutePath(const std::string& strPath) const;
-    
-    /**
-     *  Adds an expansion file to search for assets
-     */
-    void addExpansionFile(const std::string& expansionPath);
   
+    /**
+    *  Adds an expansion file to search for assets		
+    * Adds a File System to lookup files
+    */
+    virtual void addFileSystem(std::shared_ptr<FileSystemProtocol> fileSystem);
+    
 private:
     virtual bool isFileExistInternal(const std::string& strFilePath) const override;
     virtual bool isDirectoryExistInternal(const std::string& dirPath) const override;
     Data getData(const std::string& filename, bool forString);
 
     static AAssetManager* assetmanager;
-    
-    std::vector<cocos2d::ZipFile*> _expansionFiles;
-    std::vector<std::string> _expansionFileNames;
+  
+    std::vector<std::shared_ptr<FileSystemProtocol>> _fileSystems;
 };
 
 // end of platform group

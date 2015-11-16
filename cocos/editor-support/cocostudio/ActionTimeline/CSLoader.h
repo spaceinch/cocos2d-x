@@ -30,6 +30,8 @@
 #include "cocos2d.h"
 #include "base/ObjectFactory.h"
 
+#include <unordered_set>
+
 namespace flatbuffers
 {
     class FlatBufferBuilder;
@@ -114,6 +116,8 @@ public:
     
     cocos2d::Node* createNodeWithFlatBuffersForSimulator(const std::string& filename);
     cocos2d::Node* nodeWithFlatBuffersForSimulator(const flatbuffers::NodeTree* nodetree);
+  
+    void setAsyncLoadingPlist(const std::string& plist);
 
 protected:
 
@@ -149,6 +153,8 @@ protected:
     
     inline void reconstructNestNode(cocos2d::Node * node);
     static inline std::string getExtentionName(const std::string& name);
+  
+    void loadPlist(const std::string& plist);
 
     typedef std::function<cocos2d::Node*(const rapidjson::Value& json)> NodeCreateFunc;
     typedef std::pair<std::string, NodeCreateFunc> Pair;
@@ -170,7 +176,9 @@ protected:
     cocos2d::Vector<cocos2d::Node*> _callbackHandlers;
     
     std::string _csBuildID;
-    
+  
+    // Contains all plists that will be loaded asynchronously
+    std::unordered_set<std::string> _asyncLoadingPlistSet;
 };
 
 NS_CC_END
