@@ -198,9 +198,6 @@ KeyBoardWinRT::KeyBoardWinRT()
     {
         g_keyCodeMap[item.key] = item.keyCode;
     }
-KeyBoardWinRT::~KeyBoardWinRT()
-{
-
 }
 
 

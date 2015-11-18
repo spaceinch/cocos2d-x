@@ -509,7 +509,6 @@ void GLViewImpl::QueuePointerEvent(PointerEventType type, PointerEventArgs^ args
 {
     std::shared_ptr<PointerEvent> e(new PointerEvent(type, args));
     mInputEvents.push(e);
-#endif
 }
 
 void GLViewImpl::QueueWinRTKeyboardEvent(WinRTKeyboardEventType type, KeyEventArgs^ args)
