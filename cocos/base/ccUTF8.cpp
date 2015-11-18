@@ -272,7 +272,7 @@ std::vector<unsigned short> cc_utf16_vec_from_utf16_str(const unsigned short* st
     if (str == nullptr)
         return str_new;
     
-    int len = cc_wcslen(str);
+    int len = std::vector<unsigned short>(*str).size();
     
     for (int i = 0; i < len; ++i)
     {
@@ -315,7 +315,7 @@ char * cc_utf16_to_utf8 (const unsigned short  *str,
     
     
     std::u16string utf16;
-    int utf16Len = len < 0 ? cc_wcslen(str) : len;
+    int utf16Len = len < 0 ? std::vector<unsigned short>(*str).size() : len;
     
     for (int i = 0; i < utf16Len; ++i)
     {

@@ -51,7 +51,7 @@ static Sprite* createSpriteFromBase64(const char* base64String)
     
     Texture2D *texture = new Texture2D();
     texture->initWithImage(image);
-    texture->setAliasTexParameters();
+    //texture->setAliasTexParameters();
     image->release();
     
     Sprite* sprite = Sprite::createWithTexture(texture);

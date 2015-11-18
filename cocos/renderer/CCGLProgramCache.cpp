@@ -461,16 +461,14 @@ void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
 			p->INIT_SHADERS((def + std::string(cc3D_SkinPositionNormalTex_vert)).c_str(), (def + std::string(cc3D_ColorNormalTex_frag)).c_str());
 #endif
 			break;
-        case kShaderType_PositionColor_noMVP_GrayScale:
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
+        case kShaderType_PositionColor_noMVP_GrayScale:
 			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccUIGrayScale_frag);
-#else
-			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTexture_GrayScale_frag);
-#endif
 			break;
         default:
             CCLOG("cocos2d: %s:%d, error shader type", __FUNCTION__, __LINE__);
             return;
+#endif
     }
 
 #undef INIT_SHADERS

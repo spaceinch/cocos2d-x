@@ -336,7 +336,7 @@ bool RenderTexture::initWithWidthAndHeight(int w, int h, Texture2D::PixelFormat 
 		DXResourceManager::getInstance().add(&_depthStencilView);
 #endif
 
-        _texture->setAliasTexParameters();
+        //_texture->setAliasTexParameters();
 
         // retained
         setSprite(Sprite::createWithTexture(_texture));

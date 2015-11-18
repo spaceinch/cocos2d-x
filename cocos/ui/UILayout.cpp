@@ -543,7 +543,7 @@ void Layout::scissorClippingVisit(Renderer *renderer, const Mat4& parentTransfor
 void Layout::setClippingEnabled(bool able)
 {
 #ifdef DIRECTX_ENABLED
-	CCASSERT(false, "Layout::setClippingEnabled is not supported");
+	//CCASSERT(false, "Layout::setClippingEnabled is not supported");
 #else
     if (able == _clippingEnabled)
     {

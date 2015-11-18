@@ -589,7 +589,7 @@ namespace cocostudio
         auto options = (PanelOptions*)layoutOptions;
         
         bool clipEnabled = options->clipEnabled() != 0;
-        panel->setClippingEnabled(clipEnabled);
+        //panel->setClippingEnabled(clipEnabled);
         
         bool backGroundScale9Enabled = options->backGroundScale9Enabled() != 0;
         panel->setBackGroundImageScale9Enabled(backGroundScale9Enabled);

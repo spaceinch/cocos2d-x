@@ -117,7 +117,7 @@ bool ScrollView::init()
 {
     if (Layout::init())
     {
-        setClippingEnabled(true);
+        //setClippingEnabled(true);
         _innerContainer->setTouchEnabled(false);
         if(_scrollBarEnabled)
         {
@@ -419,6 +419,7 @@ bool ScrollView::isOutOfBoundary(MoveDirection dir) const
     case MoveDirection::BOTTOM: return _innerContainer->getBottomBoundary() > _bottomBoundary;
     case MoveDirection::LEFT: return _innerContainer->getLeftBoundary() > _leftBoundary;
     case MoveDirection::RIGHT: return _innerContainer->getRightBoundary() < _rightBoundary;
+    default: return false;
     }
 }
 
