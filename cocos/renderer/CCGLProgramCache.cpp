@@ -58,7 +58,7 @@ enum {
     kShaderType_3DPositionNormal,
     kShaderType_3DPositionNormalTex,
     kShaderType_3DSkinPositionNormalTex,
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT
     kShaderType_PositionColor_noMVP_GrayScale,
 #endif
     kShaderType_MAX,
@@ -462,7 +462,7 @@ void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
 #endif
 			break;
         case kShaderType_PositionColor_noMVP_GrayScale:
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WP8 || CC_TARGET_PLATFORM == CC_PLATFORM_WINRT
 			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccUIGrayScale_frag);
 #else
 			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTexture_GrayScale_frag);
