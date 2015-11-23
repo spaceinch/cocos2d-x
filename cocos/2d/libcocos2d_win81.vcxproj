@@ -336,6 +336,7 @@
     <ClCompile Include="..\3d\CCSkybox.cpp" />
     <ClCompile Include="..\3d\CCSprite3D.cpp" />
     <ClCompile Include="..\3d\CCSprite3DMaterial.cpp" />
+    <ClCompile Include="..\audio\AudioEngine.cpp" />
     <ClCompile Include="..\audio\winrt\Audio.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -380,6 +381,8 @@
       <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeaderOutputFile>
     </ClCompile>
+    <ClCompile Include="..\audio\winrt\AudioCachePlayer.cpp" />
+    <ClCompile Include="..\audio\winrt\AudioEngine-winrt.cpp" />
     <ClCompile Include="..\audio\winrt\AudioSourceReader.cpp" />
     <ClCompile Include="..\audio\winrt\MediaStreamer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -1096,6 +1099,8 @@
     <ClInclude Include="..\audio\include\Export.h" />
     <ClInclude Include="..\audio\include\SimpleAudioEngine.h" />
     <ClInclude Include="..\audio\winrt\Audio.h" />
+    <ClInclude Include="..\audio\winrt\AudioCachePlayer.h" />
+    <ClInclude Include="..\audio\winrt\AudioEngine-winrt.h" />
     <ClInclude Include="..\audio\winrt\AudioSourceReader.h" />
     <ClInclude Include="..\audio\winrt\MediaStreamer.h" />
     <ClInclude Include="..\base\allocator\CCAllocatorBase.h" />
@@ -1391,7 +1396,7 @@
     <ClInclude Include="..\storage\local-storage\LocalStorage.h" />
     <ClInclude Include="..\ui\CocosGUI.h" />
     <ClInclude Include="..\ui\GUIExport.h" />
-    <ClInclude Include="..\ui\shaders\UIShaders.h" />
+    <ClInclude Include="..\ui\UIAbstractCheckButton.h" />
     <ClInclude Include="..\ui\UIAbstractCheckButton.h" />
     <ClInclude Include="..\ui\UIButton.h" />
     <ClInclude Include="..\ui\UICheckBox.h" />
@@ -1914,7 +1919,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(EngineRoot)external\jpeg\include\$(COCOS2D_PLATFORM);$(EngineRoot)external\tiff\include\$(COCOS2D_PLATFORM);$(EngineRoot)external\png\include\$(COCOS2D_PLATFORM);$(EngineRoot)external\protobuf-lite\src;$(EngineRoot)external\winrt_8.1-specific\OggDecoder\include;$(EngineRoot)external\protobuf-lite\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(EngineRoot)external\winrt_8.1-specific\OggDecoder\include;$(EngineRoot)external\freetype2\include\$(COCOS2D_PLATFORM)\freetype2;$(EngineRoot)external\jpeg\include\win32;$(EngineRoot)external\tiff\include\win32;$(EngineRoot)external\png\include\win32;$(EngineRoot)external\protobuf-lite\src;$(EngineRoot)external\protobuf-lite\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DIRECTX_ENABLED;_USRDLL;_LIB;COCOS2DXWIN32_EXPORTS;_USE3DDLL;_EXPORT_DLL_;_USRSTUDIODLL;_USREXDLL;_USEGUIDLL;CC_ENABLE_CHIPMUNK_INTEGRATION=0;CC_USE_PHYSICS=0;COCOS2D_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/Zm384 /bigobj</AdditionalOptions>
       <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
@@ -1926,6 +1931,7 @@
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+      <AdditionalLibraryDirectories>$(EngineRoot)external\$(COCOS2D_PLATFORM)-specific\OggDecoder\prebuilt\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)/Assets/Resources/Shaders/%(Filename).cso</ObjectFileOutput>
