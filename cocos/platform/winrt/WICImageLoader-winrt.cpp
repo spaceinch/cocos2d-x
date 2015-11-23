@@ -386,17 +386,9 @@ IWICImagingFactory* WICImageLoader::getWICFactory()
 {
 	if(NULL == _wicFactory)
 	{
-		HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-
-		if(SUCCEEDED(hr))
-		{
-			hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (LPVOID*)&_wicFactory);
-		}
-
-		if(FAILED(hr))
-		{
-			SafeRelease(&_wicFactory);
-		}
+    HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+    CCASSERT(SUCCEEDED(hr) || hr == RPC_E_CHANGED_MODE, "Component Object Model (COM) initialization hasn't been satisfactory or it was previously initialized");
+    hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (LPVOID*)&_wicFactory);
 	}
 
 	return _wicFactory;	
