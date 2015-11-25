@@ -1928,7 +1928,6 @@
     <ClCompile Include="..\..\external\clipper\clipper.cpp">
       <Filter>external\clipper</Filter>
     </ClCompile>
-    </ClCompile>
     <ClCompile Include="..\..\external\poly2tri\sweep\cdt.cc">
       <Filter>external\poly2tri\sweep</Filter>
     </ClCompile>
@@ -1941,6 +1940,14 @@
     <ClCompile Include="..\..\external\clipper\clipper.cpp">
       <Filter>external\clipper</Filter>
     </ClCompile>
+    <ClCompile Include="..\physics3d\CCPhysics3D.cpp" />
+    <ClCompile Include="..\physics3d\CCPhysics3DComponent.cpp" />
+    <ClCompile Include="..\physics3d\CCPhysics3DConstraint.cpp" />
+    <ClCompile Include="..\physics3d\CCPhysics3DDebugDrawer.cpp" />
+    <ClCompile Include="..\physics3d\CCPhysics3DObject.cpp" />
+    <ClCompile Include="..\physics3d\CCPhysics3DShape.cpp" />
+    <ClCompile Include="..\physics3d\CCPhysics3DWorld.cpp" />
+    <ClCompile Include="..\physics3d\CCPhysicsSprite3D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CCAction.h">
@@ -3797,7 +3804,6 @@
     <ClInclude Include="..\..\external\clipper\clipper.hpp">
       <Filter>external\clipper</Filter>
     </ClInclude>
-    </ClInclude>
     <ClInclude Include="..\..\external\poly2tri\sweep\advancing_front.h">
       <Filter>external\poly2tri\sweep</Filter>
     </ClInclude>
@@ -3813,6 +3819,15 @@
     <ClInclude Include="..\..\external\clipper\clipper.hpp">
       <Filter>external\clipper</Filter>
     </ClInclude>
+    <ClInclude Include="..\physics3d\CCPhysics3D.h" />
+    <ClInclude Include="..\physics3d\CCPhysics3DComponent.h" />
+    <ClInclude Include="..\physics3d\CCPhysics3DConstraint.h" />
+    <ClInclude Include="..\physics3d\CCPhysics3DDebugDrawer.h" />
+    <ClInclude Include="..\physics3d\CCPhysics3DObject.h" />
+    <ClInclude Include="..\physics3d\CCPhysics3DShape.h" />
+    <ClInclude Include="..\physics3d\CCPhysics3DWorld.h" />
+    <ClInclude Include="..\physics3d\CCPhysicsSprite3D.h" />
+    <ClInclude Include="..\ui\UIAbstractCheckButton.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\3d\CCAnimationCurve.inl">
@@ -3843,9 +3858,6 @@
       <Filter>math</Filter>
     </None>
     <None Include="cocos2d.def" />
-    <None Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libogg.dll" />
-    <None Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libvorbis.dll" />
-    <None Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libvorbisfile.dll" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\renderer\shaders\ccShader_3D_Color_PS.hlsl">
@@ -3929,10 +3941,5 @@
     <FxCompile Include="..\ui\shaders\ccShader_UIGrayScale_PS.hlsl">
       <Filter>ui\shaders</Filter>
     </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libogg.lib" />
-    <Library Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libvorbis.lib" />
-    <Library Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libvorbisfile.lib" />
   </ItemGroup>
 </Project>

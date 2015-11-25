@@ -1500,9 +1500,6 @@
     <ClInclude Include="libcocos2d_8_1\libcocos2d_8_1\libcocos2d_8_1.Shared\targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libogg.dll" />
-    <None Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libvorbis.dll" />
-    <None Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libvorbisfile.dll" />
     <None Include="..\3d\CCAnimationCurve.inl" />
     <None Include="..\math\Mat4.inl" />
     <None Include="..\math\MathUtil.inl" />
@@ -1813,11 +1810,6 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libogg.lib" />
-    <Library Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libvorbis.lib" />
-    <Library Include="..\..\external\winrt_8.1-specific\OggDecoder\prebuilt\win32\libvorbisfile.lib" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{c4dd9b93-f8a9-4a25-975a-c8d08074b416}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -1944,16 +1936,18 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(EngineRoot)external\jpeg\include\$(COCOS2D_PLATFORM);$(EngineRoot)external\tiff\include\$(COCOS2D_PLATFORM);$(EngineRoot)external\png\include\$(COCOS2D_PLATFORM);$(EngineRoot)external\protobuf-lite\src;$(EngineRoot)external\protobuf-lite\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(EngineRoot)external\winrt_8.1-specific\OggDecoder\include;$(EngineRoot)external\freetype2\include\$(COCOS2D_PLATFORM)\freetype2;$(EngineRoot)external\jpeg\include\win32;$(EngineRoot)external\tiff\include\win32;$(EngineRoot)external\png\include\win32;$(EngineRoot)external\protobuf-lite\src;$(EngineRoot)external\protobuf-lite\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>DIRECTX_ENABLED;_USRDLL;_LIB;COCOS2DXWIN32_EXPORTS;_USE3DDLL;_EXPORT_DLL_;_USRSTUDIODLL;_USREXDLL;_USEGUIDLL;CC_ENABLE_CHIPMUNK_INTEGRATION=0;CC_USE_PHYSICS=0;COCOS2D_DEBUG=0;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/Zm384 /bigobj</AdditionalOptions>
       <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+      <AdditionalLibraryDirectories>$(EngineRoot)external\$(COCOS2D_PLATFORM)-specific\OggDecoder\prebuilt\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)/Assets/Resources/Shaders/%(Filename).cso</ObjectFileOutput>
