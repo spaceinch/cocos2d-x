@@ -184,6 +184,9 @@ void ActionManager::addAction(Action *action, Node *target, bool paused)
         HASH_ADD_PTR(_targets, target, element);
     }
 
+    CCASSERT(action->getTarget() == nullptr, "action already added");
+    CCASSERT(action->getOriginalTarget() == nullptr, "action already added");
+  
      actionAllocWithHashElement(element);
  
      CCASSERT(! ccArrayContainsObject(element->actions, action), "action already be added!");
