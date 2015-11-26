@@ -265,6 +265,11 @@ const std::string& Application::getResourceRootPath(void)
     return m_resourceRootPath;
 }
 
+void Application::applicationScreenSizeChanged(int newWidth, int newHeight) {
+
+}
+
+
 void Application::setStartupScriptFilename(const std::string& startupScriptFile)
 {
     m_startupScriptFilename = startupScriptFile;
