@@ -158,7 +158,7 @@ void Configuration::gatherGPUInfo()
 	_valueDict["gl.vendor"] = "Plunge Interactive";
 	_valueDict["gl.renderer"] = "Native Direct3D Renderer";
 	SET_FEATURE("gl.supports_ETC1", _supportsETC1, false);
-	SET_FEATURE("gl.supports_S3TC", _supportsS3TC, false);
+	SET_FEATURE("gl.supports_S3TC", _supportsS3TC, true);
 	SET_FEATURE("gl.supports_ATITC", _supportsATITC, false);
 	SET_FEATURE("gl.supports_PVRTC", _supportsPVRTC, false);
 	SET_FEATURE("gl.supports_NPOT", _supportsNPOT, true);
@@ -290,7 +290,7 @@ bool Configuration::supportsETC() const
 
 bool Configuration::supportsS3TC() const
 {
-#ifdef GL_EXT_texture_compression_s3tc
+#if defined(GL_EXT_texture_compression_s3tc) || defined(DIRECTX_ENABLED)
     return _supportsS3TC;
 #else
     return false;
