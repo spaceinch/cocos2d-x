@@ -1890,9 +1890,19 @@ bool Image::initWithS3TCData(const unsigned char * data, ssize_t dataLen)
     
     if (Configuration::getInstance()->supportsS3TC())  //compressed data length
     {
-        _dataLen = dataLen - sizeof(S3TCTexHeader);
+		_dataLen = dataLen
+#ifndef DIRECTX_ENABLED
+			- sizeof(S3TCTexHeader)
+#endif // DIRECTX_ENABLED
+			;
         _data = static_cast<unsigned char*>(malloc(_dataLen * sizeof(unsigned char)));
-        memcpy((void *)_data,(void *)pixelData , _dataLen);
+        memcpy((void *)_data,(void *)
+#ifndef DIRECTX_ENABLED
+			pixelData
+#else
+			data
+#endif // DIRECTX_ENABLED
+			, _dataLen);
     }
     else                                               //decompressed data length
     {

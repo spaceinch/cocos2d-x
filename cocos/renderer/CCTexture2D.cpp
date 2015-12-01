@@ -51,6 +51,7 @@ THE SOFTWARE.
 #ifdef DIRECTX_ENABLED
 #include "platform/winrt/CCGLViewImpl.h"
 #include "platform/winrt/DirectXHelper.h"
+#include "DDSTextureLoader.h"
 #endif
 
 
@@ -634,6 +635,18 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
 	{
 		format = DXGI_FORMAT_R8G8_UNORM;
 	}
+	else if (pixelFormat == PixelFormat::S3TC_DXT1)
+	{
+		format = DXGI_FORMAT_BC1_UNORM;
+	}
+	else if (pixelFormat == PixelFormat::S3TC_DXT3)
+	{
+		format = DXGI_FORMAT_BC2_UNORM;
+	}
+	else if (pixelFormat == PixelFormat::S3TC_DXT5)
+	{
+		format = DXGI_FORMAT_BC3_UNORM;
+	}
 	else if (pixelFormat != PixelFormat::RGBA8888)
 	{
 		CCASSERT(false, "Texture format not supported.");
@@ -641,25 +654,46 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
 
 	const int rowPitch = pixelsWide * bpp / 8;
 
-	D3D11_TEXTURE2D_DESC textureDescription;
-	textureDescription.Width = pixelsWide;
-	textureDescription.Height = pixelsHigh;
-	textureDescription.MipLevels = mipmapsNum;
-	textureDescription.ArraySize = 1;
-	textureDescription.Format = format;
-	textureDescription.SampleDesc.Count = 1;
-	textureDescription.SampleDesc.Quality = 0;
-	textureDescription.Usage = D3D11_USAGE_DEFAULT;
-	textureDescription.BindFlags = _renderTargetTexture ? (D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET) : (D3D11_BIND_SHADER_RESOURCE);
-	textureDescription.CPUAccessFlags = 0;
-	textureDescription.MiscFlags = (mipmapsNum > 1) ? D3D11_RESOURCE_MISC_GENERATE_MIPS : 0;
+	HRESULT hr;
+	ID3D11ShaderResourceView* texture;
 
-	D3D11_SUBRESOURCE_DATA initData;
-	initData.pSysMem = mipmaps->address;
-	initData.SysMemPitch = static_cast<UINT>(rowPitch);
-	initData.SysMemSlicePitch = static_cast<UINT>(mipmaps->len);
+#ifdef DIRECTX_ENABLED
+	bool isDDSCompressed =
+		   (pixelFormat == PixelFormat::S3TC_DXT1)
+	    || (pixelFormat == PixelFormat::S3TC_DXT3)
+	    || (pixelFormat == PixelFormat::S3TC_DXT5);
+	
+	if (isDDSCompressed)
+	{
+		CCASSERT(mipmapsNum <= 1, "Doesn't support mipmaps in dds compressed textures in DirectX");
+		hr = DirectX::CreateDDSTextureFromMemory(view->GetDevice(), mipmaps->address /* pointer to pixel data + headers */, mipmaps->len /* size of pixel data + headers */, (ID3D11Resource**)&_texture, nullptr);
+	}
+	else
+	{
+#endif // DIRECTX_ENABLED
+		D3D11_TEXTURE2D_DESC textureDescription;
+		textureDescription.Width = pixelsWide;
+		textureDescription.Height = pixelsHigh;
+		textureDescription.MipLevels = mipmapsNum;
+		textureDescription.ArraySize = 1;
+		textureDescription.Format = format;
+		textureDescription.SampleDesc.Count = 1;
+		textureDescription.SampleDesc.Quality = 0;
+		textureDescription.Usage = D3D11_USAGE_DEFAULT;
+		textureDescription.BindFlags = _renderTargetTexture ? (D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET) : (D3D11_BIND_SHADER_RESOURCE);
+		textureDescription.CPUAccessFlags = 0;
+		textureDescription.MiscFlags = (mipmapsNum > 1) ? D3D11_RESOURCE_MISC_GENERATE_MIPS : 0;
 
-	HRESULT hr = view->GetDevice()->CreateTexture2D(&textureDescription, (mipmapsNum > 1) ? nullptr : &initData, &_texture);
+		D3D11_SUBRESOURCE_DATA initData;
+		initData.pSysMem = mipmaps->address;
+		initData.SysMemPitch = static_cast<UINT>(rowPitch);
+		initData.SysMemSlicePitch = static_cast<UINT>(mipmaps->len);
+
+		hr = view->GetDevice()->CreateTexture2D(&textureDescription, (mipmapsNum > 1) ? nullptr : &initData, &_texture);
+#ifdef DIRECTX_ENABLED
+	}
+#endif // DIRECTX_ENABLED
+
 	if (SUCCEEDED(hr) && _texture != nullptr)
 	{
 		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDescription;
