@@ -84,6 +84,8 @@ public:
         RGB565,
         //! 8-bit textures used as masks
         A8,
+		//! 16-bit texture used as masks
+		A16,
         //! 8-bit intensity texture
         I8,
         //! 16-bit textures used as masks

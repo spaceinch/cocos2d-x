@@ -633,7 +633,10 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
 	}
 	else if (pixelFormat == PixelFormat::AI88)
 	{
-		format = DXGI_FORMAT_R8G8_UNORM;
+		// A8I8 texture format doesn't work in some devices (WP8.1 Direct3D_9.3 Adreno_225)
+		// It's capital the pixel shader take in account It will receive 1 component of 16 bits in texture sample
+		// Channel can be splitted in 2 bytes and get 2 component values of 8 bits
+		format = DXGI_FORMAT_R16_UNORM;
 	}
 	else if (pixelFormat == PixelFormat::S3TC_DXT1)
 	{
@@ -657,7 +660,6 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
 	HRESULT hr;
 	ID3D11ShaderResourceView* texture;
 
-#ifdef DIRECTX_ENABLED
 	bool isDDSCompressed =
 		   (pixelFormat == PixelFormat::S3TC_DXT1)
 	    || (pixelFormat == PixelFormat::S3TC_DXT3)
@@ -670,7 +672,6 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
 	}
 	else
 	{
-#endif // DIRECTX_ENABLED
 		D3D11_TEXTURE2D_DESC textureDescription;
 		textureDescription.Width = pixelsWide;
 		textureDescription.Height = pixelsHigh;
@@ -690,9 +691,7 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
 		initData.SysMemSlicePitch = static_cast<UINT>(mipmaps->len);
 
 		hr = view->GetDevice()->CreateTexture2D(&textureDescription, (mipmapsNum > 1) ? nullptr : &initData, &_texture);
-#ifdef DIRECTX_ENABLED
 	}
-#endif // DIRECTX_ENABLED
 
 	if (SUCCEEDED(hr) && _texture != nullptr)
 	{
