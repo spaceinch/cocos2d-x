@@ -1223,7 +1223,8 @@ void Label::onDraw(const Mat4& transform, bool transformUpdated)
                 _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a);
             glprogram->setUniformLocationWith4f(_uniformEffectColor,
                 _effectColorF.r, _effectColorF.g, _effectColorF.b, _effectColorF.a);
-            for (auto&& batchNode : _batchNodes)
+#ifndef DIRECTX_ENABLED // In DX below lines result in a very thin outline rendering, In OGL It supposes fix wrong letter spacing with outline enabled. Relate commit -> cbd428f6acbe23c04c36928ab3a16ecabfe4f743
+			for (auto&& batchNode : _batchNodes)
             {
                 batchNode->getTextureAtlas()->drawQuads();
             }
@@ -1231,6 +1232,7 @@ void Label::onDraw(const Mat4& transform, bool transformUpdated)
             //draw text without outline
             glprogram->setUniformLocationWith4f(_uniformEffectColor,
                 _effectColorF.r, _effectColorF.g, _effectColorF.b, 0.f);
+#endif // DIRECTX_ENABLED
             break;
         case LabelEffect::GLOW:
             glprogram->setUniformLocationWith4f(_uniformEffectColor,
