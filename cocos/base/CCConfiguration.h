@@ -133,6 +133,41 @@ public:
      */
 	bool supportsBGRA8888() const;
 
+	/** Whether or not R8G8 textures are supported.
+	*
+	* @return Is true if supports R8G8 textures.
+	* @since v0.99.2
+	*/
+	bool supportsR8G8() const;
+
+	/** Whether or not BC1 textures are supported.
+	*
+	* @return Is true if supports BC1 textures.
+	* @since v0.99.2
+	*/
+	bool supportsBC1() const;
+
+	/** Whether or not BC2 textures are supported.
+	*
+	* @return Is true if supports BC2 textures.
+	* @since v0.99.2
+	*/
+	bool supportsBC2() const;
+
+	/** Whether or not BC3 textures are supported.
+	*
+	* @return Is true if supports BC3 textures.
+	* @since v0.99.2
+	*/
+	bool supportsBC3() const;
+
+	/** Whether or not R16 textures are supported.
+	*
+	* @return Is true if supports R16 textures.
+	* @since v0.99.2
+	*/
+	bool supportsR16() const;
+
     /** Whether or not glDiscardFramebufferEXT is supported.
      * @return Is true if supports glDiscardFramebufferEXT.
      * @since v0.99.2
@@ -230,6 +265,11 @@ protected:
     bool            _supportsATITC;
     bool            _supportsNPOT;
     bool            _supportsBGRA8888;
+	bool            _supportsR8G8;
+	bool			_supportsBC1;
+	bool			_supportsBC2;
+	bool			_supportsBC3;
+	bool			_supportsR16;
     bool            _supportsDiscardFramebuffer;
     bool            _supportsShareableVAO;
     GLint           _maxSamplesAllowed;

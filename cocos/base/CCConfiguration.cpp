@@ -47,6 +47,11 @@ Configuration::Configuration()
 , _supportsATITC(false)
 , _supportsNPOT(false)
 , _supportsBGRA8888(false)
+, _supportsR8G8(false)
+, _supportsBC1(false)
+, _supportsBC2(false)
+, _supportsBC3(false)
+, _supportsR16(false)
 , _supportsDiscardFramebuffer(false)
 , _supportsShareableVAO(false)
 , _maxSamplesAllowed(0)
@@ -157,10 +162,6 @@ void Configuration::gatherGPUInfo()
 
 	_valueDict["gl.vendor"] = "Plunge Interactive";
 	_valueDict["gl.renderer"] = "Native Direct3D Renderer";
-	SET_FEATURE("gl.supports_ETC1", _supportsETC1, false);
-	SET_FEATURE("gl.supports_S3TC", _supportsS3TC, false);
-	SET_FEATURE("gl.supports_ATITC", _supportsATITC, false);
-	SET_FEATURE("gl.supports_PVRTC", _supportsPVRTC, false);
 	SET_FEATURE("gl.supports_NPOT", _supportsNPOT, true);
 	SET_FEATURE("gl.supports_discard_framebuffer", _supportsDiscardFramebuffer, true);
 	SET_FEATURE("gl.supports_vertex_array_object", _supportsShareableVAO, false);
@@ -207,6 +208,31 @@ void Configuration::gatherGPUInfo()
 	{
 		SET_FEATURE("gl.supports_BGRA8888", _supportsBGRA8888, format & D3D11_FORMAT_SUPPORT_TEXTURE2D);
 	}
+	if (view->GetDevice()->CheckFormatSupport(DXGI_FORMAT_R8G8_UNORM, &format) == S_OK)
+	{
+		SET_FEATURE("gl.supports_R8G8", _supportsR8G8, format & D3D11_FORMAT_SUPPORT_TEXTURE2D);
+	}
+	if (view->GetDevice()->CheckFormatSupport(DXGI_FORMAT_BC1_UNORM, &format) == S_OK)
+	{
+		SET_FEATURE("gl.supports_BC1", _supportsBC1, format & D3D11_FORMAT_SUPPORT_TEXTURE2D);
+	}
+	if (view->GetDevice()->CheckFormatSupport(DXGI_FORMAT_BC2_UNORM, &format) == S_OK)
+	{
+		SET_FEATURE("gl.supports_BC2", _supportsBC2, format & D3D11_FORMAT_SUPPORT_TEXTURE2D);
+	}
+	if (view->GetDevice()->CheckFormatSupport(DXGI_FORMAT_BC3_UNORM, &format) == S_OK)
+	{
+		SET_FEATURE("gl.supports_BC3", _supportsBC3, format & D3D11_FORMAT_SUPPORT_TEXTURE2D);
+	}
+	if (view->GetDevice()->CheckFormatSupport(DXGI_FORMAT_R16_UNORM, &format) == S_OK)
+	{
+		SET_FEATURE("gl.supports_R16", _supportsR16, format & D3D11_FORMAT_SUPPORT_TEXTURE2D);
+	}
+
+	SET_FEATURE("gl.supports_ETC1", _supportsETC1, false);
+	SET_FEATURE("gl.supports_S3TC", _supportsS3TC, supportsS3TC());
+	SET_FEATURE("gl.supports_ATITC", _supportsATITC, false);
+	SET_FEATURE("gl.supports_PVRTC", _supportsPVRTC, false);
 #endif
 }
 
@@ -290,11 +316,17 @@ bool Configuration::supportsETC() const
 
 bool Configuration::supportsS3TC() const
 {
-#ifdef GL_EXT_texture_compression_s3tc
+#ifndef DIRECTX_ENABLED
+#if defined(GL_EXT_texture_compression_s3tc)
     return _supportsS3TC;
 #else
     return false;
 #endif
+#else
+	return _supportsBC1
+		|| _supportsBC2
+		|| _supportsBC3;
+#endif // DIRECTX_ENABLED
 }
 
 bool Configuration::supportsATITC() const
@@ -305,6 +337,31 @@ bool Configuration::supportsATITC() const
 bool Configuration::supportsBGRA8888() const
 {
 	return _supportsBGRA8888;
+}
+
+bool Configuration::supportsR8G8() const
+{
+	return _supportsR8G8;
+}
+
+bool Configuration::supportsBC1() const
+{
+	return _supportsBC1;
+}
+
+bool Configuration::supportsBC2() const
+{
+	return _supportsBC2;
+}
+
+bool Configuration::supportsBC3() const
+{
+	return _supportsBC3;
+}
+
+bool Configuration::supportsR16() const
+{
+	return _supportsR16;
 }
 
 bool Configuration::supportsDiscardFramebuffer() const
