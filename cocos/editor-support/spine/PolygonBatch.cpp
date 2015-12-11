@@ -120,6 +120,10 @@ namespace spine {
 		memcpy(resource.pData, _vertices, sizeof(_vertices[0]) * _verticesCount);
 		GLViewImpl::sharedOpenGLView()->GetContext()->Unmap(_bufferVertex, 0);
 
+		GLViewImpl::sharedOpenGLView()->GetContext()->Map(_bufferIndex, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+		memcpy(resource.pData, _triangles, sizeof(_triangles[0]) * _trianglesCount);
+		GLViewImpl::sharedOpenGLView()->GetContext()->Unmap(_bufferIndex, 0);
+
 		DXStateCache::getInstance().setPSTexture(0, _texture->getView());
 		UINT stride = sizeof(V3F_C4B_T2F);
 		UINT offset = 0;
@@ -159,7 +163,7 @@ namespace spine {
 	indexBufferData.SysMemPitch = 0;
 	indexBufferData.SysMemSlicePitch = 0;
 
-	CD3D11_BUFFER_DESC indexBufferDescription(sizeof(_triangles[0]) * _capacity * 3, D3D11_BIND_INDEX_BUFFER);
+	CD3D11_BUFFER_DESC indexBufferDescription(sizeof(_triangles[0]) * _capacity * 3, D3D11_BIND_INDEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 	DX::ThrowIfFailed(view->GetDevice()->CreateBuffer(&indexBufferDescription, &indexBufferData, &_bufferIndex));
 	DXResourceManager::getInstance().add(&_bufferIndex);
 #endif
