@@ -64,8 +64,10 @@ namespace spine {
 	}
 
 	PolygonBatch::~PolygonBatch() {
+#ifdef DIRECTX_ENABLED
 		DXResourceManager::getInstance().remove(&_bufferIndex);
 		DXResourceManager::getInstance().remove(&_bufferVertex);
+#endif // DIRECTX_ENABLED
 		FREE(_vertices);
 		FREE(_triangles);
 	}
