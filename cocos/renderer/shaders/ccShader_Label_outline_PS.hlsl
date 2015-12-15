@@ -27,9 +27,9 @@ float4 main(PixelShaderInput input) : SV_TARGET
 {
 	float4 sampledColor = g_Texture0.Sample(TextureSampler, input.texUV);
 
-	uint asDoubleByte = max(0, sampledColor.r * 65536); // Multiply by 2^32 for transform components values in 255 range ones
-	uint highValue = asDoubleByte / 256; // Divide by 2^8 for shift 8 bits to the right and get component in second byte
-	uint lowValue = (asDoubleByte * 16777216) / 16777216; // 2 ^ (8 * 3) Shift 3 bytes to the left then same to the right for isolate and get component in first position
+	uint asDoubleByte = max(0.0, sampledColor.r * 65536.0); // Multiply by 2^32 for transform components values in 255 range ones
+	uint highValue = asDoubleByte / 256.0; // Divide by 2^8 for shift 8 bits to the right and get component in second byte
+	uint lowValue = (asDoubleByte * 16777216.0) / 16777216.0; // 2 ^ (8 * 3) Shift 3 bytes to the left then same to the right for isolate and get component in first position
 
 	float outlineAlpha = lowValue;
 	outlineAlpha /= 255.0;
