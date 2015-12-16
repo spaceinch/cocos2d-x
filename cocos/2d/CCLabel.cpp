@@ -1157,6 +1157,9 @@ void Label::onDrawShadow(GLProgram* glProgram)
         }
 
         glProgram->setUniformsForBuiltins(_shadowTransform);
+#ifdef DIRECTX_ENABLED
+		glProgram->set();
+#endif
         for (auto&& it : _letters)
         {
             it.second->updateTransform();
@@ -1174,7 +1177,10 @@ void Label::onDrawShadow(GLProgram* glProgram)
         setColor(_shadowColor3B);
 
         glProgram->setUniformsForBuiltins(_shadowTransform);
-        for (auto&& it : _letters)
+#ifdef DIRECTX_ENABLED
+		glProgram->set();
+#endif
+		for (auto&& it : _letters)
         {
             it.second->updateTransform();
         }
@@ -1205,9 +1211,7 @@ void Label::onDraw(const Mat4& transform, bool transformUpdated)
     }
 
     glprogram->setUniformsForBuiltins(transform);
-#ifdef DIRECTX_ENABLED
-    glprogram->set();
-#endif
+
 
     for (auto&& it : _letters)
     {
@@ -1246,6 +1250,9 @@ void Label::onDraw(const Mat4& transform, bool transformUpdated)
         }
     }
 
+#ifdef DIRECTX_ENABLED
+	glprogram->set();
+#endif
     for (auto&& batchNode : _batchNodes)
     {
         batchNode->getTextureAtlas()->drawQuads();

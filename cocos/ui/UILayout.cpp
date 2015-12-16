@@ -70,7 +70,11 @@ _alongVector(Vec2(0.0f, -1.0f)),
 _cOpacity(255),
 _clippingEnabled(false),
 _layoutType(Type::ABSOLUTE),
+#ifndef DIRECTX_ENABLED
 _clippingType(ClippingType::STENCIL),
+#else
+_clippingType(ClippingType::SCISSOR),
+#endif // DIRECTX_ENABLED
 _clippingStencil(nullptr),
 _clippingRect(Rect::ZERO),
 _clippingParent(nullptr),
@@ -475,7 +479,23 @@ void Layout::onAfterVisitStencil()
 void Layout::onBeforeVisitScissor()
 {
 #ifdef DIRECTX_ENABLED
-	CCASSERT(false, "Layout::onBeforeVisitScissor");
+	// apply scissor test
+	_scissorOldState = DXStateCache::getInstance().isScissorEnabled();
+	if (false == _scissorOldState)
+	{
+		DXStateCache::getInstance().enableScissor(true);
+	}
+
+	// apply scissor box
+	Rect clippingRect = getClippingRect();
+	DXStateCache::getInstance().getScissor(_clippingOldRect);
+	if (false == _clippingOldRect.equals(clippingRect))
+	{
+		DXStateCache::getInstance().setScissor(clippingRect.origin.x,
+												clippingRect.origin.y,
+												clippingRect.size.width,
+												clippingRect.size.height);
+	}
 #else
     auto glview = Director::getInstance()->getOpenGLView();
     // apply scissor test
@@ -501,7 +521,22 @@ void Layout::onBeforeVisitScissor()
 void Layout::onAfterVisitScissor()
 {
 #ifdef DIRECTX_ENABLED
-	CCASSERT(false, "Layout::onAfterVisitScissor is not supported");
+	if (_scissorOldState)
+	{
+		// revert scissor box
+		if (false == _clippingOldRect.equals(_clippingRect))
+		{
+			DXStateCache::getInstance().setScissor(_clippingOldRect.origin.x,
+													_clippingOldRect.origin.y,
+													_clippingOldRect.size.width,
+													_clippingRect.size.height);
+		}
+	}
+	else
+	{
+		// revert scissor test
+		DXStateCache::getInstance().enableScissor(false);
+	}
 #else
     if (_scissorOldState)
     {
@@ -542,9 +577,6 @@ void Layout::scissorClippingVisit(Renderer *renderer, const Mat4& parentTransfor
 
 void Layout::setClippingEnabled(bool able)
 {
-#ifdef DIRECTX_ENABLED
-	//CCASSERT(false, "Layout::setClippingEnabled is not supported");
-#else
     if (able == _clippingEnabled)
     {
         return;
@@ -553,6 +585,7 @@ void Layout::setClippingEnabled(bool able)
     switch (_clippingType)
     {
         case ClippingType::STENCIL:
+#ifndef DIRECTX_ENABLED
             if (able)
             {
                 static bool once = true;
@@ -582,15 +615,20 @@ void Layout::setClippingEnabled(bool able)
                 _clippingStencil->release();
                 _clippingStencil = nullptr;
             }
+#else
+			CCASSERT(false, "UILayout::setClippingEnabled using stencil is unsupported in DirectX.");
+#endif // DIRECTX_ENABLED
             break;
         default:
             break;
     }
-#endif
 }
     
 void Layout::setClippingType(ClippingType type)
 {
+#if DIRECTX_ENABLED
+	type = ClippingType::SCISSOR;
+#endif // DIRECTX_ENABLED
     if (type == _clippingType)
     {
         return;
@@ -695,6 +733,10 @@ const Rect& Layout::getClippingRect()
             _clippingRect.size.width = scissorWidth;
             _clippingRect.size.height = scissorHeight;
         }
+#if DIRECTX_ENABLED
+		// Flip 'y' axe to match DX coords system
+		_clippingRect.origin.y = Director::getInstance()->getWinSize().height - (_clippingRect.origin.y + _clippingRect.size.height);
+#endif // DIRECTX_ENABLED
         _clippingRectDirty = false;
     }
     return _clippingRect;
