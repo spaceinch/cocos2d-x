@@ -1421,7 +1421,8 @@ void Texture2D::setTexParameters(const TexParams &texParams)
 void Texture2D::setAliasTexParameters()
 {
 #ifdef DIRECTX_ENABLED
-	CCASSERT(false, "Texture2D::setAliasTexParameters is not supported");
+	// D3D11_TEXTURE2D_DESC already handles aliasing params which is set in texture creation
+	//CCASSERT(false, "Texture2D::setAliasTexParameters is not supported");
 #else
     if (! _antialiasEnabled)
     {
@@ -1457,7 +1458,8 @@ void Texture2D::setAliasTexParameters()
 void Texture2D::setAntiAliasTexParameters()
 {
 #ifdef DIRECTX_ENABLED
-	CCASSERT(false, "Texture2D::setAntiAliasTexParameters is not supported");
+	// D3D11_TEXTURE2D_DESC already handles anti-aliasing params which is set in texture creation
+	//CCASSERT(false, "Texture2D::setAntiAliasTexParameters is not supported");
 #else
     if ( _antialiasEnabled )
     {
