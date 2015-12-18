@@ -1,11 +1,5 @@
 Texture2D g_Texture0;
-
-SamplerState TextureSampler
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = Wrap;
-	AddressV = Wrap;
-};
+SamplerState g_Sampler0 : register(s0);
 
 // A constant buffer that stores the three basic column-major matrices for composing geometry.
 cbuffer ConstantBuffer : register(b0)
@@ -25,7 +19,7 @@ struct PixelShaderInput
 // A pass-through function for the (interpolated) color data.
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-	float4 sampledColor = g_Texture0.Sample(TextureSampler, input.texUV);
+	float4 sampledColor = g_Texture0.Sample(g_Sampler0, input.texUV);
 
 	uint asDoubleByte = max(0.0, sampledColor.r * 65536.0); // Multiply by 2^32 for transform components values in 255 range ones
 	uint highValue = asDoubleByte / 256.0; // Divide by 2^8 for shift 8 bits to the right and get component in second byte

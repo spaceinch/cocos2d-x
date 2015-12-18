@@ -668,6 +668,7 @@ void TextureAtlas::drawNumberOfQuads(ssize_t numberOfQuads, ssize_t start)
 	DXStateCache::getInstance().setVertexBuffer(_bufferVertex, sizeof(V3F_C4B_T2F), 0);
 	DXStateCache::getInstance().setIndexBuffer(_bufferIndex);
 	DXStateCache::getInstance().setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	DXStateCache::getInstance().setTexSamplerLinearClamp(0);
 	DXStateCache::getInstance().setPSTexture(0, _texture->getView());
 
 	view->GetContext()->DrawIndexed(numberOfQuads * 6, start * 6, 0);

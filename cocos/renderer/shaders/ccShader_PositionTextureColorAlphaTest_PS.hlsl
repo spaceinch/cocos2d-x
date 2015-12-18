@@ -5,13 +5,7 @@ cbuffer AlphaBuffer : register(b0)
 }
 
 Texture2D g_Texture0;
-
-SamplerState TextureSampler
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = Wrap;
-	AddressV = Wrap;
-};
+SamplerState g_Sampler0 : register(s0);
 
 // Per-pixel color data passed through the pixel shader.
 struct PixelShaderInput
@@ -24,7 +18,7 @@ struct PixelShaderInput
 // A pass-through function for the (interpolated) color data.
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-	float4 texColor = g_Texture0.Sample(TextureSampler, input.texUV);
+	float4 texColor = g_Texture0.Sample(g_Sampler0, input.texUV);
 
 	//if (texColor.a <= CC_alpha_value)
 		//clip(-1);

@@ -1,11 +1,5 @@
 Texture2D g_Texture0;
-
-SamplerState TextureSampler
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = Wrap;
-	AddressV = Wrap;
-};
+SamplerState g_Sampler0 : register(s0);
 
 cbuffer ConstantBuffer : register(b0)
 {
@@ -23,7 +17,7 @@ struct PixelShaderInput
 // A pass-through function for the (interpolated) color data.
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-	float4 color = g_Texture0.Sample(TextureSampler, input.texUV);
+	float4 color = g_Texture0.Sample(g_Sampler0, input.texUV);
 	//the texture use dual channel 16-bit output for distance_map
 	//float dist = color.b+color.g/256.0;
 	// the texture use single channel 8-bit output for distance_map

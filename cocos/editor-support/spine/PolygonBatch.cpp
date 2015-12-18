@@ -126,6 +126,7 @@ namespace spine {
 		memcpy(resource.pData, _triangles, sizeof(_triangles[0]) * _trianglesCount);
 		GLViewImpl::sharedOpenGLView()->GetContext()->Unmap(_bufferIndex, 0);
 
+		DXStateCache::getInstance().setTexSamplerLinearClamp(0);
 		DXStateCache::getInstance().setPSTexture(0, _texture->getView());
 		UINT stride = sizeof(V3F_C4B_T2F);
 		UINT offset = 0;

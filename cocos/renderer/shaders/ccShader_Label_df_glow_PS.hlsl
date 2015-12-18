@@ -1,11 +1,5 @@
 Texture2D g_Texture0;
-
-SamplerState TextureSampler
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = Wrap;
-	AddressV = Wrap;
-};
+SamplerState g_Sampler0 : register(s0);
 
 cbuffer ConstantBuffer : register(b0)
 {
@@ -24,7 +18,7 @@ struct PixelShaderInput
 // A pass-through function for the (interpolated) color data.
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-	float dist = g_Texture0.Sample(TextureSampler, input.texUV).a;
+	float dist = g_Texture0.Sample(g_Sampler0, input.texUV).a;
 	
 	//todo:Implementation 'fwidth' for glsl 1.0
 	//float width = fwidth(dist);
