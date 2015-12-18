@@ -56,7 +56,7 @@ void CCLuaLog(const char *pszMsg)
 
 
     OutputDebugStringW(widebuff);
-    OutputDebugStringA("\n");
+    //OutputDebugStringA("\n");
 
 	bufflen = WideCharToMultiByte(CP_ACP, 0, widebuff, -1, NULL, 0, NULL, NULL);
 	char* buff = new char[bufflen + 1];
