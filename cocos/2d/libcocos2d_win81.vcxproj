@@ -1485,6 +1485,10 @@
       </PrecompiledHeaderOutputFile>
     </ClCompile>
     <ClCompile Include="..\audio\winrt\SimpleAudioEngine.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">W8\$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">W8\$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">W8\$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">W8\$(IntDir)</ObjectFileName>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">NotUsing</PrecompiledHeader>
