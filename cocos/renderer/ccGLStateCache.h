@@ -217,6 +217,14 @@ public:
 	void setVSTexture(int index, ID3D11ShaderResourceView*const* view);
 	void setPSTexture(int index, ID3D11ShaderResourceView*const* view);
 
+	void setPSTextureSampler(int index, ID3D11SamplerState*const* texSampler);
+	void setTexSamplerPointWrap(int index);
+	void setTexSamplerPointClamp(int index);
+	void setTexSamplerLinearWrap(int index);
+	void setTexSamplerLinearClamp(int index);
+	void setTexSamplerAnisotropicWrap(int index);
+	void setTexSamplerAnisotropicClamp(int index);
+
 	void setBlend(GLint src, GLint dst);
 
 	void setViewport(float x, float y, float w, float h);
@@ -258,6 +266,8 @@ private:
 	DXStateCache(const DXStateCache&);
 	DXStateCache& operator=(const DXStateCache&);
 
+	HRESULT CreateTexSamplerState(D3D11_FILTER filter, D3D11_TEXTURE_ADDRESS_MODE addressMode, ID3D11SamplerState** pResult);
+
 	// Cached values
 	ID3D11Buffer* _vertexBuffer;
 	ID3D11Buffer* _indexBuffer;
@@ -269,6 +279,14 @@ private:
 	ID3D11InputLayout* _inputLayout;
 	ID3D11ShaderResourceView*const* _textureViewsPS[MAX_UNITS];
 	ID3D11ShaderResourceView*const* _textureViewsVS[MAX_UNITS];
+	ID3D11SamplerState*const* _textureSamplersPS[MAX_UNITS];
+	// Tex samplers
+	ID3D11SamplerState* _pointWrap;
+	ID3D11SamplerState* _pointClamp;
+	ID3D11SamplerState* _linearWrap;
+	ID3D11SamplerState* _linearClamp;
+	ID3D11SamplerState* _anisotropicWrap;
+	ID3D11SamplerState* _anisotropicClamp;
 
 	bool _rasterizerDirty;
 	CD3D11_RASTERIZER_DESC _rasterizerDesc;
@@ -346,6 +364,7 @@ public:
 	DX_MANAGER_PROPERTY_DEF(ID3D11DepthStencilView *, DepthStencilView);
 	DX_MANAGER_PROPERTY_DEF(ID3D11RenderTargetView *, RenderTargetView);
 	DX_MANAGER_PROPERTY_DEF(ID3D11DepthStencilState *, DepthStencilState);
+	DX_MANAGER_PROPERTY_DEF(ID3D11SamplerState *, TexSamplerState);
 
 public:
 	void clear();
