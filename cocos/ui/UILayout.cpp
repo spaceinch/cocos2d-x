@@ -491,10 +491,10 @@ void Layout::onBeforeVisitScissor()
 	DXStateCache::getInstance().getScissor(_clippingOldRect);
 	if (false == _clippingOldRect.equals(clippingRect))
 	{
-		DXStateCache::getInstance().setScissor(clippingRect.origin.x,
-												clippingRect.origin.y,
-												clippingRect.size.width,
-												clippingRect.size.height);
+		Director::getInstance()->getOpenGLView()->setScissorInPoints(clippingRect.origin.x,
+																		clippingRect.origin.y,
+																		clippingRect.size.width,
+																		clippingRect.size.height);
 	}
 #else
     auto glview = Director::getInstance()->getOpenGLView();
@@ -526,10 +526,10 @@ void Layout::onAfterVisitScissor()
 		// revert scissor box
 		if (false == _clippingOldRect.equals(_clippingRect))
 		{
-			DXStateCache::getInstance().setScissor(_clippingOldRect.origin.x,
-													_clippingOldRect.origin.y,
-													_clippingOldRect.size.width,
-													_clippingRect.size.height);
+			Director::getInstance()->getOpenGLView()->setScissorInPoints(_clippingOldRect.origin.x,
+																			_clippingOldRect.origin.y,
+																			_clippingOldRect.size.width,
+																			_clippingRect.size.height);
 		}
 	}
 	else
