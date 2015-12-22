@@ -728,8 +728,14 @@ const Rect& Layout::getClippingRect()
         }
         else
         {
+#ifndef DIRECTX_ENABLED
             _clippingRect.origin.x = worldPos.x - (scissorWidth * _anchorPoint.x);
             _clippingRect.origin.y = worldPos.y - (scissorHeight * _anchorPoint.y);
+#else
+			// worldPos var already comes with real position (without anchor offset)
+			_clippingRect.origin.x = worldPos.x;
+			_clippingRect.origin.y = worldPos.y;
+#endif
             _clippingRect.size.width = scissorWidth;
             _clippingRect.size.height = scissorHeight;
         }
