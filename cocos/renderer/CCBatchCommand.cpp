@@ -73,6 +73,7 @@ void BatchCommand::execute()
     GL::bindTexture2D(_texture->getName()); 
     GL::blendFunc(_blendType.src, _blendType.dst);
 #else
+	DXStateCache::getInstance().setTexSamplerLinearClamp(0);
 	DXStateCache::getInstance().setPSTexture(0, _texture->getView());
 	DXStateCache::getInstance().setBlend(_blendType.src, _blendType.dst);
 #endif

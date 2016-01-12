@@ -491,10 +491,10 @@ void Layout::onBeforeVisitScissor()
 	DXStateCache::getInstance().getScissor(_clippingOldRect);
 	if (false == _clippingOldRect.equals(clippingRect))
 	{
-		DXStateCache::getInstance().setScissor(clippingRect.origin.x,
-												clippingRect.origin.y,
-												clippingRect.size.width,
-												clippingRect.size.height);
+		Director::getInstance()->getOpenGLView()->setScissorInPoints(clippingRect.origin.x,
+																		clippingRect.origin.y,
+																		clippingRect.size.width,
+																		clippingRect.size.height);
 	}
 #else
     auto glview = Director::getInstance()->getOpenGLView();
@@ -526,10 +526,10 @@ void Layout::onAfterVisitScissor()
 		// revert scissor box
 		if (false == _clippingOldRect.equals(_clippingRect))
 		{
-			DXStateCache::getInstance().setScissor(_clippingOldRect.origin.x,
-													_clippingOldRect.origin.y,
-													_clippingOldRect.size.width,
-													_clippingRect.size.height);
+			Director::getInstance()->getOpenGLView()->setScissorInPoints(_clippingOldRect.origin.x,
+																			_clippingOldRect.origin.y,
+																			_clippingOldRect.size.width,
+																			_clippingRect.size.height);
 		}
 	}
 	else
@@ -728,8 +728,14 @@ const Rect& Layout::getClippingRect()
         }
         else
         {
+#ifndef DIRECTX_ENABLED
             _clippingRect.origin.x = worldPos.x - (scissorWidth * _anchorPoint.x);
             _clippingRect.origin.y = worldPos.y - (scissorHeight * _anchorPoint.y);
+#else
+			// worldPos var already comes with real position (without anchor offset)
+			_clippingRect.origin.x = worldPos.x;
+			_clippingRect.origin.y = worldPos.y;
+#endif
             _clippingRect.size.width = scissorWidth;
             _clippingRect.size.height = scissorHeight;
         }

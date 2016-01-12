@@ -1,11 +1,5 @@
 Texture2D g_Texture0;
-
-SamplerState TextureSampler
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = Wrap;
-	AddressV = Wrap;
-};
+SamplerState g_Sampler0 : register(s0);
 
 // A constant buffer that stores the three basic column-major matrices for composing geometry.
 cbuffer ConstantBuffer : register(b0)
@@ -25,5 +19,5 @@ struct PixelShaderInput
 float4 main(PixelShaderInput input) : SV_TARGET
 {
 	return input.color * float4(u_textColor.rgb, // RGB from uniform
-		u_textColor.a * g_Texture0.Sample(TextureSampler, input.texUV).a); // A from texture & uniform
+		u_textColor.a * g_Texture0.Sample(g_Sampler0, input.texUV).a); // A from texture & uniform
 }

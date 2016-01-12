@@ -283,6 +283,13 @@ DXStateCache::DXStateCache()
 	_inputLayout = nullptr;
 	_vertexShader = nullptr;
 	_pixelShader = nullptr;
+	// Tex samplers
+	_pointWrap = nullptr;
+	_pointClamp = nullptr;
+	_linearWrap = nullptr;
+	_linearClamp = nullptr;
+	_anisotropicWrap = nullptr;
+	_anisotropicClamp = nullptr;
 
 	_clearColor[0] = 0;
 	_clearColor[1] = 0;
@@ -304,6 +311,13 @@ void DXStateCache::invalidateStateCache()
 	DXResourceManager::getInstance().remove(&_depthStencilState);
 	DXResourceManager::getInstance().remove(&_blendState);
 	DXResourceManager::getInstance().remove(&_rasterizerState);
+	// Tex samplers
+	DXResourceManager::getInstance().remove(&_pointWrap);
+	DXResourceManager::getInstance().remove(&_pointClamp);
+	DXResourceManager::getInstance().remove(&_linearWrap);
+	DXResourceManager::getInstance().remove(&_linearClamp);
+	DXResourceManager::getInstance().remove(&_anisotropicWrap);
+	DXResourceManager::getInstance().remove(&_anisotropicClamp);
 
 	_vertexBuffer = nullptr;
 	_indexBuffer = nullptr;
@@ -331,6 +345,7 @@ void DXStateCache::invalidateStateCache()
 	memset(_textureViewsPS, 0, sizeof(_textureViewsPS));
 	memset(&_viewportRect, 0, sizeof(_viewportRect));
 	memset(&_scissorRect, 0, sizeof(_scissorRect));
+	memset(&_textureSamplersPS, 0, sizeof(_textureSamplersPS));
 }
 
 void DXStateCache::setShaders(ID3D11VertexShader *vs, ID3D11PixelShader *ps)
@@ -421,6 +436,16 @@ void DXStateCache::setPSTexture(int index, ID3D11ShaderResourceView*const* textu
 	{
 		_textureViewsPS[index] = textureView;
 		_view->GetContext()->PSSetShaderResources(index, 1, _textureViewsPS[index]);
+	}
+}
+
+void DXStateCache::setPSTextureSampler(int index, ID3D11SamplerState*const* texSampler)
+{
+	CCASSERT(index < MAX_UNITS, "Invalid index of unit.");
+	if (_textureSamplersPS[index] != texSampler)
+	{
+		_textureSamplersPS[index] = texSampler;
+		_view->GetContext()->PSSetSamplers(index, 1, _textureSamplersPS[index]);
 	}
 }
 
@@ -675,6 +700,94 @@ D3D11_BLEND DXStateCache::GetDXBlend(GLint glBlend) const
 	return D3D11_BLEND_ONE;
 }
 
+// Tex samplers sets
+void DXStateCache::setTexSamplerPointWrap(int index)
+{
+	if (_pointWrap == nullptr)
+	{
+		// Create sampler state
+		DX::ThrowIfFailed(CreateTexSamplerState(D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_TEXTURE_ADDRESS_WRAP, &_pointWrap));
+		DXResourceManager::getInstance().add(&_pointWrap);
+	}
+	setPSTextureSampler(index, &_pointWrap);
+}
+
+void DXStateCache::setTexSamplerPointClamp(int index)
+{
+	if (_pointClamp == nullptr)
+	{
+		// Create sampler state
+		DX::ThrowIfFailed(CreateTexSamplerState(D3D11_FILTER_MIN_MAG_MIP_POINT, D3D11_TEXTURE_ADDRESS_CLAMP, &_pointClamp));
+		DXResourceManager::getInstance().add(&_pointClamp);
+	}
+	setPSTextureSampler(index, &_pointClamp);
+}
+
+void DXStateCache::setTexSamplerLinearWrap(int index)
+{
+	if (_linearWrap == nullptr)
+	{
+		// Create sampler state
+		DX::ThrowIfFailed(CreateTexSamplerState(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_WRAP, &_linearWrap));
+		DXResourceManager::getInstance().add(&_pointWrap);
+	}
+	setPSTextureSampler(index, &_linearWrap);
+}
+
+void DXStateCache::setTexSamplerLinearClamp(int index)
+{
+	if (_linearClamp == nullptr)
+	{
+		// Create sampler state
+		DX::ThrowIfFailed(CreateTexSamplerState(D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_TEXTURE_ADDRESS_CLAMP, &_linearClamp));
+		DXResourceManager::getInstance().add(&_pointClamp);
+	}
+	setPSTextureSampler(index, &_linearClamp);
+}
+
+void DXStateCache::setTexSamplerAnisotropicWrap(int index)
+{
+	if (_anisotropicWrap == nullptr)
+	{
+		// Create sampler state
+		DX::ThrowIfFailed(CreateTexSamplerState(D3D11_FILTER_ANISOTROPIC, D3D11_TEXTURE_ADDRESS_WRAP, &_anisotropicWrap));
+		DXResourceManager::getInstance().add(&_anisotropicWrap);
+	}
+	setPSTextureSampler(index, &_anisotropicWrap);
+}
+
+void DXStateCache::setTexSamplerAnisotropicClamp(int index)
+{
+	if (_anisotropicClamp == nullptr)
+	{
+		// Create sampler state
+		DX::ThrowIfFailed(CreateTexSamplerState(D3D11_FILTER_ANISOTROPIC, D3D11_TEXTURE_ADDRESS_CLAMP, &_anisotropicClamp));
+		DXResourceManager::getInstance().add(&_anisotropicClamp);
+	}
+	setPSTextureSampler(index, &_anisotropicClamp);
+}
+// END tex samplers sets
+
+// Helper for creating texture sampler state objects
+HRESULT DXStateCache::CreateTexSamplerState(D3D11_FILTER filter, D3D11_TEXTURE_ADDRESS_MODE addressMode, ID3D11SamplerState** pResult)
+{
+	D3D11_SAMPLER_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+
+	desc.Filter = filter;
+
+	desc.AddressU = addressMode;
+	desc.AddressV = addressMode;
+	desc.AddressW = addressMode;
+
+	desc.MaxAnisotropy = (_view->GetDevice()->GetFeatureLevel() > D3D_FEATURE_LEVEL_9_1) ? 16 : 2;
+
+	desc.MaxLOD = FLT_MAX;
+	desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+
+	return _view->GetDevice()->CreateSamplerState(&desc, pResult);
+}
+
 void DXResourceManager::clear()
 {
 	clearBuffer();
@@ -688,6 +801,7 @@ void DXResourceManager::clear()
 	clearDepthStencilState();
 	clearDepthStencilView();
 	clearRenderTargetView();
+	clearTexSamplerState();
 }
 
 #endif

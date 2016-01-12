@@ -54,9 +54,8 @@ void CCLuaLog(const char *pszMsg)
     memset(widebuff, 0, sizeof(WCHAR) * (bufflen + 1));
     MultiByteToWideChar(CP_UTF8, 0, pszMsg, -1, widebuff, bufflen);
 
-
-    OutputDebugStringW(widebuff);
-    //OutputDebugStringA("\n");
+	CCLOG("%s", widebuff);
+	CCLOG("%s", "\n");
 
 	bufflen = WideCharToMultiByte(CP_ACP, 0, widebuff, -1, NULL, 0, NULL, NULL);
 	char* buff = new char[bufflen + 1];

@@ -625,6 +625,7 @@ void ProgressTimer::onDraw(const Mat4 &transform, uint32_t flags)
 	if (!_bufferIndex)
 		updateProgress();
 
+	DXStateCache::getInstance().setTexSamplerLinearClamp(0);
 	DXStateCache::getInstance().setPSTexture(0, _sprite->getTexture()->getView());
 	DXStateCache::getInstance().setBlend(_sprite->getBlendFunc().src, _sprite->getBlendFunc().dst);
 
