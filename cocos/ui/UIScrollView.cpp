@@ -117,7 +117,7 @@ bool ScrollView::init()
 {
     if (Layout::init())
     {
-        //setClippingEnabled(true);
+        setClippingEnabled(true);
         _innerContainer->setTouchEnabled(false);
         if(_scrollBarEnabled)
         {
