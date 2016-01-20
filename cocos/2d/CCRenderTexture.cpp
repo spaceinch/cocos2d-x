@@ -342,7 +342,9 @@ bool RenderTexture::initWithWidthAndHeight(int w, int h, Texture2D::PixelFormat 
         setSprite(Sprite::createWithTexture(_texture));
 
         _texture->release();
+#ifndef DIRECTX_ENABLED
         _sprite->setFlippedY(true);
+#endif
 
         _sprite->setBlendFunc( BlendFunc::ALPHA_PREMULTIPLIED );
 
@@ -733,7 +735,8 @@ void RenderTexture::onBegin()
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture->getName(), 0);
     }
 #else
-	GLViewImpl::sharedOpenGLView()->GetContext()->OMSetRenderTargets(1, &_renderTargetViewMap, _depthStencilView);
+	DXStateCache::getInstance().setRenderTarget(&_renderTargetViewMap, _depthStencilView);
+	DXStateCache::getInstance().setAlphaBlend(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 #endif
 }
 
@@ -745,7 +748,8 @@ void RenderTexture::onEnd()
 	glBindFramebuffer(GL_FRAMEBUFFER, _oldFBO);
 #else
 	GLViewImpl *view = GLViewImpl::sharedOpenGLView();
-	view->GetContext()->OMSetRenderTargets(1, view->GetRenderTargetView(), view->GetDepthStencilView());
+	DXStateCache::getInstance().setRenderTarget(view->GetRenderTargetView(), view->GetDepthStencilView());
+	DXStateCache::getInstance().setAlphaBlend(GL_ZERO, GL_ONE);
 #endif
 
     // restore viewport
