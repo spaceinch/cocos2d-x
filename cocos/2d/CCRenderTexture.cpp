@@ -736,7 +736,6 @@ void RenderTexture::onBegin()
     }
 #else
 	DXStateCache::getInstance().setRenderTarget(&_renderTargetViewMap, _depthStencilView);
-	DXStateCache::getInstance().setAlphaBlend(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 #endif
 }
 
@@ -749,7 +748,6 @@ void RenderTexture::onEnd()
 #else
 	GLViewImpl *view = GLViewImpl::sharedOpenGLView();
 	DXStateCache::getInstance().setRenderTarget(view->GetRenderTargetView(), view->GetDepthStencilView());
-	DXStateCache::getInstance().setAlphaBlend(GL_ZERO, GL_ONE);
 #endif
 
     // restore viewport

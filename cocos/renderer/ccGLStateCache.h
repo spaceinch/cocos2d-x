@@ -225,7 +225,6 @@ public:
 	void setTexSamplerAnisotropicWrap(int index);
 	void setTexSamplerAnisotropicClamp(int index);
 
-	void setAlphaBlend(GLint srcAlpha, GLint dstAlpha);
 	void setBlend(GLint src, GLint dst);
 
 	void setViewport(float x, float y, float w, float h);
@@ -303,7 +302,6 @@ private:
 
 	CD3D11_BLEND_DESC _blendDesc;
 	ID3D11BlendState* _blendState;
-	D3D11_BLEND _srcAlphaBlend, _dstAlphaBlend;
 
 	CD3D11_DEPTH_STENCIL_DESC _depthStencilDesc;
 	UINT _depthStencilRef;

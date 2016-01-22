@@ -290,9 +290,6 @@ DXStateCache::DXStateCache()
 	_linearClamp = nullptr;
 	_anisotropicWrap = nullptr;
 	_anisotropicClamp = nullptr;
-	// Alpha blend factors
-	_srcAlphaBlend = D3D11_BLEND_ZERO;
-	_dstAlphaBlend = D3D11_BLEND_ONE;
 
 	_clearColor[0] = 0;
 	_clearColor[1] = 0;
@@ -452,21 +449,12 @@ void DXStateCache::setPSTextureSampler(int index, ID3D11SamplerState*const* texS
 	}
 }
 
-// FIX: It should exists an inmediate version of setAlphaBlend function which creates a new blend state? 
-// Reason would be that setBlend might be not call every drawcall so new sets of alpha blend might miss them
-void DXStateCache::setAlphaBlend(GLint GLsrcAlpha, GLint GLdstAlpha)
-{
-	_srcAlphaBlend = GetDXBlend(GLsrcAlpha);
-	_dstAlphaBlend = GetDXBlend(GLdstAlpha);
-}
-
 void DXStateCache::setBlend(GLint GLsrc, GLint GLdst)
 {
 	D3D11_BLEND src = GetDXBlend(GLsrc);
 	D3D11_BLEND dst = GetDXBlend(GLdst);
 
-	bool change = src != _blendDesc.RenderTarget[0].SrcBlend || dst != _blendDesc.RenderTarget[0].DestBlend || 
-		_srcAlphaBlend != _blendDesc.RenderTarget[0].SrcBlendAlpha || _dstAlphaBlend != _blendDesc.RenderTarget[0].DestBlendAlpha;
+	bool change = src != _blendDesc.RenderTarget[0].SrcBlend || dst != _blendDesc.RenderTarget[0].DestBlend;
 	if (change || _blendState == nullptr)
 	{
 		DXResourceManager::getInstance().remove(&_blendState);
@@ -475,8 +463,8 @@ void DXStateCache::setBlend(GLint GLsrc, GLint GLdst)
 		_blendDesc.RenderTarget[0].BlendEnable = true;
 		_blendDesc.RenderTarget[0].SrcBlend = src;
 		_blendDesc.RenderTarget[0].DestBlend = dst;
-		_blendDesc.RenderTarget[0].SrcBlendAlpha = _srcAlphaBlend;
-		_blendDesc.RenderTarget[0].DestBlendAlpha = _dstAlphaBlend;
+		_blendDesc.RenderTarget[0].SrcBlendAlpha = src;
+		_blendDesc.RenderTarget[0].DestBlendAlpha = dst;
 		DX::ThrowIfFailed(_view->GetDevice()->CreateBlendState(&_blendDesc, &_blendState));
 
 		_view->GetContext()->OMSetBlendState(_blendState, nullptr, 0xffffffff);
