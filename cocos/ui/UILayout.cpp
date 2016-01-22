@@ -735,14 +735,10 @@ const Rect& Layout::getClippingRect()
 			// worldPos var already comes with real position (without anchor offset)
 			_clippingRect.origin.x = worldPos.x;
 			_clippingRect.origin.y = worldPos.y;
-#endif
+#endif // DIRECTX_ENABLED
             _clippingRect.size.width = scissorWidth;
             _clippingRect.size.height = scissorHeight;
         }
-#if DIRECTX_ENABLED
-		// Flip 'y' axe to match DX coords system
-		_clippingRect.origin.y = Director::getInstance()->getWinSize().height - (_clippingRect.origin.y + _clippingRect.size.height);
-#endif // DIRECTX_ENABLED
         _clippingRectDirty = false;
     }
     return _clippingRect;
