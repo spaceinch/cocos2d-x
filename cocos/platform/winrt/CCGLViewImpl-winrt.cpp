@@ -487,24 +487,10 @@ void GLViewImpl::setViewPortInPoints(float x , float y , float w , float h)
 void GLViewImpl::setScissorInPoints(float x , float y , float w , float h)
 {
 #ifdef DIRECTX_ENABLED
-
-	if (DXStateCache::getInstance().isRenderingToTexture())
-	{
-		Rect viewport = DXStateCache::getInstance().getViewport();
-		float scaleX = (viewport.size.width / _designResolutionSize.width);
-		float scaleY = (viewport.size.height / _designResolutionSize.height);
-		DXStateCache::getInstance().setScissor((GLint)(x),
-											   (GLint)(Director::getInstance()->getWinSize().height - (scaleY * h) - y),
-											   (GLsizei)(w * scaleX),
-											   (GLsizei)(h * scaleY));
-	}
-	else
-	{
 		DXStateCache::getInstance().setScissor((GLint)  (x * _scaleX + _viewPortRect.origin.x),
-											   (GLint)  ((_designResolutionSize.height - y - h) * _scaleY + _viewPortRect.origin.y),
+											   (GLint)  ((_designResolutionSize.height - (y + h)) * _scaleY + _viewPortRect.origin.y),
 											   (GLsizei)(w * _scaleX),
 											   (GLsizei)(h * _scaleY));
-	}
 #else
     glScissor((GLint) (x * _scaleX + _viewPortRect.origin.x),
         (GLint) (y * _scaleY + _viewPortRect.origin.y),
