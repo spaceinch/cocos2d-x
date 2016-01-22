@@ -238,7 +238,6 @@ public:
 	void setScissorScaling(float scaling);
 
 	void setRenderTarget(ID3D11RenderTargetView*const* renderTargetViewMap, ID3D11DepthStencilView* depthStencilView);
-	bool isRenderingToTexture() const { return _isRenderingToTexture; }
 
 	void setRasterizer();
 
@@ -313,8 +312,6 @@ private:
 	FLOAT _clearColor[4];
 	FLOAT _clearDepth;
 	UINT8 _clearStencil;
-
-	bool _isRenderingToTexture;
 };
 
 class CC_DLL DXResourceManager

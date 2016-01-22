@@ -497,45 +497,25 @@ void GLViewImpl::setViewPortInPoints(float x , float y , float w , float h)
 void GLViewImpl::setScissorInPoints(float x , float y , float w , float h)
 {
 #ifdef DIRECTX_ENABLED
-	Rect viewport = DXStateCache::getInstance().getViewport();
-	float scaleX = (viewport.size.width / _designResolutionSize.width);
-	float scaleY = (viewport.size.height / _designResolutionSize.height);
-
 	switch (m_orientation)
 	{
 	case DisplayOrientations::Landscape:
 	case DisplayOrientations::LandscapeFlipped:
-		if (DXStateCache::getInstance().isRenderingToTexture())
-		{
-			DXStateCache::getInstance().setScissor((GLint)(y * scaleY + viewport.origin.y),
-				(GLint)((Director::getInstance()->getWinSize().width - ((x + w) * scaleX)) + viewport.origin.x),
-				(GLsizei)(h * scaleY),
-				(GLsizei)(w * scaleX));
-		}
-		else
-		{
-			DXStateCache::getInstance().setScissor((GLint)(y * _scaleX + _viewPortRect.origin.y),
-				(GLint)((_viewPortRect.size.width - ((x + w) * _scaleX)) + _viewPortRect.origin.x),
-				(GLsizei)(h * _scaleY),
-				(GLsizei)(w * _scaleX));
-			break;
-		}
-
-	default:
-		if (DXStateCache::getInstance().isRenderingToTexture())
-		{
-			DXStateCache::getInstance().setScissor((GLint)((x * scaleX) + viewport.origin.x),
-				(GLint)((Director::getInstance()->getWinSize().height - y - h) * scaleY + viewport.origin.y),
-				(GLsizei)(w * scaleX),
-				(GLsizei)(h * scaleY));
-		}
-		else
-		{
-			DXStateCache::getInstance().setScissor((GLint)(x * _scaleX + _viewPortRect.origin.x),
-				(GLint)((_designResolutionSize.height - y - h) * _scaleY + _viewPortRect.origin.y),
-				(GLsizei)(w * _scaleX),
-				(GLsizei)(h * _scaleY));
-		}
+	{
+		DXStateCache::getInstance().setScissor((GLint)(y * _scaleX + _viewPortRect.origin.y),
+			(GLint)((_designResolutionSize.width - ((x + w) * _scaleX)) + _viewPortRect.origin.x),
+			(GLsizei)(h * _scaleY),
+			(GLsizei)(w * _scaleX));
+		break;
+	}
+	default: // Portrait
+	{
+		DXStateCache::getInstance().setScissor((GLint)(x * _scaleX + _viewPortRect.origin.x),
+			(GLint)((_designResolutionSize.height - (y + h)) * _scaleY + _viewPortRect.origin.y),
+			(GLsizei)(w * _scaleX),
+			(GLsizei)(h * _scaleY));
+		break;
+	}
 	}
 #else
 	switch (m_orientation)

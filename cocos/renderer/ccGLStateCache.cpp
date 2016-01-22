@@ -303,8 +303,6 @@ DXStateCache::DXStateCache()
 
 	_scissorScaling = 1.0f;
 
-	_isRenderingToTexture = false;
-
 	invalidateStateCache();
 }
 
@@ -535,9 +533,19 @@ void DXStateCache::setRenderTarget(ID3D11RenderTargetView*const* renderTargetVie
 {
 	GLViewImpl* view = GLViewImpl::sharedOpenGLView();
 
-	_isRenderingToTexture = renderTargetViewMap != view->GetRenderTargetView(); // different than back buffer?
+	Microsoft::WRL::ComPtr<ID3D11Resource> rtViewRes;
+	(*renderTargetViewMap)->GetResource(&rtViewRes);
 
-	view->GetContext()->OMSetRenderTargets(1, renderTargetViewMap, depthStencilView);
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
+	DX::ThrowIfFailed(
+		rtViewRes.As(&backBuffer)
+	);
+
+	D3D11_TEXTURE2D_DESC backBufferDesc;
+	backBuffer->GetDesc(&backBufferDesc);
+	
+	setScissorScaling(static_cast<float>(backBufferDesc.Width) / Director::getInstance()->getOpenGLView()->getFrameSize().width); // Set scissor scaling
+	view->GetContext()->OMSetRenderTargets(1, renderTargetViewMap, depthStencilView); // Set rt
 }
 
 void DXStateCache::clear()
