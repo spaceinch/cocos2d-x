@@ -1,10 +1,6 @@
 Texture2D g_Texture0;
+Texture2D g_mask : register(t1);
 SamplerState g_Sampler0: register(s0);
-
-cbuffer ConstantBuffer : register(b0)
-{
-	Texture2D u_mask;
-};
 
 struct PixelShaderInput
 {
@@ -17,7 +13,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
 {
 	float4 tex = g_Texture0(g_Sampler0, input.texUV);
 
-	float maskAlpha = u_mask(g_Sampler0, input.texUV).a;
+	float maskAlpha = g_mask(g_Sampler0, input.texUV).a;
 	float texAlpha = tex.a;
 	float blendAlpha = maskAlpha * texAlpha; // Show only where mask is not visible
 
