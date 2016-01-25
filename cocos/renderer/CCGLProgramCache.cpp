@@ -36,8 +36,10 @@ THE SOFTWARE.
 NS_CC_BEGIN
 
 enum {
-    kShaderType_PositionTextureColor,
-    kShaderType_PositionTextureColor_noMVP,
+	kShaderType_PositionTextureColor,
+	kShaderType_PositionTextureColor_noMVP,
+	kShaderType_PositionTextureColorMask_noMVP,
+	kShaderType_PositionTextureColorInvertedTint_noMVP,
     kShaderType_PositionTextureColorAlphaTest,
     kShaderType_PositionTextureColorAlphaTestNoMV,
     kShaderType_PositionColor,
@@ -380,6 +382,12 @@ void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
         case kShaderType_PositionTextureColorAlphaTestNoMV:
 			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTextureColorAlphaTest_frag);
             break;
+		case kShaderType_PositionTextureColorMask_noMVP:
+			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTextureColorMask_frag);
+			break;
+		case kShaderType_PositionTextureColorInvertedTint_noMVP:
+			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTextureColorInvertedTint_frag);
+			break;
         case kShaderType_PositionColor:  
 			p->INIT_SHADERS(ccPositionColor_vert, ccPositionColor_frag);
             break;
