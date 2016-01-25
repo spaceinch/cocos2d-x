@@ -130,6 +130,18 @@ void GLProgramCache::loadDefaultGLPrograms()
     loadDefaultGLProgram(p, kShaderType_PositionTextureColor_noMVP);
     _programs.insert( std::make_pair( GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, p ) );
 
+#ifdef DIRECTX_ENABLED
+	// Position Texture Color use a texture alpha as mask without MVP shader
+	p = new (std::nothrow) GLProgram();
+	loadDefaultGLProgram(p, kShaderType_PositionTextureColorMask_noMVP);
+	_programs.insert( std::make_pair( GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_MASK_NO_MVP, p ) );
+
+	// // Position Texture Color tint with inverted color without MVP shader
+	p = new (std::nothrow) GLProgram();
+	loadDefaultGLProgram(p, kShaderType_PositionTextureColorInvertedTint_noMVP);
+	_programs.insert(std::make_pair(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_INVERTEDTINT_NO_MVP, p));
+#endif
+
     // Position Texture Color alpha test
     p = new (std::nothrow) GLProgram();
     loadDefaultGLProgram(p, kShaderType_PositionTextureColorAlphaTest);
