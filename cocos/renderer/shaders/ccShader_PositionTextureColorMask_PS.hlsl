@@ -11,9 +11,9 @@ struct PixelShaderInput
 
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-	float4 tex = g_Texture0(g_Sampler0, input.texUV);
+	float4 tex = g_Texture0.Sample(g_Sampler0, input.texUV);
 
-	float maskAlpha = g_mask(g_Sampler0, input.texUV).a;
+	float maskAlpha = g_mask.Sample(g_Sampler0, input.texUV).a;
 	float texAlpha = tex.a;
 	float blendAlpha = maskAlpha * texAlpha; // Show only where mask is not visible
 
