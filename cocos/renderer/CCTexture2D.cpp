@@ -578,8 +578,6 @@ bool Texture2D::initWithData(const void *data, ssize_t dataLen, Texture2D::Pixel
 
 bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat pixelFormat, int pixelsWide, int pixelsHigh)
 {
-
-
     //the pixelFormat must be a certain value 
     CCASSERT(pixelFormat != PixelFormat::NONE && pixelFormat != PixelFormat::AUTO, "the \"pixelFormat\" param must be a certain value!");
     CCASSERT(pixelsWide>0 && pixelsHigh>0, "Invalid size");
@@ -597,12 +595,14 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
         return false;
     }
 
+	Configuration* cfg = Configuration::getInstance();
+
     const PixelFormatInfo& info = _pixelFormatInfoTables.at(pixelFormat);
 
-    if (info.compressed && !Configuration::getInstance()->supportsPVRTC()
-                        && !Configuration::getInstance()->supportsETC()
-                        && !Configuration::getInstance()->supportsS3TC()
-                        && !Configuration::getInstance()->supportsATITC())
+    if (info.compressed && !cfg->supportsPVRTC()
+                        && !cfg->supportsETC()
+                        && !cfg->supportsS3TC()
+                        && !cfg->supportsATITC())
     {
         CCLOG("cocos2d: WARNING: PVRTC/ETC images are not supported");
         return false;
@@ -611,7 +611,6 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
 #ifdef DIRECTX_ENABLED
 	DXResourceManager::getInstance().remove(&_texture);
 	DXResourceManager::getInstance().remove(&_textureView);
-
 
 	GLViewImpl *view = GLViewImpl::sharedOpenGLView();
 
@@ -633,10 +632,18 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
 	}
 	else if (pixelFormat == PixelFormat::AI88)
 	{
-		// A8I8 texture format doesn't work in some devices (WP8.1 Direct3D_9.3 Adreno_225)
-		// It's capital the pixel shader take in account It will receive 1 component of 16 bits in texture sample
-		// Channel can be splitted in 2 bytes and get 2 component values of 8 bits
-		format = DXGI_FORMAT_R16_UNORM;
+		if (cfg->supportsR8G8())
+		{
+			format = DXGI_FORMAT_R8G8_UNORM;
+		}
+		else
+		{
+			// Fallback
+			// A8I8 texture format doesn't work in some devices (WP8.1 Direct3D_9.3 Adreno_225)
+			// It's capital the pixel shader take in account It will receive 1 component of 16 bits in texture sample
+			// Channel can be splitted in 2 bytes and get 2 component values of 8 bits
+			format = DXGI_FORMAT_R16_UNORM;
+		}
 	}
 	else if (pixelFormat == PixelFormat::S3TC_DXT1)
 	{

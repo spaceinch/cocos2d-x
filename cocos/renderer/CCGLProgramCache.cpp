@@ -446,7 +446,14 @@ void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
 			p->INIT_SHADERS(ccLabel_vert, ccLabelNormal_frag);
             break;
         case kShaderType_LabelOutline:
-			p->INIT_SHADERS(ccLabel_vert, ccLabelOutline_frag);
+			if (Configuration::getInstance()->supportsR8G8())
+			{
+				p->INIT_SHADERS(ccLabel_vert, ccLabelOutlineR8G8_frag);
+			}
+			else
+			{
+				p->INIT_SHADERS(ccLabel_vert, ccLabelOutlineR16_frag);
+			}
             break;
         case kShaderType_3DPosition:
 			p->INIT_SHADERS(cc3D_PositionTex_vert, cc3D_Color_frag);

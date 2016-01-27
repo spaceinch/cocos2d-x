@@ -3831,9 +3831,6 @@
     <FxCompile Include="..\renderer\shaders\ccShader_Label_normal_PS.hlsl">
       <Filter>renderer\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\renderer\shaders\ccShader_Label_outline_PS.hlsl">
-      <Filter>renderer\shaders</Filter>
-    </FxCompile>
     <FxCompile Include="..\renderer\shaders\ccShader_Label_VS.hlsl">
       <Filter>renderer\shaders</Filter>
     </FxCompile>
@@ -3898,6 +3895,12 @@
       <Filter>renderer\shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\renderer\shaders\ccShader_PositionTextureColorInvertedTint_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_Label_outline_R8G8_PS.hlsl">
+      <Filter>renderer\shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\renderer\shaders\ccShader_Label_outline_R16_PS.hlsl">
       <Filter>renderer\shaders</Filter>
     </FxCompile>
   </ItemGroup>

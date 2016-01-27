@@ -100,9 +100,14 @@ const ShaderDescriptor ccLabelDistanceFieldGlow_frag = ShaderDescriptor("Label_d
 
 const ShaderDescriptor ccLabelNormal_frag = ShaderDescriptor("Label_normal")
 .Const("u_textColor", sizeof(float)* 4, GL_FLOAT_VEC4);
-const ShaderDescriptor ccLabelOutline_frag = ShaderDescriptor("Label_outline")
+// Label outline with R16 texture format
+const ShaderDescriptor ccLabelOutlineR16_frag = ShaderDescriptor("Label_outline_R16")
 .Const("u_effectColor", sizeof(float)* 4, GL_FLOAT_VEC4)
 .Const("u_textColor", sizeof(float)* 4, GL_FLOAT_VEC4);
+// Label outline with R8G8 texture format
+const ShaderDescriptor ccLabelOutlineR8G8_frag = ShaderDescriptor("Label_outline_R8G8")
+.Const("u_effectColor", sizeof(float) * 4, GL_FLOAT_VEC4)
+.Const("u_textColor", sizeof(float) * 4, GL_FLOAT_VEC4);
 
 const ShaderDescriptor ccLabel_vert = ShaderDescriptor("Label")
 .Input("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0)

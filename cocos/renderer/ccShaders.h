@@ -75,7 +75,8 @@ extern CC_DLL const ShaderDescriptor ccPositionColorLengthTexture_vert;
 extern CC_DLL const ShaderDescriptor ccLabelDistanceFieldNormal_frag;
 extern CC_DLL const ShaderDescriptor ccLabelDistanceFieldGlow_frag;
 extern CC_DLL const ShaderDescriptor ccLabelNormal_frag;
-extern CC_DLL const ShaderDescriptor ccLabelOutline_frag;
+extern CC_DLL const ShaderDescriptor ccLabelOutlineR16_frag;
+extern CC_DLL const ShaderDescriptor ccLabelOutlineR8G8_frag;
 
 extern CC_DLL const ShaderDescriptor ccLabel_vert;
 
