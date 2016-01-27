@@ -236,6 +236,7 @@ void GLViewImpl::BackButtonListener(EventKeyboard::KeyCode keyCode, Event* event
 		CCLOG("*********************************************************************");
 
 		Director::getInstance()->end();
+    exit(0);
     }
 }
 
