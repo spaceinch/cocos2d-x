@@ -36,8 +36,10 @@ THE SOFTWARE.
 NS_CC_BEGIN
 
 enum {
-    kShaderType_PositionTextureColor,
-    kShaderType_PositionTextureColor_noMVP,
+	kShaderType_PositionTextureColor,
+	kShaderType_PositionTextureColor_noMVP,
+	kShaderType_PositionTextureColorMask_noMVP,
+	kShaderType_PositionTextureColorInvertedTint_noMVP,
     kShaderType_PositionTextureColorAlphaTest,
     kShaderType_PositionTextureColorAlphaTestNoMV,
     kShaderType_PositionColor,
@@ -127,6 +129,18 @@ void GLProgramCache::loadDefaultGLPrograms()
     p = new (std::nothrow) GLProgram();
     loadDefaultGLProgram(p, kShaderType_PositionTextureColor_noMVP);
     _programs.insert( std::make_pair( GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, p ) );
+
+#ifdef DIRECTX_ENABLED
+	// Position Texture Color use a texture alpha as mask without MVP shader
+	p = new (std::nothrow) GLProgram();
+	loadDefaultGLProgram(p, kShaderType_PositionTextureColorMask_noMVP);
+	_programs.insert( std::make_pair( GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_MASK_NO_MVP, p ) );
+
+	// // Position Texture Color tint with inverted color without MVP shader
+	p = new (std::nothrow) GLProgram();
+	loadDefaultGLProgram(p, kShaderType_PositionTextureColorInvertedTint_noMVP);
+	_programs.insert(std::make_pair(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_INVERTEDTINT_NO_MVP, p));
+#endif
 
     // Position Texture Color alpha test
     p = new (std::nothrow) GLProgram();
@@ -380,6 +394,12 @@ void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
         case kShaderType_PositionTextureColorAlphaTestNoMV:
 			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTextureColorAlphaTest_frag);
             break;
+		case kShaderType_PositionTextureColorMask_noMVP:
+			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTextureColorMask_frag);
+			break;
+		case kShaderType_PositionTextureColorInvertedTint_noMVP:
+			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTextureColorInvertedTint_frag);
+			break;
         case kShaderType_PositionColor:  
 			p->INIT_SHADERS(ccPositionColor_vert, ccPositionColor_frag);
             break;
@@ -426,7 +446,14 @@ void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
 			p->INIT_SHADERS(ccLabel_vert, ccLabelNormal_frag);
             break;
         case kShaderType_LabelOutline:
-			p->INIT_SHADERS(ccLabel_vert, ccLabelOutline_frag);
+			if (Configuration::getInstance()->supportsR8G8())
+			{
+				p->INIT_SHADERS(ccLabel_vert, ccLabelOutlineR8G8_frag);
+			}
+			else
+			{
+				p->INIT_SHADERS(ccLabel_vert, ccLabelOutlineR16_frag);
+			}
             break;
         case kShaderType_3DPosition:
 			p->INIT_SHADERS(cc3D_PositionTex_vert, cc3D_Color_frag);

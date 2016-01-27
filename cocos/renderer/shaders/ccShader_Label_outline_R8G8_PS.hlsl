@@ -1,3 +1,7 @@
+// **************************************
+// Use: needs sample a texture with R8G8_UNORM format
+// **************************************
+
 Texture2D g_Texture0;
 SamplerState g_Sampler0 : register(s0);
 
@@ -20,20 +24,13 @@ struct PixelShaderInput
 float4 main(PixelShaderInput input) : SV_TARGET
 {
 	float4 sampledColor = g_Texture0.Sample(g_Sampler0, input.texUV);
+	float fontAlpha = sampledColor.g;
 
-	uint asDoubleByte = max(0.0, sampledColor.r * 65536.0); // Multiply by 2^32 for transform components values in 255 range ones
-	uint highValue = asDoubleByte / 256.0; // Divide by 2^8 for shift 8 bits to the right and get component in second byte
-	uint lowValue = (asDoubleByte * 16777216.0) / 16777216.0; // 2 ^ (8 * 3) Shift 3 bytes to the left then same to the right for isolate and get component in first position
+	float outlineAlpha = sampledColor.r;
+	if (outlineAlpha <= 0.0)
+		discard;
 
-	float outlineAlpha = lowValue;
-	outlineAlpha /= 255.0;
-	 
-	float fontAlpha = highValue;
-	fontAlpha /= 255.0;
-
-	clip(fontAlpha + outlineAlpha);
-	 
 	float4 color = u_textColor * fontAlpha + u_effectColor * (1.0 - fontAlpha);
-	 
+
 	return input.color * float4(color.rgb, max(fontAlpha, outlineAlpha) * color.a);
 }
