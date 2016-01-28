@@ -92,12 +92,20 @@ namespace {
         PixelFormatInfoMapValue(Texture2D::PixelFormat::S3TC_DXT1, Texture2D::PixelFormatInfo(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 0xFFFFFFFF, 0xFFFFFFFF, 4, true, false)),
 #endif
         
-#ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
-        PixelFormatInfoMapValue(Texture2D::PixelFormat::S3TC_DXT3, Texture2D::PixelFormatInfo(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0xFFFFFFFF, 0xFFFFFFFF, 8, true, false)),
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT2_EXT
+		PixelFormatInfoMapValue(Texture2D::PixelFormat::S3TC_DXT2, Texture2D::PixelFormatInfo(GL_COMPRESSED_RGBA_S3TC_DXT2_EXT, 0xFFFFFFFF, 0xFFFFFFFF, 8, true, true)),
 #endif
-        
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+        PixelFormatInfoMapValue(Texture2D::PixelFormat::S3TC_DXT3, Texture2D::PixelFormatInfo(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0xFFFFFFFF, 0xFFFFFFFF, 8, true, true)),
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT4_EXT
+		PixelFormatInfoMapValue(Texture2D::PixelFormat::S3TC_DXT4, Texture2D::PixelFormatInfo(GL_COMPRESSED_RGBA_S3TC_DXT4_EXT, 0xFFFFFFFF, 0xFFFFFFFF, 8, true, true)),
+#endif
+
 #ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-        PixelFormatInfoMapValue(Texture2D::PixelFormat::S3TC_DXT5, Texture2D::PixelFormatInfo(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0xFFFFFFFF, 0xFFFFFFFF, 8, true, false)),
+        PixelFormatInfoMapValue(Texture2D::PixelFormat::S3TC_DXT5, Texture2D::PixelFormatInfo(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0xFFFFFFFF, 0xFFFFFFFF, 8, true, true)),
 #endif
         
 #ifdef GL_ATC_RGB_AMD
@@ -649,11 +657,11 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
 	{
 		format = DXGI_FORMAT_BC1_UNORM;
 	}
-	else if (pixelFormat == PixelFormat::S3TC_DXT3)
+	else if (pixelFormat == PixelFormat::S3TC_DXT3 || pixelFormat == PixelFormat::S3TC_DXT2)
 	{
 		format = DXGI_FORMAT_BC2_UNORM;
 	}
-	else if (pixelFormat == PixelFormat::S3TC_DXT5)
+	else if (pixelFormat == PixelFormat::S3TC_DXT5 || pixelFormat == PixelFormat::S3TC_DXT4)
 	{
 		format = DXGI_FORMAT_BC3_UNORM;
 	}
@@ -669,7 +677,9 @@ bool Texture2D::initWithMipmaps(MipmapInfo* mipmaps, int mipmapsNum, PixelFormat
 
 	bool isDDSCompressed =
 		   (pixelFormat == PixelFormat::S3TC_DXT1)
+		|| (pixelFormat == PixelFormat::S3TC_DXT2)
 	    || (pixelFormat == PixelFormat::S3TC_DXT3)
+		|| (pixelFormat == PixelFormat::S3TC_DXT4)
 	    || (pixelFormat == PixelFormat::S3TC_DXT5);
 	
 	if (isDDSCompressed)
@@ -919,6 +929,9 @@ bool Texture2D::initWithImage(Image *image, PixelFormat format)
         }
 
         initWithMipmaps(image->getMipmaps(), image->getNumberOfMipmaps(), image->getRenderFormat(), imageWidth, imageHeight);
+
+		// set the premultiplied tag
+		_hasPremultipliedAlpha = image->hasPremultipliedAlpha();
         
         return true;
     }
@@ -930,6 +943,10 @@ bool Texture2D::initWithImage(Image *image, PixelFormat format)
         }
 
         initWithData(tempData, tempDataLen, image->getRenderFormat(), imageWidth, imageHeight, imageSize);
+		
+		// set the premultiplied tag
+		_hasPremultipliedAlpha = image->hasPremultipliedAlpha();
+
         return true;
     }
     else
