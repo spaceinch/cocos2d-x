@@ -1630,7 +1630,7 @@ void Label::updateColor()
     Color4B color4( _displayedColor.r, _displayedColor.g, _displayedColor.b, _displayedOpacity );
 
     // special opacity for premultiplied textures
-    //if (_isOpacityModifyRGB)
+    if (_isOpacityModifyRGB)
     {
         color4.r *= _displayedOpacity/255.0f;
         color4.g *= _displayedOpacity/255.0f;
