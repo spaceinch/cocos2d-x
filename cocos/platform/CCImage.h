@@ -174,7 +174,7 @@ protected:
     bool saveImageToPNG(const std::string& filePath, bool isToRGB = true);
     bool saveImageToJPG(const std::string& filePath);
     
-    void premultipliedAlpha();
+    void premultipliedAlpha(unsigned char* data, int w, int h);
     
 protected:
     /**

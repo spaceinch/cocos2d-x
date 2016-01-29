@@ -465,7 +465,7 @@ Image::Image()
 , _fileType(Format::UNKNOWN)
 , _renderFormat(Texture2D::PixelFormat::NONE)
 , _numberOfMipmaps(0)
-, _hasPremultipliedAlpha(true)
+, _hasPremultipliedAlpha(false)
 {
 
 }
@@ -871,7 +871,7 @@ bool Image::decodeWithWIC(const unsigned char *data, ssize_t dataLen)
         bRet = (img.getImageData(_data, _dataLen) > 0);
 
         if (_renderFormat == Texture2D::PixelFormat::RGBA8888) {
-            premultipliedAlpha();
+            premultipliedAlpha(_data, _width, _height);
         }
     }
 
@@ -1148,7 +1148,7 @@ bool Image::initWithPngData(const unsigned char * data, ssize_t dataLen)
         // premultiplied alpha for RGBA8888
         if (color_type == PNG_COLOR_TYPE_RGB_ALPHA)
         {
-            premultipliedAlpha();
+            premultipliedAlpha(_data, _width, _height);
         }
         else
         {
@@ -1868,7 +1868,9 @@ bool Image::initWithS3TCData(const unsigned char * data, ssize_t dataLen)
 {
     
     const uint32_t FOURCC_DXT1 = makeFourCC('D', 'X', 'T', '1');
+	const uint32_t FOURCC_DXT2 = makeFourCC('D', 'X', 'T', '2');
     const uint32_t FOURCC_DXT3 = makeFourCC('D', 'X', 'T', '3');
+	const uint32_t FOURCC_DXT4 = makeFourCC('D', 'X', 'T', '4');
     const uint32_t FOURCC_DXT5 = makeFourCC('D', 'X', 'T', '5');
     
     /* load the .dds file */
@@ -1926,6 +1928,7 @@ bool Image::initWithS3TCData(const unsigned char * data, ssize_t dataLen)
         if (FOURCC_DXT1 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC)
         {
             _renderFormat = Texture2D::PixelFormat::S3TC_DXT1;
+			_hasPremultipliedAlpha = true;
         }
         else if (FOURCC_DXT3 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC)
         {
@@ -1935,6 +1938,18 @@ bool Image::initWithS3TCData(const unsigned char * data, ssize_t dataLen)
         {
             _renderFormat = Texture2D::PixelFormat::S3TC_DXT5;
         }
+#ifdef DIRECTX_ENABLED
+		else if (FOURCC_DXT2 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC)
+		{
+			_renderFormat = Texture2D::PixelFormat::S3TC_DXT2;
+			_hasPremultipliedAlpha = true;
+		}
+		else if (FOURCC_DXT4 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC)
+		{
+			_renderFormat = Texture2D::PixelFormat::S3TC_DXT4;
+			_hasPremultipliedAlpha = true;
+		}
+#endif
     } else { //will software decode
         _renderFormat = Texture2D::PixelFormat::RGBA8888;
     }
@@ -1970,15 +1985,21 @@ bool Image::initWithS3TCData(const unsigned char * data, ssize_t dataLen)
             {
                 s3tc_decode(pixelData + encodeOffset, &decodeImageData[0], width, height, S3TCDecodeFlag::DXT1);
             }
-            else if (FOURCC_DXT3 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC)
+            else if (FOURCC_DXT3 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC || FOURCC_DXT2 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC)
             {
                 s3tc_decode(pixelData + encodeOffset, &decodeImageData[0], width, height, S3TCDecodeFlag::DXT3);
             }
-            else if (FOURCC_DXT5 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC)
+            else if (FOURCC_DXT5 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC || FOURCC_DXT4 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC)
             {
                 s3tc_decode(pixelData + encodeOffset, &decodeImageData[0], width, height, S3TCDecodeFlag::DXT5);
             }
             
+			if (_renderFormat == Texture2D::PixelFormat::RGBA8888 && 
+				(FOURCC_DXT3 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC || FOURCC_DXT5 == header->ddsd.DUMMYUNIONNAMEN4.ddpfPixelFormat.fourCC))
+			{
+				premultipliedAlpha(&decodeImageData[0], width, height);
+			}
+
             _mipmaps[i].address = (unsigned char *)_data + decodeOffset;
             _mipmaps[i].len = (stride * height);
             memcpy((void *)_mipmaps[i].address, (void *)&decodeImageData[0], _mipmaps[i].len);
@@ -2478,14 +2499,14 @@ bool Image::saveImageToJPG(const std::string& filePath)
 #endif // CC_USE_JPEG
 }
 
-void Image::premultipliedAlpha()
+void Image::premultipliedAlpha(unsigned char* data, int w, int h)
 {
     CCASSERT(_renderFormat == Texture2D::PixelFormat::RGBA8888, "The pixel format should be RGBA8888!");
     
-    unsigned int* fourBytes = (unsigned int*)_data;
-    for(int i = 0; i < _width * _height; i++)
+    unsigned int* fourBytes = (unsigned int*)data;
+    for(int i = 0; i < w * h; i++)
     {
-        unsigned char* p = _data + i * 4;
+        unsigned char* p = data + i * 4;
         fourBytes[i] = CC_RGB_PREMULTIPLY_ALPHA(p[0], p[1], p[2], p[3]);
     }
     

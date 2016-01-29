@@ -40,6 +40,7 @@ enum {
 	kShaderType_PositionTextureColor_noMVP,
 	kShaderType_PositionTextureColorMask_noMVP,
 	kShaderType_PositionTextureColorInvertedTint_noMVP,
+	kShaderType_PositionTextureColorInvertedTint,
     kShaderType_PositionTextureColorAlphaTest,
     kShaderType_PositionTextureColorAlphaTestNoMV,
     kShaderType_PositionColor,
@@ -140,6 +141,11 @@ void GLProgramCache::loadDefaultGLPrograms()
 	p = new (std::nothrow) GLProgram();
 	loadDefaultGLProgram(p, kShaderType_PositionTextureColorInvertedTint_noMVP);
 	_programs.insert(std::make_pair(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_INVERTEDTINT_NO_MVP, p));
+
+	// // Position Texture Color tint with inverted color shader
+	p = new (std::nothrow) GLProgram();
+	loadDefaultGLProgram(p, kShaderType_PositionTextureColorInvertedTint);
+	_programs.insert(std::make_pair(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_INVERTEDTINT, p));
 #endif
 
     // Position Texture Color alpha test
@@ -399,6 +405,9 @@ void GLProgramCache::loadDefaultGLProgram(GLProgram *p, int type)
 			break;
 		case kShaderType_PositionTextureColorInvertedTint_noMVP:
 			p->INIT_SHADERS(ccPositionTextureColor_noMVP_vert, ccPositionTextureColorInvertedTint_frag);
+			break;
+		case kShaderType_PositionTextureColorInvertedTint:
+			p->INIT_SHADERS(ccPositionTextureColor_vert, ccPositionTextureColorInvertedTint_frag);
 			break;
         case kShaderType_PositionColor:  
 			p->INIT_SHADERS(ccPositionColor_vert, ccPositionColor_frag);
