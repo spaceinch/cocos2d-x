@@ -104,11 +104,17 @@ public:
         PVRTC2A,
         //! ETC-compressed texture: ETC
         ETC,
-        //! S3TC-compressed texture: S3TC_Dxt1
+        //! S3TC-compressed texture: S3TC_Dxt1 (BC1/1-bit Alpha/Opaque/Has alpha premultiplied)
         S3TC_DXT1,
-        //! S3TC-compressed texture: S3TC_Dxt3
+		//! S3TC-compressed texture: S3TC_Dxt2 (BC2/Sharp alpha/Has alpha premultiplied)
+		// Unsupported in OGL
+		S3TC_DXT2,
+        //! S3TC-compressed texture: S3TC_Dxt3 (BC2/Sharp alpha/Hasn't alpha premultiplied)
         S3TC_DXT3,
-        //! S3TC-compressed texture: S3TC_Dxt5
+		//! S3TC-compressed texture: S3TC_Dxt4 (BC3/Smooth alpha/Has alpha premultiplied)
+		// Unsupported in OGL
+		S3TC_DXT4,
+        //! S3TC-compressed texture: S3TC_Dxt5 (BC3/Smooth alpha/Hasn't alpha premultiplied)
         S3TC_DXT5,
         //! ATITC-compressed texture: ATC_RGB
         ATC_RGB,

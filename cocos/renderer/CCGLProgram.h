@@ -194,6 +194,8 @@ public:
 	static const char* SHADER_NAME_POSITION_TEXTURE_COLOR_MASK_NO_MVP;
 	/**Built in shader for 2d. Support Position, Texture and Color vertex attribute, but without multiply vertex by MVP matrix, tint with inverted color.*/
 	static const char* SHADER_NAME_POSITION_TEXTURE_COLOR_INVERTEDTINT_NO_MVP;
+	/**Built in shader for 2d. Support Position, Texture and Color vertex attribute, tint with inverted color.*/
+	static const char* SHADER_NAME_POSITION_TEXTURE_COLOR_INVERTEDTINT;
     /**Built in shader for 2d. Support Position, Texture vertex attribute, but include alpha test.*/
     static const char* SHADER_NAME_POSITION_TEXTURE_ALPHA_TEST;
     /**Built in shader for 2d. Support Position, Texture and Color vertex attribute, include alpha test and without multiply vertex by MVP matrix.*/
