@@ -235,8 +235,8 @@ void GLViewImpl::BackButtonListener(EventKeyboard::KeyCode keyCode, Event* event
 		CCLOG("You MUST call event->stopPropagation() if you don't want your app to quit!");
 		CCLOG("*********************************************************************");
 
-		Director::getInstance()->end();
-    exit(0);
+		//Director::getInstance()->end();
+    //exit(0);
     }
 }
 
