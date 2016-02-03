@@ -415,7 +415,21 @@ public:
     *In lua: local setBlendFunc(local src, local dst).
     *@endcode
     */
-    inline void setBlendFunc(const BlendFunc &blendFunc) override { _blendFunc = blendFunc; }
+    void setBlendFunc(const BlendFunc &blendFunc) override {
+      //workaround for avoid cocostudio files (.csb) to overwrite wrongly the "Premultiplied Alpha" parameter
+      if (blendFunc == BlendFunc::ALPHA_PREMULTIPLIED && _texture && !_texture->hasPremultipliedAlpha())
+      {
+        _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+      }
+      else if (blendFunc == BlendFunc::ALPHA_NON_PREMULTIPLIED && _texture && _texture->hasPremultipliedAlpha())
+      {
+        _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
+      }
+      else
+      {
+        _blendFunc = blendFunc;
+      }
+    }
     /**
     * @js  NA
     * @lua NA
