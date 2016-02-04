@@ -67,7 +67,7 @@ void SkeletonRenderer::initialize () {
 	_batch = PolygonBatch::createWithCapacity(2000); // Max number of vertices and triangles per batch.
 	_batch->retain();
 
-	_blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
+	setBlendFunc(BlendFunc::ALPHA_PREMULTIPLIED);
 	setOpacityModifyRGB(true);
 
 	setGLProgram(ShaderCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR));
@@ -79,7 +79,7 @@ void SkeletonRenderer::setSkeletonData (spSkeletonData *skeletonData, bool ownsS
 }
 
 SkeletonRenderer::SkeletonRenderer ()
-	: _atlas(0), _debugSlots(false), _debugBones(false), _timeScale(1) {
+	: _atlas(0), _debugSlots(false), _debugBones(false), _timeScale(1), _isBlendFuncDirty(true) {
 }
 
 SkeletonRenderer::SkeletonRenderer (spSkeletonData *skeletonData, bool ownsSkeletonData)
@@ -217,6 +217,19 @@ void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFl
 		default: ;
 		} 
 		if (texture) {
+			// Update blending state
+			setOpacityModifyRGB(texture->hasAlphaPremultiplied());
+			if (_isBlendFuncDirty) {
+				// Set proper alpha blending
+				_isBlendFuncDirty = false;
+				if (!_premultipliedAlpha && _blendFunc == BlendFunc::ALPHA_PREMULTIPLIED) {
+					_blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+				}
+				else if (_premultipliedAlpha && _blendFunc == BlendFunc::ALPHA_NON_PREMULTIPLIED) {
+					_blendFunc == BlendFunc::ALPHA_PREMULTIPLIED;
+				}
+			}
+
 			if (slot->data->blendMode != blendMode) {
 				_batch->flush();
 				blendMode = slot->data->blendMode;
@@ -436,6 +449,7 @@ const BlendFunc& SkeletonRenderer::getBlendFunc () const {
 
 void SkeletonRenderer::setBlendFunc (const BlendFunc &blendFunc) {
 	_blendFunc = blendFunc;
+	_isBlendFuncDirty = true;
 }
 
 void SkeletonRenderer::setOpacityModifyRGB (bool value) {
