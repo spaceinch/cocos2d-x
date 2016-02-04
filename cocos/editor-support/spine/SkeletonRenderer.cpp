@@ -221,13 +221,13 @@ void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFl
 			setOpacityModifyRGB(texture->hasAlphaPremultiplied());
 			if (_isBlendFuncDirty) {
 				// Set proper alpha blending
-				_isBlendFuncDirty = false;
 				if (!_premultipliedAlpha && _blendFunc == BlendFunc::ALPHA_PREMULTIPLIED) {
-					_blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+					setBlendFunc(BlendFunc::ALPHA_NON_PREMULTIPLIED);
 				}
 				else if (_premultipliedAlpha && _blendFunc == BlendFunc::ALPHA_NON_PREMULTIPLIED) {
-					_blendFunc == BlendFunc::ALPHA_PREMULTIPLIED;
+					setBlendFunc(BlendFunc::ALPHA_PREMULTIPLIED);
 				}
+				_isBlendFuncDirty = false;
 			}
 
 			if (slot->data->blendMode != blendMode) {
@@ -448,8 +448,10 @@ const BlendFunc& SkeletonRenderer::getBlendFunc () const {
 }
 
 void SkeletonRenderer::setBlendFunc (const BlendFunc &blendFunc) {
-	_blendFunc = blendFunc;
-	_isBlendFuncDirty = true;
+	if (blendFunc != _blendFunc) {
+		_blendFunc = blendFunc;
+		_isBlendFuncDirty = true;
+	}
 }
 
 void SkeletonRenderer::setOpacityModifyRGB (bool value) {
