@@ -217,6 +217,18 @@ void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFl
 		default: ;
 		} 
 		if (texture) {
+			if (texture != _batch->getTexture()) {
+				// New texture
+				// Update blending state
+				setOpacityModifyRGB(texture->hasPremultipliedAlpha());
+				if (_premultipliedAlpha) {
+					_blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;						
+				}
+				else {
+					_blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+				}
+			}
+
 			if (slot->data->blendMode != blendMode) {
 				_batch->flush();
 				blendMode = slot->data->blendMode;
@@ -259,7 +271,9 @@ void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFl
 		if (_debugSlots) {
 			// Slots.
 			DrawPrimitives::setDrawColor4B(0, 0, 255, 255);
-			//glLineWidth(1);
+#ifndef DIRECTX_ENABLED
+			glLineWidth(1);
+#endif // DIRECTX_ENABLED
 			Vec2 points[4];
 			V3F_C4B_T2F_Quad quad;
 			for (int i = 0, n = _skeleton->slotsCount; i < n; i++) {
@@ -276,7 +290,9 @@ void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFl
 		}
 		if (_debugBones) {
 			// Bone lengths.
-			//glLineWidth(2);
+#ifndef DIRECTX_ENABLED
+			glLineWidth(2);
+#endif // DIRECTX_ENABLED
 			DrawPrimitives::setDrawColor4B(255, 0, 0, 255);
 			for (int i = 0, n = _skeleton->bonesCount; i < n; i++) {
 				spBone *bone = _skeleton->bones[i];
