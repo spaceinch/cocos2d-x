@@ -339,7 +339,7 @@ std::string Text::getDescription() const
 
 void Text::enableShadow(const Color4B& shadowColor,const Size &offset, int blurRadius)
 {
-    //_labelRenderer->enableShadow(shadowColor, offset, blurRadius);
+    _labelRenderer->enableShadow(shadowColor, offset, blurRadius);
 }
 
 void Text::enableOutline(const Color4B& outlineColor,int outlineSize)

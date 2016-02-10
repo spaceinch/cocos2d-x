@@ -48,6 +48,8 @@ public:
 	void mapBuffers ();
 	void SetZ(const float zpos) { _zPosition = zpos; }
 
+	const cocos2d::Texture2D* getTexture() const { return _texture; }
+
 protected:
 	PolygonBatch();
 	virtual ~PolygonBatch();
