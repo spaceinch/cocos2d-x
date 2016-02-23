@@ -279,6 +279,11 @@ bool GLProgram::initWithHLSL(const ShaderDescriptor &vertexShader, const ShaderD
 	cocos2d::Data vsData = FileUtils::getInstance()->getDataFromFile("Shaders/ccShader_" + vertexShader.name + "_VS.cso");
 	cocos2d::Data psData = FileUtils::getInstance()->getDataFromFile("Shaders/ccShader_" + pixelShader.name + "_PS.cso");
 
+	if (psData.getBytes() == nullptr || vsData.getBytes() == nullptr)
+	{
+		return false;
+	}
+
 	int location = 0;
 	for (auto uniform : vertexShader.uniformValues)
 	{
