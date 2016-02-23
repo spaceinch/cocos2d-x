@@ -229,7 +229,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3d\CCSkybox.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3d\CCSprite3D.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3d\CCSprite3DMaterial.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3d\CCTerrain.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\3d\cocos3d.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\audio\include\AudioEngine.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\audio\include\Export.h" />
@@ -536,6 +535,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\CCVertexAttribBinding.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\CCVertexIndexBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\CCVertexIndexData.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\DDSTextureLoader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\storage\local-storage\LocalStorage.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\ui\CocosGUI.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\ui\GUIExport.h" />
@@ -855,7 +855,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\3d\CCSkybox.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\3d\CCSprite3D.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\3d\CCSprite3DMaterial.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\3d\CCTerrain.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\audio\AudioEngine.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\audio\winrt\Audio.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -1130,6 +1129,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\CCVertexAttribBinding.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\CCVertexIndexBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\CCVertexIndexData.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\DDSTextureLoader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\storage\local-storage\LocalStorage.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\ui\CocosGUI.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\ui\UIButton.cpp" />
@@ -1311,12 +1311,6 @@
       <ShaderModel>4.0_level_9_1</ShaderModel>
     </FxCompile>
     <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_normal_PS.hlsl">
-      <ShaderType>Pixel</ShaderType>
-      <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
-      <DisableOptimizations>false</DisableOptimizations>
-      <ShaderModel>4.0_level_9_1</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="$(MSBuildThisFileDirectory)..\..\..\..\renderer\shaders\ccShader_Label_outline_PS.hlsl">
       <ShaderType>Pixel</ShaderType>
       <ObjectFileOutput>$(OutDir)/Assets/Resources/%(Filename).cso</ObjectFileOutput>
       <DisableOptimizations>false</DisableOptimizations>
