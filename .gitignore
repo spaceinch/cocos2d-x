@@ -139,6 +139,7 @@ tests/cpp-tests/Resources/audio
 
 /external/win32-specific
 /external/win10-specific
+/external/linux-specific
 /external/*/*/android
 /external/*/*/ios
 /external/*/*/mac
