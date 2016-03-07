@@ -83,40 +83,44 @@ KeyboardEvent::KeyboardEvent(Cocos2dKeyEvent type, Platform::String^ text)
 {
 
 }
+bool KeyboardEvent::s_avoidEvents = false;
 
 void KeyboardEvent::execute()
 {
-    switch(m_type)
-    {
-    case Cocos2dKeyEvent::Text:
-    {
-        std::wstring w(m_text.Get()->Data());
-        std::u16string  s16(w.begin(),w.end());
-        std::string utf8String;
-        StringUtils::UTF16ToUTF8(s16, utf8String);
-        IMEDispatcher::sharedDispatcher()->dispatchInsertText(utf8String.c_str(), utf8String.size());
-        break;
-    }
-
-    default:
-        switch (m_type)
-        {
-        case Cocos2dKeyEvent::Escape: {
-			EventKeyboard e(EventKeyboard::KeyCode::KEY_ESCAPE, false);
-			Director::getInstance()->getEventDispatcher()->dispatchEvent(&e);
-            break;
+	if (!s_avoidEvents)
+	{
+		switch (m_type)
+		{
+		case Cocos2dKeyEvent::Text:
+		{
+			std::wstring w(m_text.Get()->Data());
+			std::u16string  s16(w.begin(), w.end());
+			std::string utf8String;
+			StringUtils::UTF16ToUTF8(s16, utf8String);
+			IMEDispatcher::sharedDispatcher()->dispatchInsertText(utf8String.c_str(), utf8String.size());
+			break;
 		}
-        case Cocos2dKeyEvent::Back:
-            IMEDispatcher::sharedDispatcher()->dispatchDeleteBackward();
-            break;
-        case Cocos2dKeyEvent::Enter:
-            IMEDispatcher::sharedDispatcher()->dispatchInsertText("\n", 1);
-            break;
-        default:
-            break;
-        }        
-        break;
-    }
+
+		default:
+			switch (m_type)
+			{
+			case Cocos2dKeyEvent::Escape: {
+				EventKeyboard e(EventKeyboard::KeyCode::KEY_ESCAPE, false);
+				Director::getInstance()->getEventDispatcher()->dispatchEvent(&e);
+				break;
+			}
+			case Cocos2dKeyEvent::Back:
+				IMEDispatcher::sharedDispatcher()->dispatchDeleteBackward();
+				break;
+			case Cocos2dKeyEvent::Enter:
+				IMEDispatcher::sharedDispatcher()->dispatchInsertText("\n", 1);
+				break;
+			default:
+				break;
+			}
+			break;
+		}
+	}
 }
 
 WinRTKeyboardEvent::WinRTKeyboardEvent(WinRTKeyboardEventType type, Windows::UI::Core::KeyEventArgs^ args)
