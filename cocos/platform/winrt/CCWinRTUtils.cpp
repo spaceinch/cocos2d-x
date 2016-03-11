@@ -372,7 +372,11 @@ bool createMappedCacheFile(const std::string& srcFilePath, std::string& cacheFil
     bool ret = false;
     auto folderPath = FileUtils::getInstance()->getWritablePath();
     cacheFilePath = folderPath + computeHashForFile(srcFilePath) + ext;
-    std::string prevFile = UserDefault::getInstance()->getStringForKey(srcFilePath.c_str());
+
+	int index = srcFilePath.find_last_of('/');
+	std::string key = srcFilePath.substr(index + 1, srcFilePath.length() - index + 1);
+
+    std::string prevFile = UserDefault::getInstance()->getStringForKey(key.c_str());
 
     if (prevFile == cacheFilePath) {
         ret = FileUtils::getInstance()->isFileExist(cacheFilePath);
@@ -381,19 +385,16 @@ bool createMappedCacheFile(const std::string& srcFilePath, std::string& cacheFil
         FileUtils::getInstance()->removeFile(prevFile);
     }
 
-    UserDefault::getInstance()->setStringForKey(srcFilePath.c_str(), cacheFilePath);
+    UserDefault::getInstance()->setStringForKey(key.c_str(), cacheFilePath);
     return ret;
 }
 
 void destroyMappedCacheFile(const std::string& key)
 {
-    std::string value = UserDefault::getInstance()->getStringForKey(key.c_str());
-    
-    if (!value.empty()) {
-        FileUtils::getInstance()->removeFile(value);
-    }
-
-    UserDefault::getInstance()->setStringForKey(key.c_str(), "");
+	int index = key.find_last_of('/');
+	std::string shortKey = key.substr(index + 1, key.length() - index + 1);
+   
+	UserDefault::getInstance()->deleteValueForKey(shortKey.c_str());
 }
 
 NS_CC_END

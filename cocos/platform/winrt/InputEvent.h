@@ -82,6 +82,7 @@ public:
     KeyboardEvent(Cocos2dKeyEvent type);
     KeyboardEvent(Cocos2dKeyEvent type, Platform::String^ text);
     virtual void execute();
+	static bool s_avoidEvents;
 
 private:
     Cocos2dKeyEvent m_type;
