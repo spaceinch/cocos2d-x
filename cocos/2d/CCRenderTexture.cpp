@@ -37,7 +37,7 @@ THE SOFTWARE.
 
 #ifdef DIRECTX_ENABLED
 #include "platform/winrt/DirectXHelper.h"
-#endif
+#endif // DIRECTX_ENABLED
 
 
 NS_CC_BEGIN
