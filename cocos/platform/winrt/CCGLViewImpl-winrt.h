@@ -64,7 +64,7 @@ public:
     virtual void setIMEKeyboardState(bool bOpen);
     virtual void setIMEKeyboardState(bool bOpen, std::string str);
 
-	virtual bool Create(ID3D11Provider *d3d11Provider, float width, float height, float dpi, Windows::Graphics::Display::DisplayOrientations orientation);
+	virtual bool Create(ID3D11Provider *d3d11Provider, float width, float height, float dpi, Windows::Graphics::Display::DisplayOrientations orientation, float compositionScaleX, float compositionScaleY);
 
     void setDispatcher(Windows::UI::Core::CoreDispatcher^ dispatcher);
     Windows::UI::Core::CoreDispatcher^ getDispatcher() {return m_dispatcher.Get();}
@@ -185,6 +185,9 @@ private:
 
     cocos2d::EventListenerKeyboard* m_backButtonListener;
 	ID3D11Provider *m_d3d11Provider;
+
+	float m_compositionScaleX;
+	float m_compositionScaleY;
 
 };
 

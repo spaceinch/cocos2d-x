@@ -117,12 +117,14 @@ bool GLViewImpl::initWithFullScreen(const std::string& viewName)
     return initWithRect(viewName, Rect(0, 0, m_width, m_height), 1.0f);
 }
 
-bool GLViewImpl::Create(ID3D11Provider *d3d11Provider, float width, float height, float dpi, DisplayOrientations orientation)
+bool GLViewImpl::Create(ID3D11Provider *d3d11Provider, float width, float height, float dpi, DisplayOrientations orientation, float compositionScaleX, float compositionScaleY)
 {
     m_orientation = orientation;
     m_dpi = dpi;
 	m_d3d11Provider = d3d11Provider;
-    UpdateForWindowSizeChange(width, height);
+	m_compositionScaleX = compositionScaleX;
+	m_compositionScaleY = compositionScaleY;
+	UpdateForWindowSizeChange(width, height);
 
     return true;
 }
@@ -465,9 +467,13 @@ cocos2d::Vec2 GLViewImpl::TransformToOrientation(Windows::Foundation::Point p)
     return returnValue;
 }
 
-Vec2 GLViewImpl::GetPoint(PointerEventArgs^ args) {
+Vec2 GLViewImpl::GetPoint(PointerEventArgs^ args) 
+{
+	Windows::Foundation::Point p = args->CurrentPoint->Position;
+	p.X *= m_compositionScaleX;
+	p.Y *= m_compositionScaleY;
 
-	return TransformToOrientation(args->CurrentPoint->Position);
+	return TransformToOrientation(p);
 }
 
 void GLViewImpl::setViewPortInPoints(float x , float y , float w , float h)
