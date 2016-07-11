@@ -26,12 +26,13 @@ THE SOFTWARE.
 #include "platform/CCPlatformConfig.h"
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 
-#include "CCFileUtils-android.h"
+#include "platform/android/CCFileUtils-android.h"
 #include "platform/CCCommon.h"
-#include "jni/Java_org_cocos2dx_lib_Cocos2dxHelper.h"
+#include "platform/android/jni/JniHelper.h"
+#include "platform/android/jni/Java_org_cocos2dx_lib_Cocos2dxHelper.h"
 #include "android/asset_manager.h"
 #include "android/asset_manager_jni.h"
-#include "jni/CocosPlayClient.h"
+#include "base/ZipUtils.h"
 #include <stdlib.h>
 #include <sys/stat.h>
 
@@ -43,6 +44,7 @@ using namespace std;
 NS_CC_BEGIN
 
 AAssetManager* FileUtilsAndroid::assetmanager = nullptr;
+ZipFile* FileUtilsAndroid::obbfile = nullptr;
 
 void FileUtilsAndroid::setassetmanager(AAssetManager* a) {
     if (nullptr == a) {
@@ -58,7 +60,7 @@ FileUtils* FileUtils::getInstance()
     if (s_sharedFileUtils == nullptr)
     {
         s_sharedFileUtils = new FileUtilsAndroid();
-        if(!s_sharedFileUtils->init())
+        if (!s_sharedFileUtils->init())
         {
           delete s_sharedFileUtils;
           s_sharedFileUtils = nullptr;
@@ -74,18 +76,21 @@ FileUtilsAndroid::FileUtilsAndroid()
 
 FileUtilsAndroid::~FileUtilsAndroid()
 {
+    if (obbfile)
+    {
+        delete obbfile;
+        obbfile = nullptr;
+    }
 }
 
 bool FileUtilsAndroid::init()
 {
-    cocosplay::lazyInit();
-    if (cocosplay::isEnabled() && !cocosplay::isDemo())
+    _defaultResRootPath = "assets/";
+    
+    std::string assetsPath(getApkPath());
+    if (assetsPath.find("/obb/") != std::string::npos)
     {
-        _defaultResRootPath = cocosplay::getGameRoot();
-    }
-    else
-    {
-        _defaultResRootPath = "assets/";
+        obbfile = new ZipFile(assetsPath);
     }
 
     return FileUtils::init();
@@ -150,11 +155,6 @@ bool FileUtilsAndroid::isFileExistInternal(const std::string& strFilePath) const
         return false;
     }
 
-    if (cocosplay::isEnabled() && !cocosplay::isDemo())
-    {
-        return cocosplay::fileExists(strFilePath);
-    }
-
     bool bFound = false;
 
     // Check whether file exists in apk.
@@ -184,7 +184,7 @@ bool FileUtilsAndroid::isFileExistInternal(const std::string& strFilePath) const
     else
     {
         FILE *fp = fopen(strFilePath.c_str(), "r");
-        if(fp)
+        if (fp)
         {
             bFound = true;
             fclose(fp);
@@ -205,16 +205,6 @@ bool FileUtilsAndroid::isDirectoryExistInternal(const std::string& dirPath) cons
     int lenOfAssets = 7;
 
     std::string tmpStr;
-    if (cocosplay::isEnabled() && !cocosplay::isDemo())
-    {
-        // redirect assets/*** path to cocosplay resource dir
-        tmpStr.append(_defaultResRootPath);
-        if ('/' != tmpStr[tmpStr.length() - 1])
-        {
-            tmpStr += '/';
-        }
-        tmpStr.append(s + lenOfAssets);
-    }
 
     // find absolute path in flash memory
     if (s[0] == '/')
@@ -259,23 +249,24 @@ bool FileUtilsAndroid::isAbsolutePath(const std::string& strPath) const
     return false;
 }
 
+<<<<<<< HEAD
 void FileUtilsAndroid::addFileSystem(std::shared_ptr<FileSystemProtocol> fileSystem)
 {
   _fileSystems.push_back(fileSystem);
 }
 
 Data FileUtilsAndroid::getData(const std::string& filename, bool forString)
+=======
+FileUtils::Status FileUtilsAndroid::getContents(const std::string& filename, ResizableBuffer* buffer)
+>>>>>>> cocos2d-x-3.12
 {
+    static const std::string apkprefix("assets/");
     if (filename.empty())
-    {
-        return Data::Null;
-    }
+        return FileUtils::Status::NotExists;
 
-    unsigned char* data = nullptr;
-    ssize_t size = 0;
     string fullPath = fullPathForFilename(filename);
-    cocosplay::updateAssets(fullPath);
 
+<<<<<<< HEAD
     if (fullPath[0] != '/')
     {
         string relativePath = string();
@@ -334,85 +325,41 @@ Data FileUtilsAndroid::getData(const std::string& filename, bool forString)
 
             AAsset_close(asset);
         }
+=======
+    if (fullPath[0] == '/')
+        return FileUtils::getContents(fullPath, buffer);
+
+    string relativePath = string();
+    size_t position = fullPath.find(apkprefix);
+    if (0 == position) {
+        // "assets/" is at the beginning of the path and we don't want it
+        relativePath += fullPath.substr(apkprefix.size());
+    } else {
+        relativePath = fullPath;
+>>>>>>> cocos2d-x-3.12
     }
-    else
+    
+    if (obbfile)
     {
-        do
-        {
-            // read rrom other path than user set it
-            //CCLOG("GETTING FILE ABSOLUTE DATA: %s", filename);
-            const char* mode = nullptr;
-            if (forString)
-                mode = "rt";
-            else
-                mode = "rb";
-
-            FILE *fp = fopen(fullPath.c_str(), mode);
-            CC_BREAK_IF(!fp);
-
-            long fileSize;
-            fseek(fp,0,SEEK_END);
-            fileSize = ftell(fp);
-            fseek(fp,0,SEEK_SET);
-            if (forString)
-            {
-                data = (unsigned char*) malloc(fileSize + 1);
-                data[fileSize] = '\0';
-            }
-            else
-            {
-                data = (unsigned char*) malloc(fileSize);
-            }
-            fileSize = fread(data,sizeof(unsigned char), fileSize,fp);
-            fclose(fp);
-
-            size = fileSize;
-        } while (0);
+        if (obbfile->getFileData(relativePath, buffer))
+            return FileUtils::Status::OK;
     }
 
-    Data ret;
-    if (data == nullptr || size == 0)
-    {
-        std::string msg = "Get data from file(";
-        msg.append(filename).append(") failed!");
-        CCLOG("%s", msg.c_str());
-    }
-    else
-    {
-        ret.fastSet(data, size);
-        cocosplay::notifyFileLoaded(fullPath);
+    if (nullptr == assetmanager) {
+        LOGD("... FileUtilsAndroid::assetmanager is nullptr");
+        return FileUtils::Status::NotInitialized;
     }
 
-    return ret;
-}
-
-std::string FileUtilsAndroid::getStringFromFile(const std::string& filename)
-{
-    Data data = getData(filename, true);
-    if (data.isNull())
-        return "";
-
-    std::string ret((const char*)data.getBytes());
-    return ret;
-}
-
-Data FileUtilsAndroid::getDataFromFile(const std::string& filename)
-{
-    return getData(filename, false);
-}
-
-unsigned char* FileUtilsAndroid::getFileData(const std::string& filename, const char* mode, ssize_t * size)
-{
-    unsigned char * data = 0;
-
-    if ( filename.empty() || (! mode) )
-    {
-        return 0;
+    AAsset* asset = AAssetManager_open(assetmanager, relativePath.data(), AASSET_MODE_UNKNOWN);
+    if (nullptr == asset) {
+        LOGD("asset is nullptr");
+        return FileUtils::Status::OpenFailed;
     }
 
-    string fullPath = fullPathForFilename(filename);
-    cocosplay::updateAssets(fullPath);
+    auto size = AAsset_getLength(asset);
+    buffer->resize(size);
 
+<<<<<<< HEAD
     if (fullPath[0] != '/')
     {
         string relativePath = string();
@@ -489,19 +436,18 @@ unsigned char* FileUtilsAndroid::getFileData(const std::string& filename, const 
                 *size = fileSize;
             }
         } while (0);
+=======
+    int readsize = AAsset_read(asset, buffer->buffer(), size);
+    AAsset_close(asset);
+
+    if (readsize < size) {
+        if (readsize >= 0)
+            buffer->resize(readsize);
+        return FileUtils::Status::ReadFaild;
+>>>>>>> cocos2d-x-3.12
     }
 
-    if (! data)
-    {
-        std::string msg = "Get data from file(";
-        msg.append(filename).append(") failed!");
-        CCLOG("%s", msg.c_str());
-    }
-    else
-    {
-        cocosplay::notifyFileLoaded(fullPath);
-    }
-    return data;
+    return FileUtils::Status::OK;
 }
 
 string FileUtilsAndroid::getWritablePath() const
@@ -509,7 +455,7 @@ string FileUtilsAndroid::getWritablePath() const
     // Fix for Nexus 10 (Android 4.2 multi-user environment)
     // the path is retrieved through Java Context.getCacheDir() method
     string dir("");
-    string tmp = getFileDirectoryJNI();
+    string tmp = JniHelper::callStaticStringMethod("org/cocos2dx/lib/Cocos2dxHelper", "getCocos2dxWritablePath");
 
     if (tmp.length() > 0)
     {

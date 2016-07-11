@@ -28,7 +28,6 @@ THE SOFTWARE.
 #ifndef __CCTEXTURE_CACHE_H__
 #define __CCTEXTURE_CACHE_H__
 
-#include <string>
 #include <mutex>
 #include <thread>
 #include <condition_variable>
@@ -42,7 +41,6 @@ THE SOFTWARE.
 #include "platform/CCImage.h"
 
 #if CC_ENABLE_CACHE_TEXTURE_DATA
-    #include "platform/CCImage.h"
     #include <list>
 #endif
 
@@ -117,7 +115,7 @@ public:
     * The callback will be called from the main thread, so it is safe to create any cocos2d object from the callback.
     * Supported image extensions: .png, .jpg
      @param filepath A null terminated string.
-     @param callback A callback function would be inovked after the image is loaded.
+     @param callback A callback function would be invoked after the image is loaded.
      @since v0.8
     */
     virtual void addImageAsync(const std::string &filepath, const std::function<void(Texture2D*)>& callback);
@@ -191,7 +189,7 @@ public:
     */
     std::string getCachedTextureInfo() const;
 
-    //Wait for texture cahe to quit befor destroy instance.
+    //Wait for texture cache to quit before destroy instance.
     /**Called by director, please do not called outside.*/
     void waitForQuit();
 
@@ -202,7 +200,18 @@ public:
      *
      * @return The full path of the file.
      */
-    const std::string getTextureFilePath(Texture2D* texture)const;
+    std::string getTextureFilePath(Texture2D* texture) const;
+
+    /** Reload texture from a new file.
+    * This function is mainly for editor, won't suggest use it in game for performance reason.
+    *
+    * @param srcName Original texture file name.
+    * @param dstName New texture file name.
+    *
+    * @since v3.10
+    */
+    void renameTextureWithKey(const std::string& srcName, const std::string& dstName);
+
 
 private:
     void addImageAsyncCallBack(float dt);
