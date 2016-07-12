@@ -69,7 +69,6 @@ public:
 
     static void setassetmanager(AAssetManager* a);
     static AAssetManager* getAssetManager() { return assetmanager; }
-    static ZipFile* getObbFile() { return obbfile; }
 
     /* override functions */
     bool init() override;
@@ -77,9 +76,6 @@ public:
     virtual std::string getNewFilename(const std::string &filename) const override;
 
     virtual FileUtils::Status getContents(const std::string& filename, ResizableBuffer* buffer) override;
-
-    virtual std::string getWritablePath() const override;
-    virtual bool isAbsolutePath(const std::string& strPath) const override;
 
     virtual std::string getWritablePath() const;
     virtual bool isAbsolutePath(const std::string& strPath) const;
