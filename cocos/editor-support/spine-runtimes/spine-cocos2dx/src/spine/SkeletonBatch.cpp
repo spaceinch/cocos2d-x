@@ -47,7 +47,7 @@ void SkeletonBatch::setBufferSize (int vertexCount) {
 }
 
 SkeletonBatch* SkeletonBatch::getInstance () {
-	if (!instance) instance = new SkeletonBatch(8192);
+	if (!instance) instance = new SkeletonBatch(64000);
 	return instance;
 }
 
