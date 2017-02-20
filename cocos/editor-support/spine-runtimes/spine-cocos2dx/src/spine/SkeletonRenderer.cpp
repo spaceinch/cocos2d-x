@@ -383,6 +383,7 @@ void SkeletonRenderer::onEnter () {
 #endif
 	Node::onEnter();
 	scheduleUpdate();
+  update(0.0f);
 }
 
 void SkeletonRenderer::onExit () {
