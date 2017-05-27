@@ -1,6 +1,6 @@
 /****************************************************************************
 Copyright (c) 2011      Laschweinski
-Copyright (c) 2013-2014 Chukong Technologies Inc.
+Copyright (c) 2013-2017 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -46,13 +46,13 @@ NS_CC_BEGIN
 
 FileUtils* FileUtils::getInstance()
 {
-    if (s_sharedFileUtils == NULL)
+    if (s_sharedFileUtils == nullptr)
     {
         s_sharedFileUtils = new FileUtilsLinux();
         if(!s_sharedFileUtils->init())
         {
           delete s_sharedFileUtils;
-          s_sharedFileUtils = NULL;
+          s_sharedFileUtils = nullptr;
           CCLOG("ERROR: Could not init CCFileUtilsLinux");
         }
     }

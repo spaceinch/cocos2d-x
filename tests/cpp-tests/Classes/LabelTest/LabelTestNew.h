@@ -237,6 +237,15 @@ private:
     
 };
 
+class LabelTTFEmoji : public AtlasDemoNew
+{
+public:
+    CREATE_FUNC(LabelTTFEmoji);
+    
+    LabelTTFEmoji();
+    virtual std::string title() const override;
+    virtual std::string subtitle() const override;
+};
 
 class LabelTTFCJKWrappingTest : public AtlasDemoNew
 {
@@ -303,6 +312,7 @@ public:
 
     LabelShadowTest();
 
+    virtual void onEnter() override;
     virtual std::string title() const override;
     virtual std::string subtitle() const override;
 
@@ -310,6 +320,7 @@ public:
 private:
     cocos2d::Label* shadowLabelOutline;
     cocos2d::Label* shadowLabelTTF;
+    cocos2d::Label* shadowLabelGrow;
     cocos2d::Label* shadowLabelBMFont;
 };
 
@@ -848,6 +859,61 @@ public:
     cocos2d::Label* _label2;
     cocostudio::ILocalizationManager* _localizationJson;
     cocostudio::ILocalizationManager* _localizationBin;
+};
+
+class LabelIssue15214 : public AtlasDemoNew
+{
+public:
+    CREATE_FUNC(LabelIssue15214);
+
+    LabelIssue15214();
+
+    virtual std::string title() const override;
+    virtual std::string subtitle() const override;
+};
+
+class LabelIssue16293 : public AtlasDemoNew
+{
+public:
+    CREATE_FUNC(LabelIssue16293);
+
+    LabelIssue16293();
+
+    virtual std::string title() const override;
+    virtual std::string subtitle() const override;
+};
+
+class LabelIssue16471 : public AtlasDemoNew
+{
+public:
+    CREATE_FUNC(LabelIssue16471);
+
+    LabelIssue16471();
+
+    virtual std::string title() const override;
+    virtual std::string subtitle() const override;
+};
+
+class LabelIssue16717 : public AtlasDemoNew
+{
+public:
+    CREATE_FUNC(LabelIssue16717);
+
+    LabelIssue16717();
+
+    virtual std::string title() const override;
+    virtual std::string subtitle() const override;
+};
+
+class LabelIssueLineGap : public AtlasDemoNew
+{
+public:
+    CREATE_FUNC(LabelIssueLineGap);
+    
+    LabelIssueLineGap();
+    
+    virtual std::string title() const override;
+    virtual std::string subtitle() const override;
 };
 
 #endif

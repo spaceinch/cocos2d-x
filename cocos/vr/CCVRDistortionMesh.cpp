@@ -1,6 +1,6 @@
 /****************************************************************************
  Copyright (c) 2016 Google Inc.
- Copyright (c) 2016 Chukong Technologies Inc.
+ Copyright (c) 2016-2017 Chukong Technologies Inc.
 
  http://www.cocos2d-x.org
 
@@ -97,7 +97,7 @@ DistortionMesh::DistortionMesh(Distortion *distortion,
             vertexData[(vertexOffset + 2)] = uTexture;
             vertexData[(vertexOffset + 3)] = vTexture;
 
-            // vignete
+            // vignette
             vertexData[(vertexOffset + 4)] = vignette;
 
             vertexOffset += 5;

@@ -11,6 +11,13 @@
 -- @return float#float ret (return value: float)
         
 --------------------------------
+-- 
+-- @function [parent=#Texture2D] setAlphaTexture 
+-- @param self
+-- @param #cc.Texture2D alphaTexture
+-- @return Texture2D#Texture2D self (return value: cc.Texture2D)
+        
+--------------------------------
 --  Returns the pixel format.<br>
 -- since v2.0
 -- @function [parent=#Texture2D] getStringForFormat 
@@ -51,6 +58,12 @@
 -- @function [parent=#Texture2D] getPixelsHigh 
 -- @param self
 -- @return int#int ret (return value: int)
+        
+--------------------------------
+-- 
+-- @function [parent=#Texture2D] getAlphaTextureName 
+-- @param self
+-- @return unsigned int#unsigned int ret (return value: unsigned int)
         
 --------------------------------
 -- @overload self, int         
@@ -134,6 +147,12 @@
 -- @function [parent=#Texture2D] generateMipmap 
 -- @param self
 -- @return Texture2D#Texture2D self (return value: cc.Texture2D)
+        
+--------------------------------
+-- 
+-- @function [parent=#Texture2D] getAlphaTexture 
+-- @param self
+-- @return Texture2D#Texture2D ret (return value: cc.Texture2D)
         
 --------------------------------
 -- Get texture name, dimensions and coordinates message by a string.<br>

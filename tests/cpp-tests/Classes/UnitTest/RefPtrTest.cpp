@@ -56,7 +56,7 @@ void RefPtrTest::onEnter()
         CC_ASSERT(strcmp("World", ref1->getCString()) == 0);
         CC_ASSERT(2 == ref1->getReferenceCount());
         
-        // Assigment back to nullptr
+        // Assignment back to nullptr
         __String * world = ref1;
         CC_ASSERT(2 == world->getReferenceCount());
         
@@ -117,6 +117,13 @@ void RefPtrTest::onEnter()
         
         ref1.reset();
         CC_ASSERT((__String*) nullptr == ref1.get());
+
+        RefPtr<__String const> ref2 = __String::create("Hello");
+        CC_ASSERT(strcmp("Hello", ref2.get()->getCString()) == 0);
+        
+        ref2.reset();
+        CC_ASSERT(nullptr == ref2.get());
+        static_assert(std::is_same<const __String*, decltype(ref2.get())>::value, "");
     }
     
     // TEST(reset)

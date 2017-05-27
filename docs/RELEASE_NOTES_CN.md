@@ -2,77 +2,63 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [v3.12](#v312)
+- [v3.15](#v315)
   - [新特性](#%E6%96%B0%E7%89%B9%E6%80%A7)
-  - [主要特性的详细介绍](#%E4%B8%BB%E8%A6%81%E7%89%B9%E6%80%A7%E7%9A%84%E8%AF%A6%E7%BB%86%E4%BB%8B%E7%BB%8D)
-    - [VR支持](#vr%E6%94%AF%E6%8C%81)
-    - [Tizen支持](#tizen%E6%94%AF%E6%8C%81)
-    - [提高Android渲染效率](#%E6%8F%90%E9%AB%98android%E6%B8%B2%E6%9F%93%E6%95%88%E7%8E%87)
-    - [提升Cocos2d-html5引擎WebGL模式下的性能](#%E6%8F%90%E5%8D%87cocos2d-html5%E5%BC%95%E6%93%8Ewebgl%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E6%80%A7%E8%83%BD)
-    - [Android使用clang编译器](#android%E4%BD%BF%E7%94%A8clang%E7%BC%96%E8%AF%91%E5%99%A8)
-  - [其他改动](#%E5%85%B6%E4%BB%96%E6%94%B9%E5%8A%A8)
+  - [新特性详细介绍](#%E6%96%B0%E7%89%B9%E6%80%A7%E8%AF%A6%E7%BB%86%E4%BB%8B%E7%BB%8D)
+    - [全面支持Android Studio](#%E5%85%A8%E9%9D%A2%E6%94%AF%E6%8C%81android-studio)
+    - [音频模块在Android平台的改进](#%E9%9F%B3%E9%A2%91%E6%A8%A1%E5%9D%97%E5%9C%A8android%E5%B9%B3%E5%8F%B0%E7%9A%84%E6%94%B9%E8%BF%9B)
+    - [去除Windows 8.1的支持](#%E5%8E%BB%E9%99%A4windows-81%E7%9A%84%E6%94%AF%E6%8C%81)
+    - [去除32位linux支持](#%E5%8E%BB%E9%99%A432%E4%BD%8Dlinux%E6%94%AF%E6%8C%81)
+    - [其他](#%E5%85%B6%E4%BB%96)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# v3.12
+# v3.15
 
 ## 新特性
 
-* 支持VR，目前还处于测试阶段
-* 支持Tizen平台
-* 提升引擎在Android平台的渲染效率
-* 提升Cocos2d-html5 WebGL模式的性能
-* 支持Android的OBB扩展格式
-* Android平台使用clang编译器，使用NDK r11+
+* 全面支持 __Android Studio__，包括编译、代码编辑和调试C++代码：[使用文档](https://github.com/chukong/cocos-docs/blob/v3-unified-documentation/installation/Android-Studio.md)
+* 音频模块在Android平台使用[tremolo](http://wss.co.uk/pinknoise/tremolo/)和 __MP3 Decoder Library__ 解码音频文件，使得音频模块效率更高，兼容更多的Android设备
+* __WebSockets__ 和 __SocketIO__ 支持 __SSL__
+* AssetsManagerEx更加稳定
+* 更新 __Spine runtime__ 到v3.5.35
+* 更新 __flatbuffer__ 到v1.5
+* 升级 __OpenSSL__ 到v1.1.0
+* 去除 __Windows 8.1__ 的支持
+* 去除32位linux的支持
 
-## 主要特性的详细介绍
 
-### VR支持
+## 新特性详细介绍
 
-该版本添加了VR支持，不过还处于测试阶段。目前支持的设备有__Google Cardboard__，__Oculus Rift__，__Samsung Gear__和__Deepoon E2__。关于如何使用、测试VR功能，请参考[Programming Guide](http://cocos2d-x.org/docs/programmers-guide/vr/index.html)。
+### 全面支持Android Studio
 
-### Tizen支持
+从 __3.15__ 版本开始，可以使用Android Studio 2.3+ 编辑、编译和调试C++代码。只需要通过Android Studio打开 __proj.android-studio__ 文件夹（比如 __tests/cpp-empty-test/proj.android-studio__ ），然后点击 __run__ 按钮就可以在Android设备或者模拟器运行、调试了。
 
-该版本添加了Tizen平台的支持。支持的TizenSDK版本是__2.4__。开发Tizen平台应用时，需要使用Tizen平台有自己的IDE和模拟器。请参考[这篇文档](http://cocos2d-x.org/docs/installation/Tizen/)了解如何搭建Tizen应用开发环境。
+详细的使用方法请参考[这篇文档](https://github.com/chukong/cocos-docs/blob/v3-unified-documentation/installation/Android-Studio.md)。
 
-### 提高Android渲染效率
+### 音频模块在Android平台的改进
 
-这里要多谢社区的开发者帮忙在各种Android设备上测试、验证性能问题。这个问题的原因是因为引擎默认创建了一个比较大的map buffer，实际需要传到该map buffer的数据并没有那么多。但是在有些Android设备，不管实际数据大小是多少，每次都传输和map buffer大小一样多的数据。
+3.15版本之前，音频模块使用 __OpenSL ES__ 解码、播放音频文件，但是很多的Android设备厂商会修改这部分代码，导致音频模块在不同的Android设备上有兼容性问题。[该帖子](http://discuss.cocos2d-x.org/t/android-audio-decoding-issues-discussion/34610)就列出了许多音频模块的问题。
 
-通过代码解释如下：
+为了解决兼容性问题，我们引入了第三方的解码库[tremolo](http://wss.co.uk/pinknoise/tremolo/)和 __MP3 Decoder Library__ 。该解码库也是Android源码使用的解码库。使用该解码库除了能解决Android设备的兼容性问题，同时还带来了不少性能提升：
 
-```c++
-// 初始化map buffer
-glBindBuffer(GL_ARRAY_BUFFER, BUFFER_ID);
-glBufferData(GL_ARRAY_BUFFER, 65536, xxx , GL_DYNAMIC_DRAW);
-```
+![audio performance](https://raw.githubusercontent.com/minggo/Pictures/master/AudioDecodingPerfTest.png)
 
-具体使用map buffer的代码是
+引入该解码库会使最终的APK包增大100K左右，和带来的好处相比还是值得的。
 
-```c++
-// 实际使用map buffer
-glBindBuffer(GL_ARRAY_BUFFER, BUFFER_ID);
-// 虽然只需要传输100个元素，但是在某些Android机器上仍然传输65536个元素
-glBufferData(GL_ARRAY_BUFFER, 100, xxx , GL_DYNAMIC_DRAW);
-```
+### 去除Windows 8.1的支持
 
-详细的讨论可以参考[这个github issue](https://github.com/cocos2d/cocos2d-x/issues/15652)。
+Windows 8.1的支持一直是微软的开发者在维护。因为市场占有率原因，微软觉得没必要继续支持Windows 8.1了。
 
-### 提升Cocos2d-html5引擎WebGL模式下的性能
+### 去除32位linux支持
 
-该版本大幅提升了Cocos2d-html5引擎在WebGL模式下的性能。引擎的渲染性能、CPU使用量和内存大小都有提升。
+目前大部分的PC都是64位了，所以我们觉得去除对32位linux的支持。去除这个支持意味着第三方库去掉了对应的32位版本，这样可以减小发行包的大小，也减少引擎维护的工作。开发者如果想支持32位版本的话，可以使用[这个仓库](https://github.com/cocos2d/cocos2d-x-3rd-party-libs-src)自己编译32位版本的第三方库。
 
-![rendering peformance](https://raw.githubusercontent.com/minggo/Pictures/master/web-performance-improve/adverage-time-per-frame.png)
+### 其他
 
-![cpu-usage](https://raw.githubusercontent.com/minggo/Pictures/master/web-performance-improve/cpu-usage.png)
+[Android SDK Tools 25.3.0+](http://tools.android.com/recent/androidsdktoolsrevision2530feb2017)去除了 __ant脚本__ 和 __android命令__ ，使得cocos命令无法打包Android的Eclipse工程（proj.android）。为了不至于在最后生成APK时才报错，现在cocos命令检查到这个版本后直接返回错误。有两个方法可以解决这个问题：
 
-![memory-usage](https://raw.githubusercontent.com/minggo/Pictures/master/web-performance-improve/memory-usage.png)
+* 从旧版本的Android SDK拷贝tools文件夹过来替换对应的目录
+* 使用Android Studio工程编译打包
 
-### Android使用clang编译器
-
-[从NDK r11开始Google弃用了gcc](https://developer.android.com/ndk/downloads/revision_history.html)，所以cocos2d-x也切换到clang编译器。
-
-建议使用NDK r11c。在测试过程中发现，如果使用NDK r10c + clang的话，`Node::enumerateChildren()`会崩溃。
-
-## 其他改动
-更完整的改动列表可以阅读[full changelog](https://github.com/cocos2d/cocos2d-x/blob/v3/CHANGELOG)。
+从Android工具删除ant脚本和android的行为来看，谷歌是不希望大家继续使用Eclipse工程，所以建议大家还是使用Android Studio来编译打包吧。旧版本引擎虽然不支持Android Studio调试C++代码功能，但是编译打包还是没问题的。

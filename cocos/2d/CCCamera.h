@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright (c) 2014 Chukong Technologies Inc.
+Copyright (c) 2014-2017 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -249,7 +249,7 @@ public:
      */
     void apply();
     /**
-     Restor the FBO, RenderTargets and viewport.
+     Restore the FBO, RenderTargets and viewport.
      */
     void restore();
 

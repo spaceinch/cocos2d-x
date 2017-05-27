@@ -2,7 +2,7 @@
 Copyright (c) 2008-2010 Ricardo Quesada
 Copyright (c) 2010-2012 cocos2d-x.org
 Copyright (c) 2011      Zynga Inc.
-Copyright (c) 2013-2015 Chukong Technologies Inc.
+Copyright (c) 2013-2017 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -411,7 +411,7 @@ struct CC_DLL BlendFunc
     }
 };
 
-/** @struct TextVAlignment
+/** @enum TextVAlignment
  * Vertical text alignment type.
  *
  * @note If any of these enums are edited and/or reordered, update Texture2D.m.
@@ -423,7 +423,7 @@ enum class CC_DLL TextVAlignment
     BOTTOM
 };
 
-/** @struct TextHAlignment
+/** @enum TextHAlignment
  * Horizontal text alignment type.
  *
  * @note If any of these enums are edited and/or reordered, update Texture2D.m.
@@ -497,7 +497,7 @@ public:
     bool   _shadowEnabled;
     /// shadow x and y offset
     Size   _shadowOffset;
-    /// shadow blurrines
+    /// shadow blurriness
     float  _shadowBlur;
     /// shadow opacity
     float  _shadowOpacity;
@@ -571,7 +571,7 @@ public:
     /// enable text wrap
     bool                  _enableWrap;
     /** There are 4 overflows: none, clamp, shrink and resize_height.
-     *  The conresponding integer values are 0, 1, 2, 3 respectively
+     *  The corresponding integer values are 0, 1, 2, 3 respectively
      * For more information, please refer to Label::Overflow enum class.
      */
     int                  _overflow;

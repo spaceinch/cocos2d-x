@@ -25,7 +25,7 @@
 --  Only works on ios platform. Set Content Scale of the Factor. 
 -- @function [parent=#GLView] setContentScaleFactor 
 -- @param self
--- @param #float scaleFactor
+-- @param #float 
 -- @return bool#bool ret (return value: bool)
         
 --------------------------------
@@ -80,7 +80,7 @@
 -- param isVisible Hide or Show the mouse cursor if there is one.
 -- @function [parent=#GLView] setCursorVisible 
 -- @param self
--- @param #bool isVisible
+-- @param #bool 
 -- @return GLView#GLView self (return value: cc.GLView)
         
 --------------------------------
@@ -118,7 +118,7 @@
 -- param zoomFactor The zoom factor for frame.
 -- @function [parent=#GLView] setFrameZoomFactor 
 -- @param self
--- @param #float zoomFactor
+-- @param #float 
 -- @return GLView#GLView self (return value: cc.GLView)
         
 --------------------------------
@@ -189,7 +189,7 @@
         
 --------------------------------
 -- Renders a Scene with a Renderer<br>
--- This method is called dirctly by the Director
+-- This method is called directly by the Director
 -- @function [parent=#GLView] renderScene 
 -- @param self
 -- @param #cc.Scene scene

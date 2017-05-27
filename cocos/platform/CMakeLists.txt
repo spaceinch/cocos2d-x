@@ -1,5 +1,5 @@
 #/****************************************************************************
-# Copyright (c) 2015 Chukong Technologies Inc.
+# Copyright (c) 2015-2017 Chukong Technologies Inc.
 #
 # http://www.cocos2d-x.org
 #
@@ -26,6 +26,7 @@ if(WINDOWS)
 
 set(COCOS_PLATFORM_SPECIFIC_SRC
   platform/win32/CCStdC-win32.cpp
+  platform/win32/CCUtils-win32.cpp
   platform/win32/CCFileUtils-win32.cpp
   platform/win32/CCCommon-win32.cpp
   platform/win32/CCApplication-win32.cpp
@@ -43,6 +44,7 @@ set(COCOS_PLATFORM_SPECIFIC_SRC
   platform/apple/CCLock-apple.cpp
   platform/apple/CCFileUtils-apple.mm
   platform/apple/CCThread-apple.mm
+  platform/apple/CCDevice-apple.mm
   platform/desktop/CCGLViewImpl-desktop.cpp
 )
 
@@ -99,6 +101,7 @@ endif()
 #leave andatory external stuff here also
 
 include_directories(
+  ../external
   ../external/ConvertUTF
   ../external/edtaa3func
   ../external/poly2tri
@@ -116,6 +119,7 @@ set(COCOS_PLATFORM_SRC
   ../external/edtaa3func/edtaa3func.cpp
   ../external/ConvertUTF/ConvertUTFWrapper.cpp
   ../external/ConvertUTF/ConvertUTF.c
+  ../external/md5/md5.c
   ../external/poly2tri/common/shapes.cc
   ../external/poly2tri/sweep/advancing_front.cc
   ../external/poly2tri/sweep/cdt.cc

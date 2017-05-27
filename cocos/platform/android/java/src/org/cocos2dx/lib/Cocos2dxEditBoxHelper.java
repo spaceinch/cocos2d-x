@@ -1,6 +1,6 @@
 /****************************************************************************
 Copyright (c) 2010-2012 cocos2d-x.org
-Copyright (c) 2013-2015 Chukong Technologies Inc.
+Copyright (c) 2013-2017 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -63,9 +63,9 @@ public class Cocos2dxEditBoxHelper {
         editBoxEditingChanged(index, text);
     }
 
-    private static native void editBoxEditingDidEnd(int index, String text);
-    public static void __editBoxEditingDidEnd(int index, String text){
-        editBoxEditingDidEnd(index, text);
+    private static native void editBoxEditingDidEnd(int index, String text, int action);
+    public static void __editBoxEditingDidEnd(int index, String text, int action) {
+        editBoxEditingDidEnd(index, text, action);
     }
 
 
@@ -163,6 +163,7 @@ public class Cocos2dxEditBoxHelper {
                             mCocos2dxActivity.runOnGLThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    editBox.endAction = Cocos2dxEditBox.kEndActionUnknown;
                                     Cocos2dxEditBoxHelper.__editBoxEditingDidBegin(index);
                                 }
                             });
@@ -178,9 +179,11 @@ public class Cocos2dxEditBoxHelper {
                             mCocos2dxActivity.runOnGLThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Cocos2dxEditBoxHelper.__editBoxEditingDidEnd(index, text);
+                                    int action = editBox.endAction;
+                                    Cocos2dxEditBoxHelper.__editBoxEditingDidEnd(index, text, action);
                                 }
                             });
+                            mCocos2dxActivity.hideVirtualButton();
                             mFrameLayout.setEnableForceDoLayout(false);
                             Log.d(TAG, "edit box lose focus");
                         }
@@ -206,7 +209,11 @@ public class Cocos2dxEditBoxHelper {
                 editBox.setOnEditorActionListener(new TextView.OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                        if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                            editBox.endAction = Cocos2dxEditBox.kEndActionNext;
+                            Cocos2dxEditBoxHelper.closeKeyboardOnUiThread(index);
+                            return true;
+                        } else if (actionId == EditorInfo.IME_ACTION_DONE) {
                             Cocos2dxEditBoxHelper.closeKeyboardOnUiThread(index);
                         }
                         return false;
@@ -257,7 +264,7 @@ public class Cocos2dxEditBoxHelper {
                     }else{
                         tf = Typeface.DEFAULT;
                     }
-                    //TODO: The font size is not the same across all the anroid devices...
+                    // TODO: The font size is not the same across all the android devices...
                     if (fontSize >= 0){
                         float density =  mCocos2dxActivity.getResources().getDisplayMetrics().density;
 //                        Log.e("XXX", "density is " + density);
@@ -355,6 +362,18 @@ public class Cocos2dxEditBoxHelper {
         });
     }
 
+    public static void setTextHorizontalAlignment(final int index, final int alignment) {
+        mCocos2dxActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Cocos2dxEditBox editBox = mEditBoxArray.get(index);
+                if (editBox != null) {
+                    editBox.setTextHorizontalAlignment(alignment);
+                }
+            }
+        });
+    }
+
     public static void setInputMode(final int index, final int inputMode) {
         mCocos2dxActivity.runOnUiThread(new Runnable() {
             @Override
@@ -431,6 +450,8 @@ public class Cocos2dxEditBoxHelper {
             imm.hideSoftInputFromWindow(editBox.getWindowToken(), 0);
             mCocos2dxActivity.getGLSurfaceView().setSoftKeyboardShown(false);
             mCocos2dxActivity.getGLSurfaceView().requestFocus();
+            // can take effect after GLSurfaceView has focus
+            mCocos2dxActivity.hideVirtualButton();
         }
     }
 
