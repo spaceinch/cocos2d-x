@@ -37,7 +37,7 @@
 #include "cocostudio/WidgetReader/NodeReader/NodeReader.h"
 #include "cocostudio/CCComExtensionData.h"
 
-#include "tinyxml2.h"
+#include "tinyxml2/tinyxml2.h"
 #include "flatbuffers/flatbuffers.h"
 
 USING_NS_CC;
@@ -210,7 +210,7 @@ namespace cocostudio
                 if (csUserData != nullptr && csUserData->getCustomProperty() == "async")
                 {
                   sprite->setSpriteFrame(path);
-                  fileExist = true;
+                  // fileExist = true;
                 }
                 else if (spriteFrame)
                 {
