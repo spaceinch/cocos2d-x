@@ -29,56 +29,36 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#ifndef SPINE_IKCONSTRAINT_H_
-#define SPINE_IKCONSTRAINT_H_
+#ifndef SPINE_POLYGONBATCH_H_
+#define SPINE_POLYGONBATCH_H_
 
-#include <spine/IkConstraintData.h>
-#include <spine/Bone.h>
+#include "renderer/CCTexture2D.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace spine {
 
-struct spSkeleton;
+class PolygonBatch : public cocos2d::Ref {
+public:
+	static PolygonBatch* createWithCapacity (ssize_t capacity);
 
-typedef struct spIkConstraint {
-	spIkConstraintData* const data;
-	
-	int bonesCount;
-	spBone** bones;
-	
-	spBone* target;
-	int bendDirection;
-	float mix;
+	void add (const cocos2d::Texture2D* texture,
+		const float* vertices, const float* uvs, int verticesCount,
+		const int* triangles, int trianglesCount,
+		cocos2d::Color4B* color);
+	void flush ();
 
-#ifdef __cplusplus
-	spIkConstraint() :
-		data(0),
-		bonesCount(0),
-		bones(0),
-		target(0),
-		bendDirection(0),
-		mix(0) {
-	}
-#endif
-} spIkConstraint;
+protected:
+	PolygonBatch();
+	virtual ~PolygonBatch();
+	bool initWithCapacity (ssize_t capacity);
 
-spIkConstraint* spIkConstraint_create (spIkConstraintData* data, const struct spSkeleton* skeleton);
-void spIkConstraint_dispose (spIkConstraint* self);
+	ssize_t _capacity;
+	cocos2d::V2F_C4B_T2F* _vertices;
+	int _verticesCount;
+	GLushort* _triangles;
+	int _trianglesCount;
+	const cocos2d::Texture2D* _texture;
+};
 
-void spIkConstraint_apply (spIkConstraint* self);
-
-void spIkConstraint_apply1 (spBone* bone, float targetX, float targetY, float alpha);
-void spIkConstraint_apply2 (spBone* parent, spBone* child, float targetX, float targetY, int bendDirection, float alpha);
-
-#ifdef SPINE_SHORT_NAMES
-typedef spIkConstraint IkConstraint;
-#define IkConstraint_create(...) spIkConstraint_create(__VA_ARGS__)
-#define IkConstraint_dispose(...) spIkConstraint_dispose(__VA_ARGS__)
-#endif
-
-#ifdef __cplusplus
 }
-#endif
 
-#endif /* SPINE_IKCONSTRAINT_H_ */
+#endif // SPINE_POLYGONBATCH_H_

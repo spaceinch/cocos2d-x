@@ -29,56 +29,62 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#ifndef SPINE_IKCONSTRAINT_H_
-#define SPINE_IKCONSTRAINT_H_
+#ifndef SPINE_SKINNEDMESHATTACHMENT_H_
+#define SPINE_SKINNEDMESHATTACHMENT_H_
 
-#include <spine/IkConstraintData.h>
-#include <spine/Bone.h>
+#include <spine/Attachment.h>
+#include <spine/Slot.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct spSkeleton;
+typedef struct spSkinnedMeshAttachment {
+	spAttachment super;
+	const char* path;
 
-typedef struct spIkConstraint {
-	spIkConstraintData* const data;
-	
 	int bonesCount;
-	spBone** bones;
-	
-	spBone* target;
-	int bendDirection;
-	float mix;
+	int* bones;
 
-#ifdef __cplusplus
-	spIkConstraint() :
-		data(0),
-		bonesCount(0),
-		bones(0),
-		target(0),
-		bendDirection(0),
-		mix(0) {
-	}
-#endif
-} spIkConstraint;
+	int weightsCount;
+	float* weights;
 
-spIkConstraint* spIkConstraint_create (spIkConstraintData* data, const struct spSkeleton* skeleton);
-void spIkConstraint_dispose (spIkConstraint* self);
+	int trianglesCount;
+	int* triangles;
 
-void spIkConstraint_apply (spIkConstraint* self);
+	int uvsCount;
+	float* regionUVs;
+	float* uvs;
+	int hullLength;
 
-void spIkConstraint_apply1 (spBone* bone, float targetX, float targetY, float alpha);
-void spIkConstraint_apply2 (spBone* parent, spBone* child, float targetX, float targetY, int bendDirection, float alpha);
+	float r, g, b, a;
+
+	void* rendererObject;
+	int regionOffsetX, regionOffsetY; /* Pixels stripped from the bottom left, unrotated. */
+	int regionWidth, regionHeight; /* Unrotated, stripped pixel size. */
+	int regionOriginalWidth, regionOriginalHeight; /* Unrotated, unstripped pixel size. */
+	float regionU, regionV, regionU2, regionV2;
+	int/*bool*/regionRotate;
+
+	/* Nonessential. */
+	int edgesCount;
+	int* edges;
+	float width, height;
+} spSkinnedMeshAttachment;
+
+spSkinnedMeshAttachment* spSkinnedMeshAttachment_create (const char* name);
+void spSkinnedMeshAttachment_updateUVs (spSkinnedMeshAttachment* self);
+void spSkinnedMeshAttachment_computeWorldVertices (spSkinnedMeshAttachment* self, spSlot* slot, float* worldVertices);
 
 #ifdef SPINE_SHORT_NAMES
-typedef spIkConstraint IkConstraint;
-#define IkConstraint_create(...) spIkConstraint_create(__VA_ARGS__)
-#define IkConstraint_dispose(...) spIkConstraint_dispose(__VA_ARGS__)
+typedef spSkinnedMeshAttachment SkinnedMeshAttachment;
+#define SkinnedMeshAttachment_create(...) spSkinnedMeshAttachment_create(__VA_ARGS__)
+#define SkinnedMeshAttachment_updateUVs(...) spSkinnedMeshAttachment_updateUVs(__VA_ARGS__)
+#define SkinnedMeshAttachment_computeWorldVertices(...) spSkinnedMeshAttachment_computeWorldVertices(__VA_ARGS__)
 #endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SPINE_IKCONSTRAINT_H_ */
+#endif /* SPINE_SKINNEDMESHATTACHMENT_H_ */
