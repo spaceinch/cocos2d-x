@@ -110,6 +110,7 @@ public:
 
 protected:
     void reset();
+    void reinit();
     
     void releaseTextures();
 
