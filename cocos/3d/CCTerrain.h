@@ -25,6 +25,7 @@ THE SOFTWARE.
 #define CC_TERRAIN_H
 
 #include <vector>
+#include <string>
 
 #include "2d/CCNode.h"
 #include "2d/CCCamera.h"
