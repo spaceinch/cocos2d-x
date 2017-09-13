@@ -3655,9 +3655,6 @@
     <ClInclude Include="..\..\extensions\GUI\CCControlExtension\CCInvocation.h">
       <Filter>extension\GUI\CCControlExtensions</Filter>
     </ClInclude>
-    <ClInclude Include="..\platform\win32\CCApplication-win32.h">
-      <Filter>platform\win32</Filter>
-    </ClInclude>
     <ClInclude Include="..\platform\win32\CCFileUtils-win32.h">
       <Filter>platform\win32</Filter>
     </ClInclude>
