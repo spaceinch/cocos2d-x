@@ -66,6 +66,12 @@ typedef SSIZE_T ssize_t;
 #include <stdlib.h>
 #include <time.h>
 
+#ifndef arc4random
+#define arc4random rand
+#endif // !arc4random
+
+
+
 #ifndef M_PI
   #define M_PI      3.14159265358
 #endif
