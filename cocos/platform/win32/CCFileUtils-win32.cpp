@@ -227,6 +227,8 @@ string FileUtilsWin32::getWritablePath() const
         return _writablePath;
     }
 
+	return cocos2d::FileUtils::getInstance()->getDefaultResourceRootPath();
+	/*
     // Get full path of executable, e.g. c:\Program Files (x86)\My Game Folder\MyGame.exe
     WCHAR full_path[CC_MAX_PATH + 1] = { 0 };
     ::GetModuleFileName(nullptr, full_path, CC_MAX_PATH + 1);
@@ -270,7 +272,7 @@ string FileUtilsWin32::getWritablePath() const
         retPath = retPath.substr(0, retPath.rfind(L"\\") + 1);
     }
 
-    return convertPathFormatToUnixStyle(StringWideCharToUtf8(retPath));
+    return convertPathFormatToUnixStyle(StringWideCharToUtf8(retPath));*/
 }
 
 bool FileUtilsWin32::renameFile(const std::string &oldfullpath, const std::string& newfullpath)
