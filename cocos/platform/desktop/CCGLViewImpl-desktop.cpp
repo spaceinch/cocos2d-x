@@ -317,8 +317,12 @@ GLViewImpl* GLViewImpl::create(const std::string& viewName)
 
 GLViewImpl* GLViewImpl::create(const std::string& viewName, bool resizable)
 {
+	RECT workarea;
+	SystemParametersInfo(SPI_GETWORKAREA, 0, &workarea, 0);
+	int windowHeight = workarea.bottom - 30; //30 is the size of the windows top bar
+	
     auto ret = new (std::nothrow) GLViewImpl;
-    if(ret && ret->initWithRect(viewName, Rect(0, 0, 640, 960), 1.0f, resizable)) {
+    if(ret && ret->initWithRect(viewName, Rect(0, 0, windowHeight - (windowHeight / 3), windowHeight), 1.0f, resizable)) {
         ret->autorelease();
         return ret;
     }
@@ -363,6 +367,9 @@ bool GLViewImpl::initWithRect(const std::string& viewName, Rect rect, float fram
 {
     setViewName(viewName);
 
+	RECT workarea;
+	SystemParametersInfo(SPI_GETWORKAREA, 0, &workarea, 0);
+
     _frameZoomFactor = frameZoomFactor;
 
     glfwWindowHint(GLFW_RESIZABLE,resizable?GL_TRUE:GL_FALSE);
@@ -377,6 +384,7 @@ bool GLViewImpl::initWithRect(const std::string& viewName, Rect rect, float fram
     int neededHeight = rect.size.height * _frameZoomFactor;
 
     _mainWindow = glfwCreateWindow(neededWidth, neededHeight, _viewName.c_str(), _monitor, nullptr);
+	glfwSetWindowPos(_mainWindow, (workarea.right / 3) , 30);
 
     if (_mainWindow == nullptr)
     {
