@@ -82,6 +82,36 @@ FontAtlas::FontAtlas(Font &theFont)
     }
 }
 
+void FontAtlas::reinit()
+{
+    if (_currentPageData)
+    {
+        delete []_currentPageData;
+        _currentPageData = nullptr;
+    }
+    
+    auto texture = new (std::nothrow) Texture2D;
+    
+    _currentPageDataSize = CacheTextureWidth * CacheTextureHeight;
+    
+    auto outlineSize = _fontFreeType->getOutlineSize();
+    if(outlineSize > 0)
+    {
+        _lineHeight += 2 * outlineSize;
+        _currentPageDataSize *= 2;
+    }
+    
+    _currentPageData = new (std::nothrow) unsigned char[_currentPageDataSize];
+    memset(_currentPageData, 0, _currentPageDataSize);
+    
+    auto  pixelFormat = outlineSize > 0 ? Texture2D::PixelFormat::AI88 : Texture2D::PixelFormat::A8;
+    texture->initWithData(_currentPageData, _currentPageDataSize,
+                          pixelFormat, CacheTextureWidth, CacheTextureHeight, Size(CacheTextureWidth,CacheTextureHeight) );
+    
+    addTexture(texture,0);
+    texture->release();
+}
+
 FontAtlas::~FontAtlas()
 {
 #if CC_ENABLE_CACHE_TEXTURE_DATA
@@ -431,6 +461,8 @@ bool FontAtlas::prepareLetterDefinitions(const std::u32string& utf32Text)
             tempDef.V = tempDef.V / scaleFactor;
         }
         else{
+            if(bitmap)
+                delete[] bitmap;
             if (tempDef.xAdvance)
                 tempDef.validDefinition = true;
             else

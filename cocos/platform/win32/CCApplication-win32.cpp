@@ -151,6 +151,11 @@ void Application::setAnimationInterval(float interval)
     _animationInterval.QuadPart = (LONGLONG)(interval * freq.QuadPart);
 }
 
+void Application::setAnimationInterval(float interval, SetIntervalReason reason)
+{
+    setAnimationInterval(interval);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // static member function
 //////////////////////////////////////////////////////////////////////////
