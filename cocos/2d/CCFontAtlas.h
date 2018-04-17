@@ -112,8 +112,6 @@ protected:
     void reset();
     void reinit();
     
-    void reinit();
-    
     void releaseTextures();
 
     void findNewCharacters(const std::u32string& u32Text, std::unordered_map<unsigned int, unsigned int>& charCodeMap);
