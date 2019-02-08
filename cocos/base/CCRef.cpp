@@ -27,6 +27,7 @@ THE SOFTWARE.
 #include "base/CCAutoreleasePool.h"
 #include "base/ccMacros.h"
 #include "base/CCScriptSupport.h"
+#include "2d/CCSprite.h"
 
 #if CC_REF_LEAK_DETECTION
 #include <algorithm>    // std::find
@@ -182,7 +183,14 @@ void Ref::printLeaks()
         {
             CC_ASSERT(ref);
             const char* type = typeid(*ref).name();
-            log("[memory] LEAK: Ref object '%s' still active with reference count %d.\n", (type ? type : ""), ref->getReferenceCount());
+            if (strcmp(type, "N7cocos2d6SpriteE") == 0)
+            {
+                log("[memory] LEAK: Ref object '%s' still active with reference count %d, desc: '%s'.\n", (type ? type : ""), ref->getReferenceCount(), ((Sprite*) ref)->getDescription().c_str());
+            }
+            else
+            {
+                log("[memory] LEAK: Ref object '%s' still active with reference count %d.\n", (type ? type : ""), ref->getReferenceCount());
+            }
         }
     }
 }
