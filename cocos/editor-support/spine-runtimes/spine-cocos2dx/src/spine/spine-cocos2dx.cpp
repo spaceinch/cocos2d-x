@@ -29,8 +29,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#include <spine/spine-cocos2dx.h>
-#include <spine/extension.h>
+#include "spine/spine-cocos2dx.h"
+#include "spine/extension.h"
 
 USING_NS_CC;
 

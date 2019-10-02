@@ -2,6 +2,7 @@
  Copyright (c) 2010-2012 cocos2d-x.org
  Copyright (c) 2008-2010 Ricardo Quesada
  Copyright (c) 2011      Zynga Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -49,7 +50,7 @@
     "noCache"       : false,
     // "noCache" set whether your resources will be loaded with a timestamp suffix in the url.
     // In this way, your resources will be force updated even if the browser holds a cache of it.
-    // It's very useful for mobile browser debuging.
+    // It's very useful for mobile browser debugging.
 
     "id"            : "gameCanvas",
     // "gameCanvas" sets the id of your canvas element on the web page, it's useful only on web.

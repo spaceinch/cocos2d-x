@@ -1,7 +1,8 @@
 /****************************************************************************
  Copyright (c) 2008-2010 Ricardo Quesada
  Copyright (c) 2011-2012 cocos2d-x.org
- Copyright (c) 2013-2017 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -1234,7 +1235,7 @@ var Sprite3DUVAnimationTest = Sprite3DTestDemo.extend({
     _title:"Testing UV Animation",
     _subtitle:"",
     _cylinder_texture_offset:0,
-    _shining_duraion:0,
+    _shining_duration:0,
     _state:null,
     fade_in:true,
 
@@ -1261,7 +1262,7 @@ var Sprite3DUVAnimationTest = Sprite3DTestDemo.extend({
         cylinder.setGLProgramState(this._state);
 
         this._state.setUniformFloat("offset", this._cylinder_texture_offset);
-        this._state.setUniformFloat("duration", this._shining_duraion);
+        this._state.setUniformFloat("duration", this._shining_duration);
 
         //pass mesh's attribute to shader
         var offset = 0;
@@ -1292,18 +1293,18 @@ var Sprite3DUVAnimationTest = Sprite3DTestDemo.extend({
         this._cylinder_texture_offset = this._cylinder_texture_offset > 1 ? 0 : this._cylinder_texture_offset;
 
         if(this.fade_in){
-            this._shining_duraion += 0.5 * dt;
-            if(this._shining_duraion > 1)
+            this._shining_duration += 0.5 * dt;
+            if(this._shining_duration > 1)
                 this.fade_in = false;
         }else{
-            this._shining_duraion -= 0.5 * dt;
-            if(this._shining_duraion < 0)
+            this._shining_duration -= 0.5 * dt;
+            if(this._shining_duration < 0)
                 this.fade_in = true;
         }
 
         //pass the result to shader
         this._state.setUniformFloat("offset", this._cylinder_texture_offset);
-        this._state.setUniformFloat("duration", this._shining_duraion);
+        this._state.setUniformFloat("duration", this._shining_duration);
     }
 });
 

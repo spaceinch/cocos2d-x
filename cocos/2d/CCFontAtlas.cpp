@@ -1,6 +1,7 @@
 /****************************************************************************
  Copyright (c) 2013      Zynga Inc.
- Copyright (c) 2013-2017 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
  http://www.cocos2d-x.org
 
@@ -70,8 +71,6 @@ FontAtlas::FontAtlas(Font &theFont)
         {
             _letterPadding += 2 * FontFreeType::DistanceMapSpread;    
         }
-        
-        reinit();
 
 #if CC_ENABLE_CACHE_TEXTURE_DATA
         auto eventDispatcher = Director::getInstance()->getEventDispatcher();
@@ -80,31 +79,6 @@ FontAtlas::FontAtlas(Font &theFont)
         eventDispatcher->addEventListenerWithFixedPriority(_rendererRecreatedListener, 1);
 #endif
     }
-}
-
-FontAtlas::~FontAtlas()
-{
-#if CC_ENABLE_CACHE_TEXTURE_DATA
-    if (_fontFreeType && _rendererRecreatedListener)
-    {
-        auto eventDispatcher = Director::getInstance()->getEventDispatcher();
-        eventDispatcher->removeEventListener(_rendererRecreatedListener);
-        _rendererRecreatedListener = nullptr;
-    }
-#endif
-
-    _font->release();
-    releaseTextures();
-
-    delete []_currentPageData;
-
-#if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32 && CC_TARGET_PLATFORM != CC_PLATFORM_WINRT && CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID
-    if (_iconv)
-    {
-        iconv_close(_iconv);
-        _iconv = nullptr;
-    }
-#endif
 }
 
 void FontAtlas::reinit()
@@ -135,6 +109,31 @@ void FontAtlas::reinit()
     
     addTexture(texture,0);
     texture->release();
+}
+
+FontAtlas::~FontAtlas()
+{
+#if CC_ENABLE_CACHE_TEXTURE_DATA
+    if (_fontFreeType && _rendererRecreatedListener)
+    {
+        auto eventDispatcher = Director::getInstance()->getEventDispatcher();
+        eventDispatcher->removeEventListener(_rendererRecreatedListener);
+        _rendererRecreatedListener = nullptr;
+    }
+#endif
+
+    _font->release();
+    releaseTextures();
+
+    delete []_currentPageData;
+
+#if CC_TARGET_PLATFORM != CC_PLATFORM_WIN32 && CC_TARGET_PLATFORM != CC_PLATFORM_WINRT && CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID
+    if (_iconv)
+    {
+        iconv_close(_iconv);
+        _iconv = nullptr;
+    }
+#endif
 }
 
 void FontAtlas::reset()
@@ -342,7 +341,10 @@ bool FontAtlas::prepareLetterDefinitions(const std::u32string& utf32Text)
     {
         return false;
     } 
-    
+ 
+    if (!_currentPageData)
+        reinit();     
+ 
     std::unordered_map<unsigned int, unsigned int> codeMapOfNewChar;
     findNewCharacters(utf32Text, codeMapOfNewChar);
     if (codeMapOfNewChar.empty())
@@ -431,6 +433,8 @@ bool FontAtlas::prepareLetterDefinitions(const std::u32string& utf32Text)
             tempDef.V = tempDef.V / scaleFactor;
         }
         else{
+            if(bitmap)
+                delete[] bitmap;
             if (tempDef.xAdvance)
                 tempDef.validDefinition = true;
             else
@@ -474,9 +478,20 @@ Texture2D* FontAtlas::getTexture(int slot)
     return _atlasTextures[slot];
 }
 
-void  FontAtlas::setLineHeight(float newHeight)
+void FontAtlas::setLineHeight(float newHeight)
 {
     _lineHeight = newHeight;
+}
+
+std::string FontAtlas::getFontName() const
+{
+    std::string fontName = _fontFreeType ? _fontFreeType->getFontName() : "";
+    if(fontName.empty()) return fontName;
+    auto idx = fontName.rfind('/');
+    if (idx != std::string::npos) { return fontName.substr(idx + 1); }
+    idx = fontName.rfind('\\');
+    if (idx != std::string::npos) { return fontName.substr(idx + 1); }
+    return fontName;
 }
 
 void FontAtlas::setAliasTexParameters()

@@ -1,6 +1,7 @@
 /****************************************************************************
  Copyright (c) 2012 cocos2d-x.org
- Copyright (c) 2013-2017 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -26,7 +27,7 @@
 #include "MaterialSystemTest.h"
 
 #include <ctime>
-#include <spine/spine-cocos2dx.h>
+#include "spine/spine-cocos2dx.h"
 
 #include "../testResource.h"
 #include "cocos2d.h"
@@ -464,7 +465,7 @@ void Material_invalidate::onEnter()
     sprite->runAction(repeat);
 
     // SPINE
-    auto skeletonNode = spine::SkeletonAnimation::createWithJsonFile("spine/goblins_mesh.json", "spine/goblins.atlas", 1.5f);
+    auto skeletonNode = spine::SkeletonAnimation::createWithJsonFile("spine/goblins-pro.json", "spine/goblins.atlas", 1.5f);
     skeletonNode->setAnimation(0, "walk", true);
     skeletonNode->setSkin("goblin");
 
@@ -533,7 +534,7 @@ void Material_renderState::onEnter()
     sprite->runAction(repeat);
 
     // SPINE
-    auto skeletonNode = spine::SkeletonAnimation::createWithJsonFile("spine/goblins_mesh.json", "spine/goblins.atlas", 1.5f);
+    auto skeletonNode = spine::SkeletonAnimation::createWithJsonFile("spine/goblins-pro.json", "spine/goblins.atlas", 1.5f);
     skeletonNode->setAnimation(0, "walk", true);
     skeletonNode->setSkin("goblin");
 

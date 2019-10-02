@@ -1,5 +1,6 @@
 /****************************************************************************
-Copyright (c) 2013-2014 Chukong Technologies Inc.
+Copyright (c) 2013-2016 Chukong Technologies Inc.
+Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -31,7 +32,7 @@ THE SOFTWARE.
 #include "editor-support/cocostudio/DictionaryHelper.h"
 #include "editor-support/cocostudio/CocosStudioExport.h"
 
-#include "json/document.h"
+#include "json/document-wrapper.h"
 
 #include <string>
 #include <queue>
@@ -123,7 +124,7 @@ public:
 
     /**
      * Translate XML export from Dragon Bone flash tool to datas, and save them.
-     * When you add a new xml, the data already saved will be keeped.
+     * When you add a new xml, the data already saved will be kept.
      *
      * @param xmlPath The cache of the xml
      */

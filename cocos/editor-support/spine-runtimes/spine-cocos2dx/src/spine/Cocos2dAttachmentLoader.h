@@ -32,7 +32,7 @@
 #ifndef SPINE_COCOS2DATTACHMENTLOADER_H_
 #define SPINE_COCOS2DATTACHMENTLOADER_H_
 
-#include <spine/AtlasAttachmentLoader.h>
+#include "spine/AtlasAttachmentLoader.h"
 
 extern "C" {
 

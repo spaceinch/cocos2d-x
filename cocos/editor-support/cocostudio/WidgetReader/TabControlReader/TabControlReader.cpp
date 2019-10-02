@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2015 Chukong Technologies Inc.
+ Copyright (c) 2015-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
  http://www.cocos2d-x.org
  
@@ -986,19 +987,19 @@ flatbuffers::Offset<flatbuffers::TabItemOption> TabItemReader::createTabItemOpti
     return  *(&options);
 }
 
-void TabItemReader::setPropsWithFlatBuffers(cocos2d::Node* node, const flatbuffers::Table* nodeOption)
+void TabItemReader::setPropsWithFlatBuffers(cocos2d::Node* /*node*/, const flatbuffers::Table* /*nodeOption*/)
 {
     // do nothing
 }
 
-cocos2d::Node* TabItemReader::createNodeWithFlatBuffers(const flatbuffers::Table* nodeOptions)
+cocos2d::Node* TabItemReader::createNodeWithFlatBuffers(const flatbuffers::Table* /*nodeOptions*/)
 {
     // do nothing
     return nullptr;
 }
 
 flatbuffers::Offset<flatbuffers::Table> TabItemReader::createOptionsWithFlatBuffers(
-                                                                                    const tinyxml2::XMLElement* objectData, flatbuffers::FlatBufferBuilder* builder)
+                                                                                    const tinyxml2::XMLElement* /*objectData*/, flatbuffers::FlatBufferBuilder* /*builder*/)
 {
     
     // nothing

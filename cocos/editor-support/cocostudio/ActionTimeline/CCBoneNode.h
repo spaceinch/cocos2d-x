@@ -1,5 +1,6 @@
 /****************************************************************************
-Copyright (c) 2015 Chukong Technologies Inc.
+Copyright (c) 2015-2016 Chukong Technologies Inc.
+Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
 http://www.cocos2d-x.org
 
@@ -110,7 +111,7 @@ public:
     virtual const cocos2d::BlendFunc & getBlendFunc() const override { return _blendFunc; }
 
     // debug draw show, bone's debugdraw can be draw when bone is visible
-    // when bone's added to skeleton, DebugDrawEnabled controled by skeleton's DebugDrawEnabled
+    // when bone's added to skeleton, DebugDrawEnabled controlled by skeleton's DebugDrawEnabled
     virtual void setDebugDrawEnabled(bool isDebugDraw);
     virtual bool isDebugDrawEnabled() const { return _isRackShow; }
 

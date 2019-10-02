@@ -1,5 +1,6 @@
 /****************************************************************************
- Copyright (c) 2013-2017 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
  
  http://www.cocos2d-x.org
  
@@ -815,7 +816,7 @@ bool UIS9Flip::init()
                 flipYLabel->setString("sprite is flipped!");
             }
             else{
-                flipYLabel->setString("sprpite is not flipped!");
+                flipYLabel->setString("sprite is not flipped!");
             }
         });
         this->addChild(toggleFlipYButton);
@@ -852,7 +853,7 @@ bool UIS9Flip::init()
                 flipYLabel->setString("sprite is flipped!");
             }
             else{
-                flipYLabel->setString("sprpite is not flipped!");
+                flipYLabel->setString("sprite is not flipped!");
             }
             
         });

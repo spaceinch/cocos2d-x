@@ -1,6 +1,7 @@
 /****************************************************************************
  Copyright (c) 2011-2012 cocos2d-x.org
- Copyright (c) 2013-2017 Chukong Technologies Inc.
+ Copyright (c) 2013-2016 Chukong Technologies Inc.
+ Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos2d-x.org
 
@@ -135,7 +136,7 @@ bool LuaStack::init(void)
     toluafix_open(_state);
 
     // Register our version of the global "print" function
-    const luaL_reg global_functions [] = {
+    const luaL_Reg global_functions [] = {
         {"print", lua_print},
         {"release_print",lua_release_print},
         {nullptr, nullptr}
@@ -259,18 +260,19 @@ int LuaStack::executeScriptFile(const char* filename)
     }
 
     FileUtils *utils = FileUtils::getInstance();
+
     //
-    // 1. check .lua suffix
-    // 2. check .luac suffix
+    // 1. check .luac suffix
+    // 2. check .lua suffix
     //
-    std::string tmpfilename = buf + NOT_BYTECODE_FILE_EXT;
+    std::string tmpfilename = buf + BYTECODE_FILE_EXT;
     if (utils->isFileExist(tmpfilename))
     {
         buf = tmpfilename;
     }
     else
     {
-        tmpfilename = buf + BYTECODE_FILE_EXT;
+        tmpfilename = buf + NOT_BYTECODE_FILE_EXT;
         if (utils->isFileExist(tmpfilename))
         {
             buf = tmpfilename;
@@ -873,8 +875,10 @@ int LuaStack::luaLoadBuffer(lua_State *L, const char *chunk, int chunkSize, cons
                                               (unsigned char*)_xxteaKey,
                                               (xxtea_long)_xxteaKeyLen,
                                               &len);
-        skipBOM((const char*&)result, (int&)len);
-        r = luaL_loadbuffer(L, (char*)result, len, chunkName);
+        unsigned char* content = result;
+        xxtea_long contentSize = len;
+        skipBOM((const char*&)content, (int&)contentSize);
+        r = luaL_loadbuffer(L, (char*)content, contentSize, chunkName);
         free(result);
     }
     else

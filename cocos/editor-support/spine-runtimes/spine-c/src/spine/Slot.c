@@ -29,8 +29,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#include <spine/Slot.h>
-#include <spine/extension.h>
+#include "spine/Slot.h"
+#include "spine/extension.h"
 
 typedef struct {
 	spSlot super;
@@ -41,12 +41,15 @@ spSlot* spSlot_create (spSlotData* data, spBone* bone) {
 	spSlot* self = SUPER(NEW(_spSlot));
 	CONST_CAST(spSlotData*, self->data) = data;
 	CONST_CAST(spBone*, self->bone) = bone;
+	spColor_setFromFloats(&self->color, 1, 1, 1, 1);
+	self->darkColor = data->darkColor == 0 ? 0 : spColor_create();
 	spSlot_setToSetupPose(self);
 	return self;
 }
 
 void spSlot_dispose (spSlot* self) {
 	FREE(self->attachmentVertices);
+	FREE(self->darkColor);
 	FREE(self);
 }
 
@@ -66,10 +69,8 @@ float spSlot_getAttachmentTime (const spSlot* self) {
 }
 
 void spSlot_setToSetupPose (spSlot* self) {
-	self->r = self->data->r;
-	self->g = self->data->g;
-	self->b = self->data->b;
-	self->a = self->data->a;
+	spColor_setFromColor(&self->color, &self->data->color);
+	if (self->darkColor) spColor_setFromColor(self->darkColor, self->data->darkColor);
 
 	if (!self->data->attachmentName)
 		spSlot_setAttachment(self, 0);
