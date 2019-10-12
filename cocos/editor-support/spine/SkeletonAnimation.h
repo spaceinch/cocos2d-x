@@ -103,7 +103,7 @@ public:
 CC_CONSTRUCTOR_ACCESS:
 	SkeletonAnimation ();
 	virtual ~SkeletonAnimation ();
-	virtual void initialize () override;
+	virtual void initialize ();
 
 protected:
 	spAnimationState* _state;
