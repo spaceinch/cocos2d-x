@@ -637,21 +637,21 @@ Frame* ActionTimelineCache::loadVisibleFrameWithFlatBuffers(const flatbuffers::B
     return frame;
 }
     
-Frame* ActionTimelineCache::loadPositionFrameWithFlatBuffers(const flatbuffers::PointFrame *flatbuffers)
+Frame* ActionTimelineCache::loadPositionFrameWithFlatBuffers(const flatbuffers::PointFrame *flatbuffers_p)
 {
     PositionFrame* frame = PositionFrame::create();
     
-    auto f_position = flatbuffers->postion();
+    auto f_position = flatbuffers_p->position();
     Vec2 position(f_position->x(), f_position->y());
     frame->setPosition(position);
     
-    int frameIndex = flatbuffers->frameIndex();
+    int frameIndex = flatbuffers_p->frameIndex();
     frame->setFrameIndex(frameIndex);
     
-    bool tween = flatbuffers->tween() != 0;
+    bool tween = flatbuffers_p->tween() != 0;
     frame->setTween(tween);
     
-    auto easingData = flatbuffers->easingData();
+    auto easingData = flatbuffers_p->easingData();
     if (easingData)
     {
         loadEasingDataWithFlatBuffers(frame, easingData);
