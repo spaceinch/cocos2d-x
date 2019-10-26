@@ -288,6 +288,8 @@ THE SOFTWARE.
 // vr
 #include "vr/CCVRGenericRenderer.h"
 
+// Spaceinch
+#include "ui/CocosGUI.h"
 
 // Deprecated
 // All deprecated features are include inside deprecated/CCDeprecated.h.
