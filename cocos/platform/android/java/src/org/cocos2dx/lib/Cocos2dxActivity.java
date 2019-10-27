@@ -130,11 +130,8 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     protected void onCreate(final Bundle savedInstanceState) {
         sContext = this;
       
-      Log.d("cocos2dx", "onCreate 1");
-      
         super.onCreate(savedInstanceState);
       
-      Log.d("cocos2dx", "onCreate 2");
 
         // Workaround in https://stackoverflow.com/questions/16283079/re-launch-of-activity-on-home-button-but-only-the-first-time/16447508
         /*if (!isTaskRoot()) {
@@ -146,28 +143,16 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
             return;
         }*/
       
-      Log.d("cocos2dx", "onCreate 3");
-
         this.hideVirtualButton();
       
-      Log.d("cocos2dx", "onCreate 4");
-
         onLoadNativeLibraries();
       
-      Log.d("cocos2dx", "onCreate 5");
-
         this.mHandler = new Cocos2dxHandler(this);
       
-      Log.d("cocos2dx", "onCreate 6");
-        
         Cocos2dxHelper.init(this);
-      
-      Log.d("cocos2dx", "onCreate 7");
-        
+
         this.mGLContextAttrs = getGLContextAttrs();
         this.init();
-      
-      Log.d("cocos2dx", "onCreate 8");
 
         if (mVideoHelper == null) {
             mVideoHelper = new Cocos2dxVideoHelper(this, mFrameLayout);
@@ -181,13 +166,9 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
             mEditBoxHelper = new Cocos2dxEditBoxHelper(mFrameLayout);
         }
       
-      Log.d("cocos2dx", "onCreate 9");
-
         Window window = this.getWindow();
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
       
-      Log.d("cocos2dx", "onCreate 10");
-
         // Audio configuration
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
