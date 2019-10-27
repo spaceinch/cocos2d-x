@@ -110,10 +110,13 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
     protected void onLoadNativeLibraries() {
         try {
+          Log.d("cocos2dx", "LOAD LIBRARY A");
             ApplicationInfo ai = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
-            String libName = bundle.getString("android.app.lib_name");
+            String libName = bundle.getString("cocos2dcpp");
+          Log.d("cocos2dx", "LOAD LIBRARY");
             System.loadLibrary(libName);
+          Log.d("cocos2dx", "LOAD LIBRARY DONE");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -125,29 +128,46 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        sContext = this;
+      
+      Log.d("cocos2dx", "onCreate 1");
+      
         super.onCreate(savedInstanceState);
+      
+      Log.d("cocos2dx", "onCreate 2");
 
         // Workaround in https://stackoverflow.com/questions/16283079/re-launch-of-activity-on-home-button-but-only-the-first-time/16447508
-        if (!isTaskRoot()) {
+        /*if (!isTaskRoot()) {
             // Android launched another instance of the root activity into an existing task
             //  so just quietly finish and go away, dropping the user back into the activity
             //  at the top of the stack (ie: the last state of this task)
             finish();
             Log.w(TAG, "[Workaround] Ignore the activity started from icon!");
             return;
-        }
+        }*/
+      
+      Log.d("cocos2dx", "onCreate 3");
 
         this.hideVirtualButton();
+      
+      Log.d("cocos2dx", "onCreate 4");
 
         onLoadNativeLibraries();
+      
+      Log.d("cocos2dx", "onCreate 5");
 
-        sContext = this;
         this.mHandler = new Cocos2dxHandler(this);
+      
+      Log.d("cocos2dx", "onCreate 6");
         
         Cocos2dxHelper.init(this);
+      
+      Log.d("cocos2dx", "onCreate 7");
         
         this.mGLContextAttrs = getGLContextAttrs();
         this.init();
+      
+      Log.d("cocos2dx", "onCreate 8");
 
         if (mVideoHelper == null) {
             mVideoHelper = new Cocos2dxVideoHelper(this, mFrameLayout);
@@ -160,9 +180,13 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         if(mEditBoxHelper == null){
             mEditBoxHelper = new Cocos2dxEditBoxHelper(mFrameLayout);
         }
+      
+      Log.d("cocos2dx", "onCreate 9");
 
         Window window = this.getWindow();
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+      
+      Log.d("cocos2dx", "onCreate 10");
 
         // Audio configuration
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
