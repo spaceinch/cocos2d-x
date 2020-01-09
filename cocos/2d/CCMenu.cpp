@@ -273,7 +273,7 @@ bool Menu::onTouchBegan(Touch* touch, Event* /*event*/)
         _state = Menu::State::TRACKING_TOUCH;
         _selectedWithCamera = camera;
         _selectedItem->selected();
-        
+
         return true;
     }
     
@@ -282,28 +282,34 @@ bool Menu::onTouchBegan(Touch* touch, Event* /*event*/)
 
 void Menu::onTouchEnded(Touch* /*touch*/, Event* /*event*/)
 {
+    retain();
+  
     CCASSERT(_state == Menu::State::TRACKING_TOUCH, "[Menu ccTouchEnded] -- invalid state");
-    this->retain();
     if (_selectedItem)
     {
-        _selectedItem->unselected();
-        _selectedItem->activate();
+      auto selectedItem = _selectedItem;
+      _selectedItem = nullptr;
+      
+      selectedItem->retain();
+      selectedItem->unselected();
+      selectedItem->activate();
+      selectedItem->release();
     }
     _state = Menu::State::WAITING;
     _selectedWithCamera = nullptr;
-    this->release();
+  
+    release();
 }
 
 void Menu::onTouchCancelled(Touch* /*touch*/, Event* /*event*/)
 {
     CCASSERT(_state == Menu::State::TRACKING_TOUCH, "[Menu ccTouchCancelled] -- invalid state");
-    this->retain();
     if (_selectedItem)
     {
         _selectedItem->unselected();
+        _selectedItem = nullptr;
     }
     _state = Menu::State::WAITING;
-    this->release();
 }
 
 void Menu::onTouchMoved(Touch* touch, Event* /*event*/)
