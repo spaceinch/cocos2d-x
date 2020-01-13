@@ -33,9 +33,36 @@ namespace cocosbuilder {
 
 void MenuItemLoader::onHandlePropTypeBlock(Node * pNode, Node * pParent, const char * pPropertyName, BlockData * pBlockData, CCBReader * ccbReader) {
     if(strcmp(pPropertyName, PROPERTY_BLOCK) == 0) {
-        if (nullptr != pBlockData) // Add this condition to allow MenuItemImage without target/selector predefined 
+      
+      
+        if (nullptr != pBlockData
+            && nullptr != pBlockData->_target // MJM, CHECK HERE
+            && nullptr != pBlockData->mSELMenuHandler) // Add this condition to allow MenuItemImage without target/selector predefined
         {
-            ((MenuItem *)pNode)->setCallback( std::bind( pBlockData->mSELMenuHandler, pBlockData->_target, std::placeholders::_1) );
+          // ((MenuItem *)pNode)->setCallback( std::bind( pBlockData->mSELMenuHandler, pBlockData->_target, std::placeholders::_1) );
+          //std::bind( pBlockData->mSELMenuHandler, pBlockData->_target, std::placeholders::_1);
+          
+          // MJM, MEM LEAK THIS, NEVER DESTROY
+          // cocos2dx may destroy the original
+          BlockData* data = new BlockData();
+          data->_target = pBlockData->_target;
+          data->mSELMenuHandler = pBlockData->mSELMenuHandler;
+          
+           ((MenuItem *)pNode)->setCallback([=](Ref* sender){
+            /*if ( data->_target != nullptr &&
+                 data->mSELMenuHandler != nullptr)
+            {*/
+              auto obj = data->_target;
+              auto func = data->mSELMenuHandler;
+              (obj->*(func))(sender);
+           });
+
+            //((*(pBlockData->_target)).*pBlockData->mSELMenuHandler)(sender);
+            
+            //auto call = pBlockData->mSELMenuHandler;
+            //(*call)(pBlockData->_target, sender);
+         // });
+            ///std::bind( pBlockData->mSELMenuHandler, pBlockData->_target, std::placeholders::_1) );
 //            ((MenuItem *)pNode)->setTarget(pBlockData->_target, pBlockData->mSELMenuHandler);
         }
     } else {

@@ -113,7 +113,8 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
           Log.d("cocos2dx", "LOAD LIBRARY A");
             ApplicationInfo ai = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
-            String libName = bundle.getString("cocos2dcpp");
+            //String libName = bundle.getString("cocos2dcpp");
+            String libName = bundle.getString("android.app.lib_name");
           Log.d("cocos2dx", "LOAD LIBRARY");
             System.loadLibrary(libName);
           Log.d("cocos2dx", "LOAD LIBRARY DONE");
