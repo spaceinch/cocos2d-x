@@ -108,6 +108,10 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
         }
     }
 
+    public void onDestroy() {
+        Cocos2dxRenderer.nativeOnDestroy();
+    }
+
     // ===========================================================
     // Methods
     // ===========================================================
@@ -122,6 +126,7 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
     private static native void nativeOnSurfaceChanged(final int width, final int height);
     private static native void nativeOnPause();
     private static native void nativeOnResume();
+    private static native void nativeOnDestroy();
 
     public void handleActionDown(final int id, final float x, final float y) {
         Cocos2dxRenderer.nativeTouchesBegin(id, x, y);

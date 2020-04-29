@@ -202,6 +202,10 @@ public class Cocos2dxGLSurfaceView extends GLSurfaceView {
         super.onPause();
     }
 
+    public void onDestroy() {
+        mCocos2dxRenderer.onDestroy();
+    }
+
     @Override
     public boolean onTouchEvent(final MotionEvent pMotionEvent) {
         // these data are used in ACTION_MOVE and ACTION_CANCEL

@@ -140,6 +140,12 @@ JNIEXPORT void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnSurfaceChanged(JNI
     cocos2d::Application::getInstance()->applicationScreenSizeChanged(w, h);
 }
 
+JNIEXPORT void Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeOnDestroy(JNIEnv*  env, jobject thiz)
+{
+    auto director = cocos2d::Director::getInstance();
+    director->end();
+}
+
 }
 
 #endif // CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
