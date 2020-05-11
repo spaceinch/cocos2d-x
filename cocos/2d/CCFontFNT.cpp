@@ -36,6 +36,7 @@
 #include <cmath>
 #include <set>
 #include <unordered_map>
+#include <regex>
 
 NS_CC_BEGIN
 
@@ -178,8 +179,10 @@ BMFontConfiguration* FNTConfigLoadFile(const std::string& fntFile)
 
 BMFontConfiguration * BMFontConfiguration::create(const std::string& FNTfile)
 {
+    const std::string FNTfileReplacement = std::regex_replace(FNTfile, std::regex("Shag-Lounge"), "Dimbo");
+
     BMFontConfiguration * ret = new (std::nothrow) BMFontConfiguration();
-    if (ret->initWithFNTfile(FNTfile))
+    if (ret->initWithFNTfile(FNTfileReplacement))
     {
         ret->autorelease();
         return ret;

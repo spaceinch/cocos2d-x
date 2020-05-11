@@ -22,7 +22,7 @@
  THE SOFTWARE.
  ****************************************************************************/
 
-
+#include <regex>
 
 #include "editor-support/cocostudio/WidgetReader/TextBMFontReader/TextBMFontReader.h"
 
@@ -232,6 +232,7 @@ namespace cocostudio
         std::string errorFilePath = "";
         std::string errorContent = "";
         std::string path = cmftDic->path()->c_str();
+        path = std::regex_replace(path, std::regex("Shag-Lounge"), "Dimbo");
         int cmfType = cmftDic->resourceType();
         switch (cmfType)
         {
