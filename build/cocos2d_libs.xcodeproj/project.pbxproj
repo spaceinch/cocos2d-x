@@ -1149,14 +1149,6 @@
 		292DB16019B461CA00A80320 /* ExtensionDeprecated.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 292DB15D19B461CA00A80320 /* ExtensionDeprecated.cpp */; };
 		292DB16119B461CA00A80320 /* ExtensionDeprecated.h in Headers */ = {isa = PBXBuildFile; fileRef = 292DB15E19B461CA00A80320 /* ExtensionDeprecated.h */; };
 		292DB16219B461CA00A80320 /* ExtensionDeprecated.h in Headers */ = {isa = PBXBuildFile; fileRef = 292DB15E19B461CA00A80320 /* ExtensionDeprecated.h */; };
-		29394CF019B01DBA00D2DE1A /* UIWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = 29394CEC19B01DBA00D2DE1A /* UIWebView.h */; };
-		29394CF119B01DBA00D2DE1A /* UIWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = 29394CEC19B01DBA00D2DE1A /* UIWebView.h */; };
-		29394CF219B01DBA00D2DE1A /* UIWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 29394CED19B01DBA00D2DE1A /* UIWebView.mm */; };
-		29394CF319B01DBA00D2DE1A /* UIWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 29394CED19B01DBA00D2DE1A /* UIWebView.mm */; };
-		29394CF419B01DBA00D2DE1A /* UIWebViewImpl-ios.h in Headers */ = {isa = PBXBuildFile; fileRef = 29394CEE19B01DBA00D2DE1A /* UIWebViewImpl-ios.h */; };
-		29394CF519B01DBA00D2DE1A /* UIWebViewImpl-ios.h in Headers */ = {isa = PBXBuildFile; fileRef = 29394CEE19B01DBA00D2DE1A /* UIWebViewImpl-ios.h */; };
-		29394CF619B01DBA00D2DE1A /* UIWebViewImpl-ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 29394CEF19B01DBA00D2DE1A /* UIWebViewImpl-ios.mm */; };
-		29394CF719B01DBA00D2DE1A /* UIWebViewImpl-ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 29394CEF19B01DBA00D2DE1A /* UIWebViewImpl-ios.mm */; };
 		294D7D941D0E67B4002CE7B7 /* CCDevice-apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = 294D7D921D0E67B4002CE7B7 /* CCDevice-apple.mm */; };
 		294D7D951D0E67B4002CE7B7 /* CCDevice-apple.mm in Sources */ = {isa = PBXBuildFile; fileRef = 294D7D921D0E67B4002CE7B7 /* CCDevice-apple.mm */; };
 		294D7D961D0E67B4002CE7B7 /* CCDevice-apple.h in Headers */ = {isa = PBXBuildFile; fileRef = 294D7D931D0E67B4002CE7B7 /* CCDevice-apple.h */; };
@@ -2052,7 +2044,6 @@
 		507B3B501C31BDD30067B53E /* CCPUDoEnableComponentEventHandlerTranslator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B665E1021AA80A6500DDB1C5 /* CCPUDoEnableComponentEventHandlerTranslator.cpp */; };
 		507B3B511C31BDD30067B53E /* CCTransition.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A5701D8180BCB8C0088DEC7 /* CCTransition.cpp */; };
 		507B3B531C31BDD30067B53E /* CCEventAssetsManagerEx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 15B3707019EE414C00ABE682 /* CCEventAssetsManagerEx.cpp */; };
-		507B3B541C31BDD30067B53E /* UIWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 29394CED19B01DBA00D2DE1A /* UIWebView.mm */; };
 		507B3B551C31BDD30067B53E /* CCLabelBMFontLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1AD71D0E180E26E600808F54 /* CCLabelBMFontLoader.cpp */; };
 		507B3B571C31BDD30067B53E /* CCPUCollisionAvoidanceAffectorTranslator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B665E0F61AA80A6500DDB1C5 /* CCPUCollisionAvoidanceAffectorTranslator.cpp */; };
 		507B3B581C31BDD30067B53E /* CCThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50ABBF2B1926664700A911A9 /* CCThread.cpp */; };
@@ -2112,7 +2103,6 @@
 		507B3B9B1C31BDD30067B53E /* CCNodeLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1AD71D1F180E26E600808F54 /* CCNodeLoader.cpp */; };
 		507B3B9C1C31BDD30067B53E /* CCPUVelocityMatchingAffectorTranslator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B665E1EA1AA80A6500DDB1C5 /* CCPUVelocityMatchingAffectorTranslator.cpp */; };
 		507B3B9D1C31BDD30067B53E /* WidgetCallBackHandlerProtocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38ACD1FA1A27111900C3093D /* WidgetCallBackHandlerProtocol.cpp */; };
-		507B3B9E1C31BDD30067B53E /* UIWebViewImpl-ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = 29394CEF19B01DBA00D2DE1A /* UIWebViewImpl-ios.mm */; };
 		507B3B9F1C31BDD30067B53E /* CCPUGeometryRotatorTranslator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B665E1341AA80A6500DDB1C5 /* CCPUGeometryRotatorTranslator.cpp */; };
 		507B3BA31C31BDD30067B53E /* CCFastTMXLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B24AA981195A675C007B4522 /* CCFastTMXLayer.cpp */; };
 		507B3BA41C31BDD30067B53E /* CCParticleSystemQuad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A57021F180BCC1A0088DEC7 /* CCParticleSystemQuad.cpp */; };
@@ -2584,7 +2574,6 @@
 		507B3E2C1C31BDD30067B53E /* CCGrabber.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A570118180BC90D0088DEC7 /* CCGrabber.h */; };
 		507B3E2F1C31BDD30067B53E /* CCGrid.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A57011A180BC90D0088DEC7 /* CCGrid.h */; };
 		507B3E321C31BDD30067B53E /* ccShader_PositionTextureA8Color.frag in Headers */ = {isa = PBXBuildFile; fileRef = 5034CA01191D591000CE6051 /* ccShader_PositionTextureA8Color.frag */; };
-		507B3E351C31BDD30067B53E /* UIWebViewImpl-ios.h in Headers */ = {isa = PBXBuildFile; fileRef = 29394CEE19B01DBA00D2DE1A /* UIWebViewImpl-ios.h */; };
 		507B3E361C31BDD30067B53E /* Vec2.h in Headers */ = {isa = PBXBuildFile; fileRef = 50ABBD301925AB0000A911A9 /* Vec2.h */; };
 		507B3E371C31BDD30067B53E /* CCComExtensionData.h in Headers */ = {isa = PBXBuildFile; fileRef = 43015DBE1B60DF4000E75161 /* CCComExtensionData.h */; };
 		507B3E381C31BDD30067B53E /* CCAllocatorStrategyGlobalSmallBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = D0FD03451A3B51AA00825BB5 /* CCAllocatorStrategyGlobalSmallBlock.h */; };
@@ -2747,7 +2736,6 @@
 		507B3F251C31BDD30067B53E /* CCPUUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = B665E1E71AA80A6500DDB1C5 /* CCPUUtil.h */; };
 		507B3F261C31BDD30067B53E /* UILayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 2905F9F918CF08D000240AA3 /* UILayout.h */; };
 		507B3F271C31BDD30067B53E /* CCParticleSystemQuad.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A570220180BCC1A0088DEC7 /* CCParticleSystemQuad.h */; };
-		507B3F291C31BDD30067B53E /* UIWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = 29394CEC19B01DBA00D2DE1A /* UIWebView.h */; };
 		507B3F2A1C31BDD30067B53E /* CCUISingleLineTextField.h in Headers */ = {isa = PBXBuildFile; fileRef = 2980F01B1BA9A5550059E678 /* CCUISingleLineTextField.h */; };
 		507B3F2C1C31BDD30067B53E /* CCBSelectorResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = 1AD71D03180E26E600808F54 /* CCBSelectorResolver.h */; };
 		507B3F2D1C31BDD30067B53E /* CCFastTMXLayer.h in Headers */ = {isa = PBXBuildFile; fileRef = B24AA982195A675C007B4522 /* CCFastTMXLayer.h */; };
@@ -4955,10 +4943,6 @@
 		292F1A611A52447100E479F8 /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl.a; path = ../external/curl/prebuilt/mac/libcurl.a; sourceTree = "<group>"; };
 		292F1A661A524F2700E479F8 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = usr/lib/libssl.dylib; sourceTree = SDKROOT; };
 		292F1A6A1A5250F700E479F8 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = ../external/curl/prebuilt/mac/libssl.a; sourceTree = "<group>"; };
-		29394CEC19B01DBA00D2DE1A /* UIWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIWebView.h; sourceTree = "<group>"; };
-		29394CED19B01DBA00D2DE1A /* UIWebView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UIWebView.mm; sourceTree = "<group>"; };
-		29394CEE19B01DBA00D2DE1A /* UIWebViewImpl-ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebViewImpl-ios.h"; sourceTree = "<group>"; };
-		29394CEF19B01DBA00D2DE1A /* UIWebViewImpl-ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "UIWebViewImpl-ios.mm"; sourceTree = "<group>"; };
 		294D7D921D0E67B4002CE7B7 /* CCDevice-apple.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "CCDevice-apple.mm"; sourceTree = "<group>"; };
 		294D7D931D0E67B4002CE7B7 /* CCDevice-apple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CCDevice-apple.h"; sourceTree = "<group>"; };
 		2958244919873D8E00F9746D /* UIScale9Sprite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIScale9Sprite.cpp; sourceTree = "<group>"; };
@@ -7579,10 +7563,6 @@
 		29CB8F521929D65500C841D6 /* experimental */ = {
 			isa = PBXGroup;
 			children = (
-				29394CEC19B01DBA00D2DE1A /* UIWebView.h */,
-				29394CED19B01DBA00D2DE1A /* UIWebView.mm */,
-				29394CEE19B01DBA00D2DE1A /* UIWebViewImpl-ios.h */,
-				29394CEF19B01DBA00D2DE1A /* UIWebViewImpl-ios.mm */,
 				3EA0FB69191C841D00B170C8 /* UIVideoPlayer.h */,
 				3EA0FB6A191C841D00B170C8 /* UIVideoPlayer-ios.mm */,
 			);
@@ -9265,7 +9245,6 @@
 				5020A1651D49912500E80C72 /* Atlas.h in Headers */,
 				1A570093180BC5A10088DEC7 /* CCActionTween.h in Headers */,
 				50ABBD4A1925AB0000A911A9 /* Mat4.h in Headers */,
-				29394CF419B01DBA00D2DE1A /* UIWebViewImpl-ios.h in Headers */,
 				B665E3C01AA80A6500DDB1C5 /* CCPUScaleAffector.h in Headers */,
 				B665E2401AA80A6500DDB1C5 /* CCPUCircleEmitterTranslator.h in Headers */,
 				1A57009A180BC5C10088DEC7 /* CCAtlasNode.h in Headers */,
@@ -9597,7 +9576,6 @@
 				50ABBDA11925AB4100A911A9 /* CCGroupCommand.h in Headers */,
 				50864C911C7BC1B000B3BAB1 /* chipmunk_private.h in Headers */,
 				B665E24C1AA80A6500DDB1C5 /* CCPUColorAffector.h in Headers */,
-				29394CF019B01DBA00D2DE1A /* UIWebView.h in Headers */,
 				15AE186519AAD31D00C27E9E /* CDOpenALSupport.h in Headers */,
 				B6CAAFE81AF9A9E100B9B856 /* CCPhysics3DComponent.h in Headers */,
 				15AE1B5C19AADA9900C27E9E /* UITextAtlas.h in Headers */,
@@ -10132,7 +10110,6 @@
 				507B3E2F1C31BDD30067B53E /* CCGrid.h in Headers */,
 				507B3E321C31BDD30067B53E /* ccShader_PositionTextureA8Color.frag in Headers */,
 				5020A22A1D49912500E80C72 /* TransformConstraintData.h in Headers */,
-				507B3E351C31BDD30067B53E /* UIWebViewImpl-ios.h in Headers */,
 				507B3E361C31BDD30067B53E /* Vec2.h in Headers */,
 				507B3E371C31BDD30067B53E /* CCComExtensionData.h in Headers */,
 				507B3E381C31BDD30067B53E /* CCAllocatorStrategyGlobalSmallBlock.h in Headers */,
@@ -10325,7 +10302,6 @@
 				507B3F251C31BDD30067B53E /* CCPUUtil.h in Headers */,
 				507B3F261C31BDD30067B53E /* UILayout.h in Headers */,
 				507B3F271C31BDD30067B53E /* CCParticleSystemQuad.h in Headers */,
-				507B3F291C31BDD30067B53E /* UIWebView.h in Headers */,
 				507B3F2A1C31BDD30067B53E /* CCUISingleLineTextField.h in Headers */,
 				1A40D11D1E8E56C7002E363A /* error.h in Headers */,
 				507B3F2C1C31BDD30067B53E /* CCBSelectorResolver.h in Headers */,
@@ -10942,7 +10918,6 @@
 				1A57011E180BC90D0088DEC7 /* CCGrabber.h in Headers */,
 				1A570122180BC90D0088DEC7 /* CCGrid.h in Headers */,
 				5034CA2E191D591100CE6051 /* ccShader_PositionTextureA8Color.frag in Headers */,
-				29394CF519B01DBA00D2DE1A /* UIWebViewImpl-ios.h in Headers */,
 				50ABBD5B1925AB0000A911A9 /* Vec2.h in Headers */,
 				43015DC21B60DF4000E75161 /* CCComExtensionData.h in Headers */,
 				D0FD035E1A3B51AA00825BB5 /* CCAllocatorStrategyGlobalSmallBlock.h in Headers */,
@@ -11142,7 +11117,6 @@
 				15AE1BAC19AADFDF00C27E9E /* UILayout.h in Headers */,
 				1A570230180BCC1A0088DEC7 /* CCParticleSystemQuad.h in Headers */,
 				1A40D11C1E8E56C7002E363A /* error.h in Headers */,
-				29394CF119B01DBA00D2DE1A /* UIWebView.h in Headers */,
 				2980F0261BA9A5550059E678 /* CCUISingleLineTextField.h in Headers */,
 				15AE18B419AAD33D00C27E9E /* CCBSelectorResolver.h in Headers */,
 				B24AA988195A675C007B4522 /* CCFastTMXLayer.h in Headers */,
@@ -11799,7 +11773,6 @@
 				B6DD2FD91B04825B00E47F5F /* DetourLocalBoundary.cpp in Sources */,
 				15AE187A19AAD33D00C27E9E /* CCBAnimationManager.cpp in Sources */,
 				15AE1B6D19AADA9900C27E9E /* UIHelper.cpp in Sources */,
-				29394CF219B01DBA00D2DE1A /* UIWebView.mm in Sources */,
 				A0534A671B872FFD006B03E5 /* CCDownloader-apple.mm in Sources */,
 				B665E2B21AA80A6500DDB1C5 /* CCPUForceField.cpp in Sources */,
 				46BDE4CF1FA86C7F00104C05 /* Triangulator.c in Sources */,
@@ -12079,7 +12052,6 @@
 				B665E4361AA80A6600DDB1C5 /* CCPUVortexAffector.cpp in Sources */,
 				B665E3DE1AA80A6600DDB1C5 /* CCPUSimpleSpline.cpp in Sources */,
 				B665E22E1AA80A6500DDB1C5 /* CCPUBoxColliderTranslator.cpp in Sources */,
-				29394CF619B01DBA00D2DE1A /* UIWebViewImpl-ios.mm in Sources */,
 				50ABBE831925AB6F00A911A9 /* ccFPSImages.c in Sources */,
 				15AE1B7019AADA9900C27E9E /* CocosGUI.cpp in Sources */,
 				50CB247719D9C5A100687767 /* AudioCache.mm in Sources */,
@@ -12579,7 +12551,6 @@
 				507B3B501C31BDD30067B53E /* CCPUDoEnableComponentEventHandlerTranslator.cpp in Sources */,
 				507B3B511C31BDD30067B53E /* CCTransition.cpp in Sources */,
 				507B3B531C31BDD30067B53E /* CCEventAssetsManagerEx.cpp in Sources */,
-				507B3B541C31BDD30067B53E /* UIWebView.mm in Sources */,
 				507B3B551C31BDD30067B53E /* CCLabelBMFontLoader.cpp in Sources */,
 				507B3B571C31BDD30067B53E /* CCPUCollisionAvoidanceAffectorTranslator.cpp in Sources */,
 				507B3B581C31BDD30067B53E /* CCThread.cpp in Sources */,
@@ -12644,7 +12615,6 @@
 				507B3B9B1C31BDD30067B53E /* CCNodeLoader.cpp in Sources */,
 				507B3B9C1C31BDD30067B53E /* CCPUVelocityMatchingAffectorTranslator.cpp in Sources */,
 				507B3B9D1C31BDD30067B53E /* WidgetCallBackHandlerProtocol.cpp in Sources */,
-				507B3B9E1C31BDD30067B53E /* UIWebViewImpl-ios.mm in Sources */,
 				507B3B9F1C31BDD30067B53E /* CCPUGeometryRotatorTranslator.cpp in Sources */,
 				507B3BA31C31BDD30067B53E /* CCFastTMXLayer.cpp in Sources */,
 				507B3BA41C31BDD30067B53E /* CCParticleSystemQuad.cpp in Sources */,
@@ -13248,7 +13218,6 @@
 				B665E25F1AA80A6500DDB1C5 /* CCPUDoEnableComponentEventHandlerTranslator.cpp in Sources */,
 				1A5701E7180BCB8C0088DEC7 /* CCTransition.cpp in Sources */,
 				15B3707D19EE414C00ABE682 /* CCEventAssetsManagerEx.cpp in Sources */,
-				29394CF319B01DBA00D2DE1A /* UIWebView.mm in Sources */,
 				15AE18BD19AAD33D00C27E9E /* CCLabelBMFontLoader.cpp in Sources */,
 				B665E2471AA80A6500DDB1C5 /* CCPUCollisionAvoidanceAffectorTranslator.cpp in Sources */,
 				50ABC01E1926664800A911A9 /* CCThread.cpp in Sources */,
@@ -13312,7 +13281,6 @@
 				15AE18CE19AAD33D00C27E9E /* CCNodeLoader.cpp in Sources */,
 				B665E42F1AA80A6600DDB1C5 /* CCPUVelocityMatchingAffectorTranslator.cpp in Sources */,
 				38ACD1FD1A27111900C3093D /* WidgetCallBackHandlerProtocol.cpp in Sources */,
-				29394CF719B01DBA00D2DE1A /* UIWebViewImpl-ios.mm in Sources */,
 				B665E2C31AA80A6500DDB1C5 /* CCPUGeometryRotatorTranslator.cpp in Sources */,
 				5020A1511D49912500E80C72 /* Animation.c in Sources */,
 				B24AA986195A675C007B4522 /* CCFastTMXLayer.cpp in Sources */,
