@@ -26,4 +26,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: '../java/libs', include: ['*.jar'])
+
+    implementation 'androidx.activity:activity:1.7.0'
 }

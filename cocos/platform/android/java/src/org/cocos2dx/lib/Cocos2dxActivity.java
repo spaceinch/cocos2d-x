@@ -43,6 +43,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import androidx.activity.ComponentActivity;
 
 import org.cocos2dx.lib.Cocos2dxHelper.Cocos2dxHelperListener;
 
@@ -51,7 +52,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLContext;
 
-public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelperListener {
+public abstract class Cocos2dxActivity extends ComponentActivity implements Cocos2dxHelperListener {
     // ===========================================================
     // Constants
     // ===========================================================
@@ -246,16 +247,6 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     @Override
     public void runOnGLThread(final Runnable pRunnable) {
         this.mGLSurfaceView.queueEvent(pRunnable);
-    }
-    
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        for (OnActivityResultListener listener : Cocos2dxHelper.getOnActivityResultListeners()) {
-            listener.onActivityResult(requestCode, resultCode, data);
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
 
