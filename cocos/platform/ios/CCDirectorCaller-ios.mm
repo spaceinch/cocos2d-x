@@ -30,11 +30,29 @@
 
 #import <Foundation/Foundation.h>
 #import <OpenGLES/EAGL.h>
+#import <QuartzCore/CADisplayLink.h>
 
 #import "base/CCDirector.h"
 #import "platform/ios/CCEAGLView-ios.h"
 
 static id s_sharedDirectorCaller;
+
+// Frames per second requested by Director::setAnimationInterval(). Applied as
+// a preferred frame rate so ProMotion displays can run above 60 Hz.
+static float s_framesPerSecond = 60.0f;
+
+static void applyFrameRate(id link)
+{
+    CADisplayLink* displayLink = (CADisplayLink*)link;
+    if (@available(iOS 15.0, *))
+    {
+        displayLink.preferredFrameRateRange = CAFrameRateRangeMake(MIN(s_framesPerSecond, 30.0f), s_framesPerSecond, s_framesPerSecond);
+    }
+    else
+    {
+        displayLink.preferredFramesPerSecond = (NSInteger)s_framesPerSecond;
+    }
+}
 
 @interface NSObject(CADisplayLink)
 +(id) displayLinkWithTarget: (id)arg1 selector:(SEL)arg2;
@@ -105,7 +123,7 @@ static id s_sharedDirectorCaller;
     [self stopMainLoop];
     
     displayLink = [NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(doCaller:)];
-    [displayLink setFrameInterval: self.interval];
+    applyFrameRate(displayLink);
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
@@ -121,9 +139,10 @@ static id s_sharedDirectorCaller;
     [self stopMainLoop];
         
     self.interval = 60.0 * intervalNew;
+    s_framesPerSecond = (float)(1.0 / intervalNew);
         
     displayLink = [NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(doCaller:)];
-    [displayLink setFrameInterval: self.interval];
+    applyFrameRate(displayLink);
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 }
                       
