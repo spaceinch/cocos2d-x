@@ -3,7 +3,7 @@ const char* cc3D_PositionNormalTex_vert = R"(
 
 #ifdef USE_NORMAL_MAPPING
 #if (MAX_DIRECTIONAL_LIGHT_NUM > 0)
-uniform vec3 u_DirLightSourceDirection[MAX_DIRECTIONAL_LIGHT_NUM];
+uniform highp vec3 u_DirLightSourceDirection[MAX_DIRECTIONAL_LIGHT_NUM];
 #endif
 #endif
 #if (MAX_POINT_LIGHT_NUM > 0)
@@ -12,7 +12,7 @@ uniform vec3 u_PointLightSourcePosition[MAX_POINT_LIGHT_NUM];
 #if (MAX_SPOT_LIGHT_NUM > 0)
 uniform vec3 u_SpotLightSourcePosition[MAX_SPOT_LIGHT_NUM];
 #ifdef USE_NORMAL_MAPPING
-uniform vec3 u_SpotLightSourceDirection[MAX_SPOT_LIGHT_NUM];
+uniform highp vec3 u_SpotLightSourceDirection[MAX_SPOT_LIGHT_NUM];
 #endif
 #endif
 
@@ -117,7 +117,7 @@ const char* cc3D_SkinPositionNormalTex_vert = R"(
 
 #ifdef USE_NORMAL_MAPPING
 #if (MAX_DIRECTIONAL_LIGHT_NUM > 0)
-uniform vec3 u_DirLightSourceDirection[MAX_DIRECTIONAL_LIGHT_NUM];
+uniform highp vec3 u_DirLightSourceDirection[MAX_DIRECTIONAL_LIGHT_NUM];
 #endif
 #endif
 #if (MAX_POINT_LIGHT_NUM > 0)
@@ -126,7 +126,7 @@ uniform vec3 u_PointLightSourcePosition[MAX_POINT_LIGHT_NUM];
 #if (MAX_SPOT_LIGHT_NUM > 0)
 uniform vec3 u_SpotLightSourcePosition[MAX_SPOT_LIGHT_NUM];
 #ifdef USE_NORMAL_MAPPING
-uniform vec3 u_SpotLightSourceDirection[MAX_SPOT_LIGHT_NUM];
+uniform highp vec3 u_SpotLightSourceDirection[MAX_SPOT_LIGHT_NUM];
 #endif
 #endif
 
