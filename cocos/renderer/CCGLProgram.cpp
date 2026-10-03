@@ -31,6 +31,7 @@ THE SOFTWARE.
 #ifndef WIN32
 #include <alloca.h>
 #endif
+#include <vector>
 
 #include "base/CCDirector.h"
 #include "base/ccUTF8.h"
@@ -145,17 +146,29 @@ const char* GLProgram::ATTRIBUTE_NAME_BINORMAL = "a_binormal";
 
 
 
+// These uniform declarations are prepended verbatim to both the vertex and
+// fragment compilation units (see compileShader() below), but the two units
+// get different default float/int precisions (vertex: highp, fragment:
+// mediump -- see the headersDef branch above). Leaving these without an
+// explicit precision qualifier meant every uniform here silently picked up
+// its stage's differing default precision. Apple's old EAGL/GLES driver
+// (and most desktop/Android GL drivers) never enforced the GLSL ES spec
+// rule that a uniform shared between stages must have matching precision,
+// but ANGLE's Metal backend (MetalANGLE) validates it strictly and fails
+// to link EVERY cocos2d program over it ("Precisions of uniform ... differ
+// between VERTEX and FRAGMENT shaders"). Pin an explicit, matching
+// precision here so linking no longer depends on that default.
 static const char * COCOS2D_SHADER_UNIFORMS =
-        "uniform mat4 CC_PMatrix;\n"
-        "uniform mat4 CC_MultiViewPMatrix[4];\n"
-        "uniform mat4 CC_MVMatrix;\n"
-        "uniform mat4 CC_MVPMatrix;\n"
-        "uniform mat4 CC_MultiViewMVPMatrix[4];\n"
-        "uniform mat3 CC_NormalMatrix;\n"
-        "uniform vec4 CC_Time;\n"
-        "uniform vec4 CC_SinTime;\n"
-        "uniform vec4 CC_CosTime;\n"
-        "uniform vec4 CC_Random01;\n"
+        "uniform highp mat4 CC_PMatrix;\n"
+        "uniform highp mat4 CC_MultiViewPMatrix[4];\n"
+        "uniform highp mat4 CC_MVMatrix;\n"
+        "uniform highp mat4 CC_MVPMatrix;\n"
+        "uniform highp mat4 CC_MultiViewMVPMatrix[4];\n"
+        "uniform highp mat3 CC_NormalMatrix;\n"
+        "uniform highp vec4 CC_Time;\n"
+        "uniform highp vec4 CC_SinTime;\n"
+        "uniform highp vec4 CC_CosTime;\n"
+        "uniform highp vec4 CC_Random01;\n"
         "uniform sampler2D CC_Texture0;\n"
         "uniform sampler2D CC_Texture1;\n"
         "uniform sampler2D CC_Texture2;\n"
@@ -612,7 +625,18 @@ bool GLProgram::link()
 
     if (status == GL_FALSE)
     {
-        CCLOG("cocos2d: ERROR: Failed to link program: %i", _program);
+        GLint logLength = 0;
+        glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLength);
+        if (logLength > 0)
+        {
+            std::vector<char> log(logLength);
+            glGetProgramInfoLog(_program, logLength, nullptr, log.data());
+            CCLOG("cocos2d: ERROR: Failed to link program: %i, log: %s", _program, log.data());
+        }
+        else
+        {
+            CCLOG("cocos2d: ERROR: Failed to link program: %i (no info log)", _program);
+        }
         GL::deleteProgram(_program);
         _program = 0;
     }

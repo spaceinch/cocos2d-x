@@ -1304,7 +1304,17 @@ void Director::createStatsLabel()
     }
 
     Texture2D::PixelFormat currentFormat = Texture2D::getDefaultAlphaPixelFormat();
+#if CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+    // MetalANGLE's GLES->Metal format table doesn't translate the packed
+    // 16-bit formats (RGBA4444 -> MTLPixelFormatABGR4Unorm) on GPUs that
+    // lack native support for them (e.g. the iOS Simulator's Mac GPU),
+    // which crashes MTLDebugValidateMTLPixelFormat on first use. The stats
+    // texture is tiny and only shown in debug builds, so just use RGBA8888
+    // here instead of chasing MetalANGLE's packed-format support.
+    Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA8888);
+#else
     Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA4444);
+#endif
     unsigned char *data = nullptr;
     ssize_t dataLength = 0;
     getFPSImageData(&data, &dataLength);
