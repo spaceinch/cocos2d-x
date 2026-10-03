@@ -17536,6 +17536,14 @@
 					CC_TARGET_OS_IPHONE,
 				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../external/metalangle/MetalANGLE.xcframework/ios-arm64_armv7",
+				);
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../external/metalangle/MetalANGLE.xcframework/ios-arm64_i386_x86_64-simulator",
+				);
 				HEADER_SEARCH_PATHS = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
@@ -17570,6 +17578,14 @@
 					CC_TARGET_OS_IPHONE,
 				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../external/metalangle/MetalANGLE.xcframework/ios-arm64_armv7",
+				);
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../external/metalangle/MetalANGLE.xcframework/ios-arm64_i386_x86_64-simulator",
+				);
 				HEADER_SEARCH_PATHS = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (

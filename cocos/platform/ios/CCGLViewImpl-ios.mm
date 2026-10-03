@@ -35,7 +35,12 @@
 
 NS_CC_BEGIN
 
-void* GLViewImpl::_pixelFormat = kEAGLColorFormatRGB565;
+// These pixel-format strings used to be Apple's kEAGLColorFormat* constants
+// (OpenGLES/EAGLDrawable.h); their values are just string identifiers that
+// CCEAGLView-ios.mm's -convertPixelFormat: and -setupSurfaceWithSharegroup:
+// compare/forward, so the literals are reproduced directly here now that
+// MetalANGLE (not OpenGLES) owns the drawable.
+void* GLViewImpl::_pixelFormat = (void*)@"EAGLColorFormat565";
 int GLViewImpl::_depthFormat = GL_DEPTH_COMPONENT16;
 
 GLViewImpl* GLViewImpl::createWithEAGLView(void *eaglview)
@@ -86,10 +91,10 @@ void GLViewImpl::convertAttrs()
 {
     if(_glContextAttrs.redBits==8 && _glContextAttrs.greenBits==8 && _glContextAttrs.blueBits==8 && _glContextAttrs.alphaBits==8)
     {
-        _pixelFormat = kEAGLColorFormatRGBA8;
+        _pixelFormat = (void*)@"EAGLColorFormatRGBA8";
     } else if (_glContextAttrs.redBits==5 && _glContextAttrs.greenBits==6 && _glContextAttrs.blueBits==5 && _glContextAttrs.alphaBits==0)
     {
-        _pixelFormat = kEAGLColorFormatRGB565;
+        _pixelFormat = (void*)@"EAGLColorFormat565";
     } else
     {
         CCASSERT(0, "Unsupported render buffer pixel format. Using default");

@@ -39,8 +39,15 @@ THE SOFTWARE.
 #define GL_DEPTH24_STENCIL8         GL_DEPTH24_STENCIL8_OES
 #define GL_WRITE_ONLY               GL_WRITE_ONLY_OES
 
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
+// All GLES2 calls in cocos2d-x and Pluck's game code flow through this one
+// header. Pointing it at MetalANGLE's GLES2 headers instead of Apple's
+// OpenGLES.framework ones is what routes every unmodified glFoo() call onto
+// MetalANGLE's GLES-on-Metal translation layer instead of Apple's
+// deprecated OpenGLES driver; MetalANGLE implements the same OES/APPLE/EXT
+// extension entry points (vertex array objects, map buffer, packed
+// depth-stencil, etc.) that this file and the rest of cocos2d-x rely on.
+#include <MetalANGLE/GLES2/gl2.h>
+#include <MetalANGLE/GLES2/gl2ext.h>
 
 #endif // CC_PLATFORM_IOS
 

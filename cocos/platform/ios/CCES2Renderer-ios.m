@@ -43,55 +43,34 @@
 @implementation CCES2Renderer
 
 @synthesize context=context_;
-@synthesize defaultFramebuffer=defaultFramebuffer_;
-@synthesize colorRenderbuffer=colorRenderbuffer_;
-@synthesize msaaColorbuffer=msaaColorbuffer_;
-@synthesize msaaFramebuffer=msaaFramebuffer_;
 
-// Create an OpenGL ES 2.0 context
-- (id) initWithDepthFormat:(unsigned int)depthFormat withPixelFormat:(unsigned int)pixelFormat withSharegroup:(EAGLSharegroup*)sharegroup withMultiSampling:(BOOL) multiSampling withNumberOfSamples:(unsigned int) requestedSamples
+// Create an OpenGL ES 2.0 context backed by MetalANGLE (Metal instead of
+// Apple's deprecated OpenGLES driver). Unlike the EAGL version, there is no
+// up-front framebuffer/renderbuffer object to create here: MGLLayer (bound
+// in -resizeFromLayer:) owns and sizes its own Metal-backed storage,
+// including the optional depth/stencil buffer, based on the
+// drawableColorFormat/drawableDepthFormat/drawableStencilFormat set on it
+// below.
+- (id) initWithDepthFormat:(unsigned int)depthFormat withPixelFormat:(unsigned int)pixelFormat withSharegroup:(id)sharegroup withMultiSampling:(BOOL) multiSampling withNumberOfSamples:(unsigned int) requestedSamples
 {
     self = [super init];
     if (self)
     {
-        if( ! sharegroup )
-            context_ = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-        else
-            context_ = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2 sharegroup:sharegroup];
+        // Pluck never requests a shared context or multisampling (see
+        // CCGLViewImpl-ios.mm), so neither is implemented here.
+        NSAssert(!sharegroup, @"Shared MGLContexts are not implemented by this Metal renderer");
+        NSAssert(!multiSampling, @"Multisampling is not implemented by this Metal renderer");
 
-        if (!context_ || ![EAGLContext setCurrentContext:context_] )
+        context_ = [[MGLContext alloc] initWithAPI:kMGLRenderingAPIOpenGLES2];
+
+        if (!context_ || ![MGLContext setCurrentContext:context_] )
         {
             [self release];
             return nil;
         }
-        
+
         depthFormat_ = depthFormat;
         pixelFormat_ = pixelFormat;
-        multiSampling_ = multiSampling;
-
-        // Create default framebuffer object. The backing will be allocated for the current layer in -resizeFromLayer
-        glGenFramebuffers(1, &defaultFramebuffer_);
-        NSAssert( defaultFramebuffer_, @"Can't create default frame buffer");
-
-        glGenRenderbuffers(1, &colorRenderbuffer_);
-        NSAssert( colorRenderbuffer_, @"Can't create default render buffer");
-
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer_);
-        glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer_);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer_);
-
-        if (multiSampling_)
-        {
-            GLint maxSamplesAllowed;
-            glGetIntegerv(GL_MAX_SAMPLES_APPLE, &maxSamplesAllowed);
-            samplesToUse_ = MIN(maxSamplesAllowed,requestedSamples);
-            
-            /* Create the MSAA framebuffer (offscreen) */
-            glGenFramebuffers(1, &msaaFramebuffer_);
-            NSAssert( msaaFramebuffer_, @"Can't create default MSAA frame buffer");
-            glBindFramebuffer(GL_FRAMEBUFFER, msaaFramebuffer_);
-            
-        }
 
         CHECK_GL_ERROR();
     }
@@ -99,84 +78,41 @@
     return self;
 }
 
-- (BOOL)resizeFromLayer:(CAEAGLLayer *)layer
+- (BOOL)resizeFromLayer:(MGLLayer *)layer
 {
-    // Allocate color buffer backing based on the current layer size
-    glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer_);
+    layer_ = layer;
 
-    if( ! [context_ renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer] )
+    // Translate the GL enums CCGLViewImpl-ios.mm picked (see convertAttrs())
+    // into the drawable formats MGLLayer wants, then let it (re)allocate its
+    // own Metal-backed storage for the new size.
+    layer.drawableColorFormat = (pixelFormat_ == GL_RGB565) ? MGLDrawableColorFormatRGB565 : MGLDrawableColorFormatRGBA8888;
+
+    if (depthFormat_ == GL_DEPTH24_STENCIL8_OES)
     {
-        NSLog(@"failed to call context");
+        layer.drawableDepthFormat = MGLDrawableDepthFormat24;
+        layer.drawableStencilFormat = MGLDrawableStencilFormat8;
     }
-    
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth_);
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight_);
+    else if (depthFormat_ == GL_DEPTH_COMPONENT16)
+    {
+        layer.drawableDepthFormat = MGLDrawableDepthFormat16;
+        layer.drawableStencilFormat = MGLDrawableStencilFormatNone;
+    }
+    else
+    {
+        layer.drawableDepthFormat = MGLDrawableDepthFormatNone;
+        layer.drawableStencilFormat = MGLDrawableStencilFormatNone;
+    }
+
+    [MGLContext setCurrentContext:context_ forLayer:layer];
+    [layer bindDefaultFrameBuffer];
+
+    CGSize size = layer.drawableSize;
+    backingWidth_ = (GLint)size.width;
+    backingHeight_ = (GLint)size.height;
 
     NSLog(@"cocos2d: surface size: %dx%d", (int)backingWidth_, (int)backingHeight_);
 
-    if (multiSampling_)
-    {
-        if ( msaaColorbuffer_) {
-            glDeleteRenderbuffers(1, &msaaColorbuffer_);
-            msaaColorbuffer_ = 0;
-        }
-        
-        /* Create the offscreen MSAA color buffer.
-         After rendering, the contents of this will be blitted into ColorRenderbuffer */
-        
-        //msaaFrameBuffer needs to be binded
-        glBindFramebuffer(GL_FRAMEBUFFER, msaaFramebuffer_);
-        glGenRenderbuffers(1, &msaaColorbuffer_);
-        NSAssert(msaaFramebuffer_, @"Can't create MSAA color buffer");
-        
-        glBindRenderbuffer(GL_RENDERBUFFER, msaaColorbuffer_);
-        
-        glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER, samplesToUse_, pixelFormat_ , backingWidth_, backingHeight_);
-        
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, msaaColorbuffer_);
-        
-        GLenum error;
-        if ( (error=glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE)
-        {
-            NSLog(@"Failed to make complete framebuffer object 0x%X", error);
-            return NO;
-        }
-    }
-
     CHECK_GL_ERROR();
-
-    if (depthFormat_)
-    {
-        if( ! depthBuffer_ ) {
-            glGenRenderbuffers(1, &depthBuffer_);
-            NSAssert(depthBuffer_, @"Can't create depth buffer");
-        }
-
-        glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer_);
-        
-        if( multiSampling_ )
-            glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER, samplesToUse_, depthFormat_,backingWidth_, backingHeight_);
-        else
-            glRenderbufferStorage(GL_RENDERBUFFER, depthFormat_, backingWidth_, backingHeight_);
-
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_);
-        
-        if (depthFormat_ == GL_DEPTH24_STENCIL8_OES) {
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_);
-        }
-
-        // bind color buffer
-        glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer_);        
-    }
-
-    CHECK_GL_ERROR();
-
-    GLenum error;
-    if( (error=glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        NSLog(@"Failed to make complete framebuffer object 0x%X", error);
-        return NO;
-    }
 
     return YES;
 }
@@ -191,61 +127,36 @@
     return [NSString stringWithFormat:@"<%@ = %08X | size = %ix%i>", [self class], (unsigned int)self, backingWidth_, backingHeight_];
 }
 
+// Unused under MetalANGLE (MGLLayer manages its own renderbuffer storage);
+// kept only so CCEAGLView-ios.mm's dead (Pluck never enables multiSampling)
+// MSAA branch still type-checks against the CCESRenderer protocol.
 - (unsigned int) colorRenderBuffer
 {
-    return colorRenderbuffer_;
+    return 0;
 }
 
 - (unsigned int) defaultFrameBuffer
 {
-    return defaultFramebuffer_;
+    return layer_.defaultOpenGLFrameBufferID;
 }
 
 - (unsigned int) msaaFrameBuffer
 {
-    return msaaFramebuffer_;
+    return 0;
 }
 
 - (unsigned int) msaaColorBuffer
 {
-    return msaaColorbuffer_;
+    return 0;
 }
 
 - (void)dealloc
 {
 //    CCLOGINFO("deallocing CCES2Renderer: %p", self);
 
-    // Tear down GL
-    if (defaultFramebuffer_) {
-        glDeleteFramebuffers(1, &defaultFramebuffer_);
-        defaultFramebuffer_ = 0;
-    }
-
-    if (colorRenderbuffer_) {
-        glDeleteRenderbuffers(1, &colorRenderbuffer_);
-        colorRenderbuffer_ = 0;
-    }
-
-    if( depthBuffer_ ) {
-        glDeleteRenderbuffers(1, &depthBuffer_ );
-        depthBuffer_ = 0;
-    }
-    
-    if ( msaaColorbuffer_)
-    {
-        glDeleteRenderbuffers(1, &msaaColorbuffer_);
-        msaaColorbuffer_ = 0;
-    }
-    
-    if ( msaaFramebuffer_)
-    {
-        glDeleteRenderbuffers(1, &msaaFramebuffer_);
-        msaaFramebuffer_ = 0;
-    }
-
     // Tear down context
-    if ([EAGLContext currentContext] == context_)
-        [EAGLContext setCurrentContext:nil];
+    if ([MGLContext currentContext] == context_)
+        [MGLContext setCurrentContext:nil];
 
     [context_ release];
     context_ = nil;

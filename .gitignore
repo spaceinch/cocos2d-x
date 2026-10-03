@@ -129,6 +129,7 @@ project.properties
 # Ignore prebuilt libraries folder
 /external/*
 !/external/config.json
+!/external/metalangle/
 /templates/lua-template-runtime/runtime
 /v*-deps-*.zip
 /v*-lua-runtime-*.zip

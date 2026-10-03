@@ -65,10 +65,11 @@ Copyright (C) 2008 Apple Inc. All Rights Reserved.
 #if CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 
 #import <UIKit/UIKit.h>
-#import <OpenGLES/EAGL.h>
-#import <OpenGLES/EAGLDrawable.h>
-#import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
+// MetalANGLE's MGLKit stands in for OpenGLES/EAGL here: GL calls are
+// translated onto Metal instead of going through Apple's deprecated
+// OpenGLES driver. Game GL code (which only ever goes through CCGL.h) is
+// unaffected.
+#import <MetalANGLE/MGLKit.h>
 #import <CoreFoundation/CoreFoundation.h>
 
 #import "platform/ios/CCESRenderer-ios.h"
@@ -83,21 +84,22 @@ extern BOOL s_ignoreLayoutRefresh;
 //CLASS INTERFACE:
 
 /** CCEAGLView Class.
- * This class wraps the CAEAGLLayer from CoreAnimation into a convenient UIView subclass.
- * The view content is basically an EAGL surface you render your OpenGL scene into.
- * Note that setting the view non-opaque will only work if the EAGL surface has an alpha channel.
+ * This class wraps MetalANGLE's MGLLayer (a CAEAGLLayer equivalent backed by
+ * Metal) into a convenient UIView subclass.
+ * The view content is basically a Metal-backed surface you render your
+ * OpenGL ES scene into via MetalANGLE's GLES-on-Metal translation.
+ * Note that setting the view non-opaque will only work if the surface has an alpha channel.
  */
 @interface CCEAGLView : UIView <UIKeyInput, UITextInput, UITextInputTraits>
 {
-    id                        <CCESRenderer> renderer_;    
-    EAGLContext                *context_; // weak ref
+    id                        <CCESRenderer> renderer_;
+    MGLContext                *context_; // weak ref
 
     NSString                *pixelformat_;
     GLuint                    depthFormat_;
     BOOL                    preserveBackbuffer_;
 
     CGSize                    size_;
-    BOOL                    discardFramebufferSupported_;
 
     //fsaa addition
     BOOL                    multisampling_;
@@ -128,15 +130,16 @@ extern BOOL s_ignoreLayoutRefresh;
 + (id) viewWithFrame:(CGRect)frame pixelFormat:(NSString*)format;
 /** creates an initializes an CCEAGLView with a frame, a color buffer format, and a depth buffer format */
 + (id) viewWithFrame:(CGRect)frame pixelFormat:(NSString*)format depthFormat:(GLuint)depth;
-/** creates an initializes an CCEAGLView with a frame, a color buffer format, a depth buffer format, a sharegroup, and multisampling */
-+ (id) viewWithFrame:(CGRect)frame pixelFormat:(NSString*)format depthFormat:(GLuint)depth preserveBackbuffer:(BOOL)retained sharegroup:(EAGLSharegroup*)sharegroup multiSampling:(BOOL)multisampling numberOfSamples:(unsigned int)samples;
+/** creates an initializes an CCEAGLView with a frame, a color buffer format, a depth buffer format, a sharegroup, and multisampling.
+ * sharegroup is unused (Pluck always passes nil); kept loosely typed rather than importing MGLSharegroup here. */
++ (id) viewWithFrame:(CGRect)frame pixelFormat:(NSString*)format depthFormat:(GLuint)depth preserveBackbuffer:(BOOL)retained sharegroup:(id)sharegroup multiSampling:(BOOL)multisampling numberOfSamples:(unsigned int)samples;
 
 /** Initializes an CCEAGLView with a frame and 0-bit depth buffer, and a RGB565 color buffer */
 - (id) initWithFrame:(CGRect)frame; //These also set the current context
 /** Initializes an CCEAGLView with a frame, a color buffer format, and 0-bit depth buffer */
 - (id) initWithFrame:(CGRect)frame pixelFormat:(NSString*)format;
 /** Initializes an CCEAGLView with a frame, a color buffer format, a depth buffer format, a sharegroup and multisampling support */
-- (id) initWithFrame:(CGRect)frame pixelFormat:(NSString*)format depthFormat:(GLuint)depth preserveBackbuffer:(BOOL)retained sharegroup:(EAGLSharegroup*)sharegroup multiSampling:(BOOL)sampling numberOfSamples:(unsigned int)nSamples;
+- (id) initWithFrame:(CGRect)frame pixelFormat:(NSString*)format depthFormat:(GLuint)depth preserveBackbuffer:(BOOL)retained sharegroup:(id)sharegroup multiSampling:(BOOL)sampling numberOfSamples:(unsigned int)nSamples;
 
 /** pixel format: it could be RGBA8 (32-bit) or RGB565 (16-bit) */
 @property(nonatomic,readonly) NSString* pixelFormat;
@@ -146,8 +149,8 @@ extern BOOL s_ignoreLayoutRefresh;
 /** returns surface size in pixels */
 @property(nonatomic,readonly) CGSize surfaceSize;
 
-/** OpenGL context */
-@property(nonatomic,readonly) EAGLContext *context;
+/** OpenGL context (MetalANGLE's MGLContext) */
+@property(nonatomic,readonly) MGLContext *context;
 
 @property(nonatomic,readwrite) BOOL multiSampling;
 

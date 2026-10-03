@@ -83,7 +83,7 @@ BOOL s_ignoreLayoutRefresh = NO;
 #define IOS_MAX_TOUCHES_COUNT     10
 
 @interface CCEAGLView (Private)
-- (BOOL) setupSurfaceWithSharegroup:(EAGLSharegroup*)sharegroup;
+- (BOOL) setupSurfaceWithSharegroup:(id)sharegroup;
 - (unsigned int) convertPixelFormat:(NSString*) pixelFormat;
 @end
 
@@ -97,7 +97,9 @@ BOOL s_ignoreLayoutRefresh = NO;
 @synthesize keyboardShowNotification = keyboardShowNotification_;
 + (Class) layerClass
 {
-    return [CAEAGLLayer class];
+    // MGLLayer is MetalANGLE's CAEAGLLayer equivalent: a Metal-backed CALayer
+    // that GL calls are translated onto.
+    return [MGLLayer class];
 }
 
 + (id) viewWithFrame:(CGRect)frame
@@ -115,14 +117,14 @@ BOOL s_ignoreLayoutRefresh = NO;
     return [[[self alloc] initWithFrame:frame pixelFormat:format depthFormat:depth preserveBackbuffer:NO sharegroup:nil multiSampling:NO numberOfSamples:0] autorelease];
 }
 
-+ (id) viewWithFrame:(CGRect)frame pixelFormat:(NSString*)format depthFormat:(GLuint)depth preserveBackbuffer:(BOOL)retained sharegroup:(EAGLSharegroup*)sharegroup multiSampling:(BOOL)multisampling numberOfSamples:(unsigned int)samples
++ (id) viewWithFrame:(CGRect)frame pixelFormat:(NSString*)format depthFormat:(GLuint)depth preserveBackbuffer:(BOOL)retained sharegroup:(id)sharegroup multiSampling:(BOOL)multisampling numberOfSamples:(unsigned int)samples
 {
     return [[[self alloc]initWithFrame:frame pixelFormat:format depthFormat:depth preserveBackbuffer:retained sharegroup:sharegroup multiSampling:multisampling numberOfSamples:samples] autorelease];
 }
 
 - (id) initWithFrame:(CGRect)frame
 {
-    return [self initWithFrame:frame pixelFormat:kEAGLColorFormatRGB565 depthFormat:0 preserveBackbuffer:NO sharegroup:nil multiSampling:NO numberOfSamples:0];
+    return [self initWithFrame:frame pixelFormat:@"EAGLColorFormat565" depthFormat:0 preserveBackbuffer:NO sharegroup:nil multiSampling:NO numberOfSamples:0];
 }
 
 - (id) initWithFrame:(CGRect)frame pixelFormat:(NSString*)format 
@@ -130,7 +132,7 @@ BOOL s_ignoreLayoutRefresh = NO;
     return [self initWithFrame:frame pixelFormat:format depthFormat:0 preserveBackbuffer:NO sharegroup:nil multiSampling:NO numberOfSamples:0];
 }
 
-- (id) initWithFrame:(CGRect)frame pixelFormat:(NSString*)format depthFormat:(GLuint)depth preserveBackbuffer:(BOOL)retained sharegroup:(EAGLSharegroup*)sharegroup multiSampling:(BOOL)sampling numberOfSamples:(unsigned int)nSamples
+- (id) initWithFrame:(CGRect)frame pixelFormat:(NSString*)format depthFormat:(GLuint)depth preserveBackbuffer:(BOOL)retained sharegroup:(id)sharegroup multiSampling:(BOOL)sampling numberOfSamples:(unsigned int)nSamples
 {
     if((self = [super initWithFrame:frame]))
     {
@@ -164,9 +166,9 @@ BOOL s_ignoreLayoutRefresh = NO;
 {
     if( (self = [super initWithCoder:aDecoder]) ) {
         
-        CAEAGLLayer*            eaglLayer = (CAEAGLLayer*)[self layer];
+        MGLLayer*            eaglLayer = (MGLLayer*)[self layer];
         
-        pixelformat_ = kEAGLColorFormatRGB565;
+        pixelformat_ = @"EAGLColorFormat565";
         depthFormat_ = 0; // GL_DEPTH_COMPONENT24_OES;
         multiSampling_= NO;
         requestedSamples_ = 0;
@@ -215,14 +217,15 @@ BOOL s_ignoreLayoutRefresh = NO;
 }
 
 
--(BOOL) setupSurfaceWithSharegroup:(EAGLSharegroup*)sharegroup
+-(BOOL) setupSurfaceWithSharegroup:(id)sharegroup
 {
-    CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
+    MGLLayer *eaglLayer = (MGLLayer *)self.layer;
     
     eaglLayer.opaque = YES;
-    eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                                    [NSNumber numberWithBool:preserveBackbuffer_], kEAGLDrawablePropertyRetainedBacking,
-                                    pixelformat_, kEAGLDrawablePropertyColorFormat, nil];
+    eaglLayer.retainedBacking = preserveBackbuffer_;
+    // eaglLayer.drawableColorFormat/drawableDepthFormat/drawableStencilFormat
+    // are set from CCES2Renderer's -resizeFromLayer: once the renderer knows
+    // the requested pixel/depth formats below.
     
     
     renderer_ = [[CCES2Renderer alloc] initWithDepthFormat:depthFormat_
@@ -236,12 +239,6 @@ BOOL s_ignoreLayoutRefresh = NO;
         return NO;
     
     context_ = [renderer_ context];
-    
-    #if GL_EXT_discard_framebuffer == 1
-        discardFramebufferSupported_ = YES;
-    #else
-        discardFramebufferSupported_ = NO;
-    #endif
     
     CHECK_GL_ERROR();
     
@@ -268,7 +265,7 @@ BOOL s_ignoreLayoutRefresh = NO;
         return;
     }
     
-    [renderer_ resizeFromLayer:(CAEAGLLayer*)self.layer];
+    [renderer_ resizeFromLayer:(MGLLayer*)self.layer];
     size_ = [renderer_ backingSize];
 
     // Issue #914 #924
@@ -292,60 +289,24 @@ BOOL s_ignoreLayoutRefresh = NO;
     // IMPORTANT:
     // - preconditions
     //    -> context_ MUST be the OpenGL context
-    //    -> renderbuffer_ must be the RENDER BUFFER
 
-#ifdef __IPHONE_4_0
-    
-    if (multiSampling_)
+    // MetalANGLE's MGLLayer owns and presents its own Metal-backed
+    // framebuffer directly; there is no separate renderbuffer to present,
+    // and (since Pluck never enables multiSampling_, see
+    // CCGLViewImpl-ios.mm) no MSAA resolve/discard dance to do either.
+    MGLLayer *layer = (MGLLayer*)self.layer;
+    if (![layer present])
     {
-        /* Resolve from msaaFramebuffer to resolveFramebuffer */
-        //glDisable(GL_SCISSOR_TEST);     
-        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE, [renderer_ msaaFrameBuffer]);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE, [renderer_ defaultFrameBuffer]);
-        glResolveMultisampleFramebufferAPPLE();
+//      CCLOG(@"cocos2d: Failed to present layer in %s\n", __FUNCTION__);
     }
-    
-    if(discardFramebufferSupported_)
-    {    
-        if (multiSampling_)
-        {
-            if (depthFormat_)
-            {
-                GLenum attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
-                glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER_APPLE, 2, attachments);
-            }
-            else
-            {
-                GLenum attachments[] = {GL_COLOR_ATTACHMENT0};
-                glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER_APPLE, 1, attachments);
-            }
-            
-            glBindRenderbuffer(GL_RENDERBUFFER, [renderer_ colorRenderBuffer]);
-    
-        }    
-        
-        // not MSAA
-        else if (depthFormat_ ) {
-            GLenum attachments[] = { GL_DEPTH_ATTACHMENT};
-            glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, attachments);
-        }
-    }
-    
-#endif // __IPHONE_4_0
-    
-     if(![context_ presentRenderbuffer:GL_RENDERBUFFER])
-        {
-//         CCLOG(@"cocos2d: Failed to swap renderbuffer in %s\n", __FUNCTION__);
-        }
 
 #if COCOS2D_DEBUG
     CHECK_GL_ERROR();
 #endif
-    
-    // We can safely re-bind the framebuffer here, since this will be the
-    // 1st instruction of the new main loop
-    if( multiSampling_ )
-        glBindFramebuffer(GL_FRAMEBUFFER, [renderer_ msaaFrameBuffer]);    
+
+    // Re-bind the default framebuffer here, since this will be the 1st
+    // instruction of the new main loop.
+    [layer bindDefaultFrameBuffer];
 }
 
 - (unsigned int) convertPixelFormat:(NSString*) pixelFormat

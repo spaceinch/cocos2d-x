@@ -33,52 +33,36 @@
 
 #import "platform/ios/CCESRenderer-ios.h"
 
-#import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
+#import <MetalANGLE/MGLKit.h>
 
 #import "platform/CCPlatformMacros.h"
 
+// MGLLayer (MetalANGLE's CAEAGLLayer equivalent) owns and sizes its own
+// Metal-backed framebuffer/depth-stencil storage, so unlike the EAGL-based
+// renderer this no longer hand-manages GL renderbuffer/framebuffer objects.
+// It just tracks the layer's drawable size and the context, and forwards
+// -defaultFrameBuffer to the layer's own framebuffer id. Pluck never
+// requests multisampling (see CCGLViewImpl-ios.mm's multiSampling:NO), so
+// the EAGL version's MSAA bookkeeping is not reimplemented here; the MSAA
+// protocol accessors are kept only so CCEAGLView-ios.mm's (unused-for-Pluck)
+// multisampling branch still type-checks.
 @interface CCES2Renderer : NSObject <CCESRenderer>
 {
-    // The pixel dimensions of the CAEAGLLayer
+    // The pixel dimensions of the MGLLayer's drawable
     GLint backingWidth_;
     GLint backingHeight_;
-
-    unsigned int    samplesToUse_;
-    BOOL            multiSampling_;
 
     unsigned int    depthFormat_;
     unsigned int    pixelFormat_;
 
-    // The OpenGL ES names for the framebuffer and renderbuffer used to render to this view
-    GLuint defaultFramebuffer_;
-    GLuint colorRenderbuffer_;
-    GLuint depthBuffer_;
-
-
-    //buffers for MSAA
-    GLuint msaaFramebuffer_;
-    GLuint msaaColorbuffer_;
-
-    EAGLContext *context_;
+    MGLContext *context_;
+    MGLLayer *layer_; // weak; set by -resizeFromLayer:
 }
 
-/** Color Renderbuffer */
-@property (nonatomic,readonly) GLuint colorRenderbuffer;
+/** MGLContext */
+@property (nonatomic,readonly) MGLContext* context;
 
-/** Default Renderbuffer */
-@property (nonatomic,readonly) GLuint defaultFramebuffer;
-
-/** MSAA Framebuffer */
-@property (nonatomic,readonly) GLuint msaaFramebuffer;
-
-/** MSAA Color Buffer */
-@property (nonatomic,readonly) GLuint msaaColorbuffer;
-
-/** EAGLContext */
-@property (nonatomic,readonly) EAGLContext* context;
-
-- (BOOL)resizeFromLayer:(CAEAGLLayer *)layer;
+- (BOOL)resizeFromLayer:(MGLLayer *)layer;
 @end
 
 

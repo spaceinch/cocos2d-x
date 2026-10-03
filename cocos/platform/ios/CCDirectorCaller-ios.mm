@@ -29,7 +29,8 @@
 #import "platform/ios/CCDirectorCaller-ios.h"
 
 #import <Foundation/Foundation.h>
-#import <OpenGLES/EAGL.h>
+// MetalANGLE's MGLContext/MGLLayer stand in for EAGLContext/CAEAGLLayer.
+#import <MetalANGLE/MGLKit.h>
 #import <QuartzCore/CADisplayLink.h>
 
 #import "base/CCDirector.h"
@@ -150,11 +151,16 @@ static void applyFrameRate(id link)
 {
     if (isAppActive) {
         cocos2d::Director* director = cocos2d::Director::getInstance();
-        EAGLContext* cocos2dxContext = [(CCEAGLView*)director->getOpenGLView()->getEAGLView() context];
-        if (cocos2dxContext != [EAGLContext currentContext])
+        CCEAGLView* eaglView = (CCEAGLView*)director->getOpenGLView()->getEAGLView();
+        MGLContext* cocos2dxContext = [eaglView context];
+        if (cocos2dxContext != [MGLContext currentContext])
             glFlush();
-        
-        [EAGLContext setCurrentContext: cocos2dxContext];
+
+        // Unlike EAGLContext, MetalANGLE's MGLContext must know which
+        // MGLLayer it is drawing into (there is no separate
+        // renderbufferStorage:fromDrawable: call for that), so pass the
+        // view's layer here instead of a bare setCurrentContext:.
+        [MGLContext setCurrentContext:cocos2dxContext forLayer:(MGLLayer*)eaglView.layer];
         director->mainLoop();
     }
 }

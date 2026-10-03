@@ -34,16 +34,20 @@
 #include "platform/CCPlatformMacros.h"
 #import <QuartzCore/QuartzCore.h>
 
-#import <OpenGLES/EAGL.h>
-#import <OpenGLES/EAGLDrawable.h>
+// Metal-backed replacement for OpenGLES/EAGL: MetalANGLE translates GLES
+// calls onto Metal. MGLContext/MGLLayer are its EAGLContext/CAEAGLLayer
+// equivalents.
+#import <MetalANGLE/MGLKit.h>
 
 @protocol CCESRenderer <NSObject>
 
-- (id) initWithDepthFormat:(unsigned int)depthFormat withPixelFormat:(unsigned int)pixelFormat withSharegroup:(EAGLSharegroup*)sharegroup withMultiSampling:(BOOL) multiSampling withNumberOfSamples:(unsigned int) requestedSamples;
+// sharegroup is unused: Pluck never requests a shared context (always nil),
+// so the type is left loose rather than importing MGLSharegroup everywhere.
+- (id) initWithDepthFormat:(unsigned int)depthFormat withPixelFormat:(unsigned int)pixelFormat withSharegroup:(id)sharegroup withMultiSampling:(BOOL) multiSampling withNumberOfSamples:(unsigned int) requestedSamples;
 
-- (BOOL) resizeFromLayer:(CAEAGLLayer *)layer;
+- (BOOL) resizeFromLayer:(MGLLayer *)layer;
 
-- (EAGLContext*) context;
+- (MGLContext*) context;
 - (CGSize) backingSize;
 
 - (unsigned int) colorRenderBuffer;
