@@ -13602,7 +13602,6 @@
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -13656,7 +13655,6 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -13783,7 +13781,7 @@
 				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
 				HEADER_SEARCH_PATHS = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../external/png/prebuilt/tvos\"",
 					"\"$(SRCROOT)/../external/jpeg/prebuilt/tvos\"",
@@ -13819,7 +13817,7 @@
 				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
 				HEADER_SEARCH_PATHS = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../external/png/prebuilt/tvos\"",
 					"\"$(SRCROOT)/../external/jpeg/prebuilt/tvos\"",
@@ -13855,7 +13853,7 @@
 				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
 				HEADER_SEARCH_PATHS = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../external/png/prebuilt/ios\"",
 					"\"$(SRCROOT)/../external/jpeg/prebuilt/ios\"",
@@ -13869,6 +13867,20 @@
 					"\"$(SRCROOT)/../external/bullet/prebuilt/ios\"",
 					"\"$(SRCROOT)/../external/Box2D/prebuilt/ios\"",
 					"$(SRCROOT)/../external/uv/prebuilt/ios",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"\"$(SRCROOT)/../external/png/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/jpeg/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/tiff/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/webp/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/freetype2/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/curl/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/websockets/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/chipmunk/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/openssl/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/bullet/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/Box2D/prebuilt/ios-simulator\"",
+					"$(SRCROOT)/../external/uv/prebuilt/ios-simulator",
 				);
 				OTHER_LDFLAGS = "-llibsql3";
 				SDKROOT = iphoneos;
@@ -13893,7 +13905,7 @@
 				);
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = YES;
 				HEADER_SEARCH_PATHS = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../external/png/prebuilt/ios\"",
 					"\"$(SRCROOT)/../external/jpeg/prebuilt/ios\"",
@@ -13907,6 +13919,20 @@
 					"\"$(SRCROOT)/../external/bullet/prebuilt/ios\"",
 					"\"$(SRCROOT)/../external/Box2D/prebuilt/ios\"",
 					"$(SRCROOT)/../external/uv/prebuilt/ios",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"\"$(SRCROOT)/../external/png/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/jpeg/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/tiff/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/webp/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/freetype2/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/curl/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/websockets/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/chipmunk/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/openssl/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/bullet/prebuilt/ios-simulator\"",
+					"\"$(SRCROOT)/../external/Box2D/prebuilt/ios-simulator\"",
+					"$(SRCROOT)/../external/uv/prebuilt/ios-simulator",
 				);
 				OTHER_LDFLAGS = "-llibsql3";
 				SDKROOT = iphoneos;
