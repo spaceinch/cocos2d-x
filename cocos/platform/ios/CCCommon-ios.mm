@@ -32,7 +32,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#import <UIKit/UIAlert.h>
+#import <UIKit/UIKit.h>
 #include "base/CCDirector.h"
 #include "base/CCConsole.h"
 
@@ -46,13 +46,17 @@ void MessageBox(const char * msg, const char * title)
 #if !defined(CC_TARGET_OS_TVOS)
     NSString * tmpTitle = (title) ? [NSString stringWithUTF8String : title] : nil;
     NSString * tmpMsg = (msg) ? [NSString stringWithUTF8String : msg] : nil;
-    UIAlertView * messageBox = [[UIAlertView alloc] initWithTitle: tmpTitle
-                                                          message: tmpMsg
-                                                         delegate: nil
-                                                cancelButtonTitle: @"OK"
-                                                otherButtonTitles: nil];
-    [messageBox autorelease];
-    [messageBox show];
+    // UIAlertView throws NSObjectNotAvailableException in apps that use the UIScene life cycle
+    UIAlertController * messageBox = [UIAlertController alertControllerWithTitle: tmpTitle
+                                                                         message: tmpMsg
+                                                                  preferredStyle: UIAlertControllerStyleAlert];
+    [messageBox addAction: [UIAlertAction actionWithTitle: @"OK" style: UIAlertActionStyleCancel handler: nil]];
+    UIViewController * presenter = [[UIApplication sharedApplication] keyWindow].rootViewController;
+    while (presenter.presentedViewController && !presenter.presentedViewController.isBeingDismissed)
+    {
+        presenter = presenter.presentedViewController;
+    }
+    [presenter presentViewController: messageBox animated: YES completion: nil];
 #endif
 
 }

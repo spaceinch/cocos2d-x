@@ -247,7 +247,10 @@ static CCAccelerometerDispatcher* s_pAccelerometerDispatcher;
 
     double tmp = _acceleration->x;
 
-    switch ([[UIApplication sharedApplication] statusBarOrientation])
+    // statusBarOrientation can report Unknown in apps that use the UIScene life cycle; ask the window's scene instead
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] keyWindow].windowScene.interfaceOrientation;
+
+    switch (orientation)
     {
         case UIInterfaceOrientationLandscapeRight:
             _acceleration->x = -_acceleration->y;
@@ -265,9 +268,9 @@ static CCAccelerometerDispatcher* s_pAccelerometerDispatcher;
             break;
 
         case UIInterfaceOrientationPortrait:
-            break;
         default:
-            NSAssert(false, @"unknown orientation");
+            // Unknown while there is no key window (launching, backgrounded); treat it as portrait
+            break;
     }
 
     cocos2d::EventAcceleration event(*_acceleration);
